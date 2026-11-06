@@ -1,4 +1,8 @@
+
+import './App.css';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+
+import MainLayout from './components/MainLayout';
 
 // Public pages
 import Home from './pages/Home';
@@ -51,133 +55,41 @@ function App() {
     <BrowserRouter>
       <Routes>
 
-        {/* Homepage */}
-        <Route path="/" element={<Home />} />
+        {/* Public pages with shared Navbar and Footer */}
+        <Route element={<MainLayout />}>
+          <Route path="/" element={<Home />} />
+          <Route path="/food-experiences" element={<FoodExperiences />} />
+          <Route path="/food-experiences/:id" element={<FoodExperienceDetails />} />
+          <Route path="/food-tours" element={<FoodTours />} />
+          <Route path="/food-tours/:id" element={<FoodTourDetails />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/booking" element={<Booking />} />
+          <Route path="/my-bookings" element={<MyBookings />} />
+          <Route path="/my-itineraries" element={<MyItineraries />} />
+          <Route path="/my-favourites" element={<MyFavourites />} />
+          <Route path="/tourist/profile" element={<TouristProfile />} />
+          <Route path="/my-reviews" element={<MyReviews />} />
+        </Route>
 
-        {/* Food Experiences */}
-        <Route
-          path="/food-experiences"
-          element={<FoodExperiences />}
-        />
-
-        <Route
-          path="/food-experiences/:id"
-          element={<FoodExperienceDetails />}
-        />
-
-        {/* Food Tours */}
-        <Route
-          path="/food-tours"
-          element={<FoodTours />}
-        />
-
-        <Route
-          path="/food-tours/:id"
-          element={<FoodTourDetails />}
-        />
-
-        {/* Registration and Login */}
-        <Route
-          path="/register"
-          element={<Register />}
-        />
-
-        <Route
-          path="/login"
-          element={<Login />}
-        />
-
-        {/* Tourist Bookings */}
-        <Route
-          path="/booking"
-          element={<Booking />}
-        />
-
-        <Route
-          path="/my-bookings"
-          element={<MyBookings />}
-        />
-
-        {/* Itinerary Planner */}
-        <Route
-          path="/my-itineraries"
-          element={<MyItineraries />}
-        />
-
-        {/* Vendor and Tour Operator Bookings */}
-        <Route
-          path="/provider/bookings"
-          element={<ProviderBookings />}
-        />
-
-        {/* Vendor Food Experience Creation */}
-        <Route
-          path="/vendor/create-experience"
-          element={<CreateFoodExperience />}
-        />
-
-        {/* Tour Operator Food Tour Creation */}
-        <Route
-          path="/operator/create-tour"
-          element={<CreateFoodTour />}
-        />
-
-        {/* Tour Stop Creation */}
-        <Route
-          path="/operator/add-tour-stop"
-          element={<AddTourStop />}
-        />
-
-        {/* My Favourites */}
-        <Route
-          path="/my-favourites"
-          element={<MyFavourites />}
-        />
+        {/* Provider bookings and creation */}
+        <Route path="/provider/bookings" element={<ProviderBookings />} />
+        <Route path="/vendor/create-experience" element={<CreateFoodExperience />} />
+        <Route path="/operator/create-tour" element={<CreateFoodTour />} />
+        <Route path="/operator/add-tour-stop" element={<AddTourStop />} />
 
         {/* Dashboards */}
-        <Route
-          path="/vendor/dashboard"
-          element={<VendorDashboard />}
-        />
-        <Route
-          path="/operator/dashboard"
-          element={<TourOperatorDashboard />}
-        />
-        <Route
-          path="/tourist/dashboard"
-          element={<TouristDashboard />}
-        />
+        <Route path="/vendor/dashboard" element={<VendorDashboard />} />
+        <Route path="/operator/dashboard" element={<TourOperatorDashboard />} />
+        <Route path="/tourist/dashboard" element={<TouristDashboard />} />
 
-        {/* Edit or Delete Vendor Pages */}
-        <Route
-          path="/vendor/food-experiences/:id/edit"
-          element={<EditFoodExperience />}
-        />
-        <Route
-          path="/operator/food-tours/:id/edit"
-          element={<EditFoodTour />}
-        />
-        <Route
-          path="/operator/tour-stops/:id/edit"
-          element={<EditTourStop />}
-        />
+        {/* Edit provider content */}
+        <Route path="/vendor/food-experiences/:id/edit" element={<EditFoodExperience />} />
+        <Route path="/operator/food-tours/:id/edit" element={<EditFoodTour />} />
+        <Route path="/operator/tour-stops/:id/edit" element={<EditTourStop />} />
 
         {/* Manage Tour Stops */}
-        <Route
-          path="/operator/tour-stops"
-          element={<TourOperatorTourStops />}
-        />
-
-        {/* Tourist Profile */}
-        <Route
-          path="/tourist/profile"
-          element={<TouristProfile />}
-        />
-        {/* My Reviews */}
-        <Route
-          path="/my-reviews"
-          element={<MyReviews />}
-        />
+        <Route path="/operator/tour-stops" element={<TourOperatorTourStops />} />
 
       </Routes>
     </BrowserRouter>
