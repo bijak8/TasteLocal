@@ -26,10 +26,10 @@ function CreateFoodExperience() {
   const [loading, setLoading] = useState(false);
 
   const handleChange = (event) => {
-    setFormData({
-      ...formData,
+    setFormData((previousData) => ({
+      ...previousData,
       [event.target.name]: event.target.value,
-    });
+    }));
   };
 
   const handleSubmit = async (event) => {
@@ -55,7 +55,6 @@ function CreateFoodExperience() {
 
       alert('Food experience created successfully!');
       navigate('/food-experiences');
-
     } catch (error) {
       console.error('Error creating food experience:', error);
 
@@ -64,66 +63,93 @@ function CreateFoodExperience() {
           ? JSON.stringify(error.response.data)
           : 'Unable to create food experience. Please try again.'
       );
-
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="container py-5">
-      <div className="row justify-content-center">
-        <div className="col-lg-8">
+    <section className="create-experience-page">
+      <div className="create-experience-container">
 
-          <div className="card shadow-sm">
-            <div className="card-body p-4 p-md-5">
+        <div className="create-experience-heading">
+          <span className="create-experience-eyebrow">
+            SHARE YOUR LOCAL FLAVOURS
+          </span>
+          <h1>Create Food Experience</h1>
+          <p>
+            Bring your culinary activities to life and invite
+            travellers to discover something memorable.
+          </p>
+        </div>
 
-              <h2 className="fw-bold mb-2">
-                Create Food Experience
-              </h2>
+        <div className="create-experience-card">
 
-              <p className="text-secondary mb-4">
-                Share your local food activities with tourists.
-              </p>
+          <div className="create-experience-card-heading">
+            <div className="create-experience-icon">✦</div>
+            <div>
+              <h2>Experience Details</h2>
+              <p>Complete the information below to publish your experience.</p>
+            </div>
+          </div>
 
-              {error && (
-                <div className="alert alert-danger">{error}</div>
-              )}
+          {error && (
+            <div className="create-experience-error" role="alert">
+              {error}
+            </div>
+          )}
 
-              <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit}>
 
-                <h5 className="fw-bold mb-3">Basic Information</h5>
-
-                <div className="mb-3">
-                  <label className="form-label">Experience Title</label>
-                  <input
-                    type="text"
-                    name="title"
-                    className="form-control"
-                    value={formData.title}
-                    onChange={handleChange}
-                    required
-                  />
+            {/* Basic Information */}
+            <div className="create-experience-section">
+              <div className="create-experience-section-heading">
+                <span>01</span>
+                <div>
+                  <h3>Basic Information</h3>
+                  <p>Tell travellers what makes your experience special.</p>
                 </div>
+              </div>
 
-                <div className="mb-3">
-                  <label className="form-label">Description</label>
-                  <textarea
-                    name="description"
-                    className="form-control"
-                    rows="4"
-                    value={formData.description}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
+              <div className="create-experience-field">
+                <label htmlFor="experience-title">
+                  Experience Title *
+                </label>
+                <input
+                  id="experience-title"
+                  type="text"
+                  name="title"
+                  placeholder="e.g. Traditional Malaysian Cooking Class"
+                  value={formData.title}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
 
-                <div className="mb-3">
-                  <label className="form-label">Category</label>
+              <div className="create-experience-field">
+                <label htmlFor="experience-description">
+                  Description *
+                </label>
+                <textarea
+                  id="experience-description"
+                  name="description"
+                  rows="5"
+                  placeholder="Describe the activities, food and highlights..."
+                  value={formData.description}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+
+              <div className="create-experience-form-grid">
+                <div className="create-experience-field">
+                  <label htmlFor="experience-category">
+                    Category *
+                  </label>
                   <input
+                    id="experience-category"
                     type="text"
                     name="category"
-                    className="form-control"
                     placeholder="e.g. Cooking Class, Food Tasting"
                     value={formData.category}
                     onChange={handleChange}
@@ -131,164 +157,215 @@ function CreateFoodExperience() {
                   />
                 </div>
 
-                <div className="mb-3">
-                  <label className="form-label">Price (SGD)</label>
-                  <input
-                    type="number"
-                    name="price"
-                    className="form-control"
-                    min="0"
-                    step="0.01"
-                    value={formData.price}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-
-                <hr />
-
-                <h5 className="fw-bold mb-3">Schedule and Capacity</h5>
-
-                <div className="mb-3">
-                  <label className="form-label">Date</label>
-                  <input
-                    type="date"
-                    name="date"
-                    className="form-control"
-                    value={formData.date}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-
-                <div className="row">
-                  <div className="col-md-6 mb-3">
-                    <label className="form-label">Start Time</label>
+                <div className="create-experience-field">
+                  <label htmlFor="experience-price">
+                    Price (SGD) *
+                  </label>
+                  <div className="create-experience-price-input">
+                    <span>SGD</span>
                     <input
-                      type="time"
-                      name="start_time"
-                      className="form-control"
-                      value={formData.start_time}
-                      onChange={handleChange}
-                      required
-                    />
-                  </div>
-
-                  <div className="col-md-6 mb-3">
-                    <label className="form-label">End Time</label>
-                    <input
-                      type="time"
-                      name="end_time"
-                      className="form-control"
-                      value={formData.end_time}
+                      id="experience-price"
+                      type="number"
+                      name="price"
+                      min="0"
+                      step="0.01"
+                      placeholder="0.00"
+                      value={formData.price}
                       onChange={handleChange}
                       required
                     />
                   </div>
                 </div>
+              </div>
+            </div>
 
-                <div className="mb-3">
-                  <label className="form-label">
-                    Maximum Participants
+            {/* Schedule and Capacity */}
+            <div className="create-experience-section">
+              <div className="create-experience-section-heading">
+                <span>02</span>
+                <div>
+                  <h3>Schedule and Capacity</h3>
+                  <p>Set the date, duration and number of participants.</p>
+                </div>
+              </div>
+
+              <div className="create-experience-field">
+                <label htmlFor="experience-date">Date *</label>
+                <input
+                  id="experience-date"
+                  type="date"
+                  name="date"
+                  value={formData.date}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+
+              <div className="create-experience-form-grid">
+                <div className="create-experience-field">
+                  <label htmlFor="experience-start-time">
+                    Start Time *
                   </label>
                   <input
-                    type="number"
-                    name="capacity"
-                    className="form-control"
-                    min="1"
-                    value={formData.capacity}
+                    id="experience-start-time"
+                    type="time"
+                    name="start_time"
+                    value={formData.start_time}
                     onChange={handleChange}
                     required
                   />
                 </div>
 
-                <hr />
-
-                <h5 className="fw-bold mb-3">Location</h5>
-
-                <div className="mb-3">
-                  <label className="form-label">Address</label>
+                <div className="create-experience-field">
+                  <label htmlFor="experience-end-time">
+                    End Time *
+                  </label>
                   <input
-                    type="text"
-                    name="address"
-                    className="form-control"
-                    value={formData.address}
+                    id="experience-end-time"
+                    type="time"
+                    name="end_time"
+                    value={formData.end_time}
                     onChange={handleChange}
                     required
                   />
                 </div>
+              </div>
 
-                <div className="row">
-                  <div className="col-md-6 mb-3">
-                    <label className="form-label">City</label>
-                    <input
-                      type="text"
-                      name="city"
-                      className="form-control"
-                      value={formData.city}
-                      onChange={handleChange}
-                    />
-                  </div>
-
-                  <div className="col-md-6 mb-3">
-                    <label className="form-label">Area</label>
-                    <input
-                      type="text"
-                      name="area"
-                      className="form-control"
-                      value={formData.area}
-                      onChange={handleChange}
-                    />
-                  </div>
-                </div>
-
-                <div className="row">
-                  <div className="col-md-6 mb-3">
-                    <label className="form-label">
-                      Latitude (Optional)
-                    </label>
-                    <input
-                      type="number"
-                      step="any"
-                      name="latitude"
-                      className="form-control"
-                      value={formData.latitude}
-                      onChange={handleChange}
-                    />
-                  </div>
-
-                  <div className="col-md-6 mb-3">
-                    <label className="form-label">
-                      Longitude (Optional)
-                    </label>
-                    <input
-                      type="number"
-                      step="any"
-                      name="longitude"
-                      className="form-control"
-                      value={formData.longitude}
-                      onChange={handleChange}
-                    />
-                  </div>
-                </div>
-
-                <button
-                  type="submit"
-                  className="btn btn-warning btn-lg w-100 mt-3"
-                  disabled={loading}
-                >
-                  {loading
-                    ? 'Creating...'
-                    : 'Publish Food Experience'}
-                </button>
-
-              </form>
+              <div className="create-experience-field">
+                <label htmlFor="experience-capacity">
+                  Maximum Participants *
+                </label>
+                <input
+                  id="experience-capacity"
+                  type="number"
+                  name="capacity"
+                  min="1"
+                  placeholder="e.g. 10"
+                  value={formData.capacity}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
             </div>
-          </div>
 
+            {/* Location */}
+            <div className="create-experience-section">
+              <div className="create-experience-section-heading">
+                <span>03</span>
+                <div>
+                  <h3>Location</h3>
+                  <p>Help travellers find where your experience takes place.</p>
+                </div>
+              </div>
+
+              <div className="create-experience-field">
+                <label htmlFor="experience-address">Address *</label>
+                <input
+                  id="experience-address"
+                  type="text"
+                  name="address"
+                  placeholder="Enter the full street address"
+                  value={formData.address}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+
+              <div className="create-experience-form-grid">
+                <div className="create-experience-field">
+                  <label htmlFor="experience-city">City</label>
+                  <input
+                    id="experience-city"
+                    type="text"
+                    name="city"
+                    placeholder="e.g. Singapore"
+                    value={formData.city}
+                    onChange={handleChange}
+                  />
+                </div>
+
+                <div className="create-experience-field">
+                  <label htmlFor="experience-area">Area</label>
+                  <input
+                    id="experience-area"
+                    type="text"
+                    name="area"
+                    placeholder="e.g. Chinatown"
+                    value={formData.area}
+                    onChange={handleChange}
+                  />
+                </div>
+              </div>
+
+              <div className="create-experience-location-note">
+                <strong>Optional GPS coordinates</strong>
+                <p>
+                  Add latitude and longitude if you want to provide
+                  more precise map positioning.
+                </p>
+              </div>
+
+              <div className="create-experience-form-grid">
+                <div className="create-experience-field">
+                  <label htmlFor="experience-latitude">
+                    Latitude
+                  </label>
+                  <input
+                    id="experience-latitude"
+                    type="number"
+                    step="any"
+                    name="latitude"
+                    placeholder="e.g. 1.3521"
+                    value={formData.latitude}
+                    onChange={handleChange}
+                  />
+                </div>
+
+                <div className="create-experience-field">
+                  <label htmlFor="experience-longitude">
+                    Longitude
+                  </label>
+                  <input
+                    id="experience-longitude"
+                    type="number"
+                    step="any"
+                    name="longitude"
+                    placeholder="e.g. 103.8198"
+                    value={formData.longitude}
+                    onChange={handleChange}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Form actions */}
+            <div className="create-experience-actions">
+              <button
+                type="button"
+                className="create-experience-cancel-btn"
+                onClick={() => navigate(-1)}
+                disabled={loading}
+              >
+                Cancel
+              </button>
+
+              <button
+                type="submit"
+                className="create-experience-submit-btn"
+                disabled={loading}
+              >
+                {loading ? 'Publishing...' : 'Publish Food Experience'}
+              </button>
+            </div>
+
+            <p className="create-experience-required-note">
+              * Required fields
+            </p>
+
+          </form>
         </div>
       </div>
-    </div>
+    </section>
   );
 }
 

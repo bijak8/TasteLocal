@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import API from '../services/api';
@@ -26,7 +27,6 @@ function TouristProfile() {
     fetchProfile();
   }, [navigate]);
 
-  // Fetch tourist profile
   const fetchProfile = async () => {
     try {
       setLoading(true);
@@ -40,7 +40,6 @@ function TouristProfile() {
         last_name: response.data.last_name || '',
         email: response.data.email || '',
       });
-
     } catch (err) {
       console.error('Error fetching profile:', err);
 
@@ -53,13 +52,11 @@ function TouristProfile() {
         err.response?.data?.detail ||
         'Unable to load your profile.'
       );
-
     } finally {
       setLoading(false);
     }
   };
 
-  // Handle form changes
   const handleChange = (event) => {
     setFormData((previousData) => ({
       ...previousData,
@@ -67,7 +64,6 @@ function TouristProfile() {
     }));
   };
 
-  // Update tourist profile
   const handleSubmit = async (event) => {
     event.preventDefault();
 
@@ -93,7 +89,6 @@ function TouristProfile() {
       });
 
       setSuccess('Your profile has been updated successfully!');
-
     } catch (err) {
       console.error('Error updating profile:', err);
 
@@ -104,7 +99,6 @@ function TouristProfile() {
           ? JSON.stringify(errorData)
           : 'Unable to update your profile. Please try again.'
       );
-
     } finally {
       setSaving(false);
     }
@@ -112,136 +106,133 @@ function TouristProfile() {
 
   if (loading) {
     return (
-      <div className="container py-5 text-center">
-        Loading your profile...
-      </div>
+      <section className="tourist-profile-page">
+        <div className="profile-loading">
+          <div className="profile-loader"></div>
+          <p>Loading your profile...</p>
+        </div>
+      </section>
     );
   }
 
   return (
-    <div className="container py-5">
-      <div className="row justify-content-center">
-        <div className="col-lg-8">
+    <section className="tourist-profile-page">
+      <div className="tourist-profile-container">
 
-          <div className="card shadow-sm">
-            <div className="card-body p-4 p-md-5">
+        <div className="profile-page-heading">
+          <div>
+            <span className="profile-eyebrow">
+              YOUR TASTELOCAL ACCOUNT
+            </span>
+            <h1>My Profile</h1>
+            <p>
+              Keep your personal information up to date
+              for your TasteLocal account.
+            </p>
+          </div>
 
-              <div className="d-flex justify-content-between align-items-center mb-4">
-                <h2 className="fw-bold mb-0">
-                  My Profile
-                </h2>
+          <button
+            type="button"
+            className="profile-back-btn"
+            onClick={() => navigate('/tourist/dashboard')}
+          >
+            ← Back to Dashboard
+          </button>
+        </div>
 
-                <button
-                  type="button"
-                  className="btn btn-outline-secondary btn-sm"
-                  onClick={() => navigate('/tourist/dashboard')}
-                >
-                  Back to Dashboard
-                </button>
-              </div>
+        <div className="profile-content-card">
 
-              <p className="text-muted mb-4">
-                View and update your personal information.
-              </p>
+          <div className="profile-card-heading">
+            <div className="profile-avatar">
+              {formData.first_name
+                ? formData.first_name.charAt(0).toUpperCase()
+                : 'T'}
+            </div>
 
-              {error && (
-                <div className="alert alert-danger">
-                  {error}
-                </div>
-              )}
-
-              {success && (
-                <div className="alert alert-success">
-                  {success}
-                </div>
-              )}
-
-              <form onSubmit={handleSubmit}>
-
-                {/* Username */}
-                <div className="mb-3">
-                  <label className="form-label">
-                    Username
-                  </label>
-
-                  <input
-                    type="text"
-                    className="form-control"
-                    value={formData.username}
-                    disabled
-                  />
-
-                  <small className="text-muted">
-                    Your username cannot be changed.
-                  </small>
-                </div>
-
-                {/* First Name */}
-                <div className="mb-3">
-                  <label className="form-label">
-                    First Name
-                  </label>
-
-                  <input
-                    type="text"
-                    name="first_name"
-                    className="form-control"
-                    value={formData.first_name}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-
-                {/* Last Name */}
-                <div className="mb-3">
-                  <label className="form-label">
-                    Last Name
-                  </label>
-
-                  <input
-                    type="text"
-                    name="last_name"
-                    className="form-control"
-                    value={formData.last_name}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-
-                {/* Email */}
-                <div className="mb-4">
-                  <label className="form-label">
-                    Email Address
-                  </label>
-
-                  <input
-                    type="email"
-                    name="email"
-                    className="form-control"
-                    value={formData.email}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  className="btn btn-primary btn-lg w-100"
-                  disabled={saving}
-                >
-                  {saving
-                    ? 'Saving Changes...'
-                    : 'Update Profile'}
-                </button>
-
-              </form>
-
+            <div>
+              <h2>Personal Information</h2>
+              <p>Manage your account details below.</p>
             </div>
           </div>
 
+          {error && (
+            <div className="profile-alert profile-alert-error" role="alert">
+              {error}
+            </div>
+          )}
+
+          {success && (
+            <div className="profile-alert profile-alert-success" role="status">
+              {success}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit}>
+
+            <div className="profile-form-group">
+              <label htmlFor="username">Username</label>
+              <input
+                id="username"
+                type="text"
+                value={formData.username}
+                disabled
+              />
+              <small>Your username cannot be changed.</small>
+            </div>
+
+            <div className="profile-form-row">
+              <div className="profile-form-group">
+                <label htmlFor="first_name">First Name</label>
+                <input
+                  id="first_name"
+                  type="text"
+                  name="first_name"
+                  value={formData.first_name}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+
+              <div className="profile-form-group">
+                <label htmlFor="last_name">Last Name</label>
+                <input
+                  id="last_name"
+                  type="text"
+                  name="last_name"
+                  value={formData.last_name}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="profile-form-group">
+              <label htmlFor="email">Email Address</label>
+              <input
+                id="email"
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                required
+              />
+            </div>
+
+            <div className="profile-form-actions">
+              <button
+                type="submit"
+                className="profile-save-btn"
+                disabled={saving}
+              >
+                {saving ? 'Saving Changes...' : 'Update Profile'}
+              </button>
+            </div>
+
+          </form>
         </div>
+
       </div>
-    </div>
+    </section>
   );
 }
 

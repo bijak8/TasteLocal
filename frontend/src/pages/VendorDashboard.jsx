@@ -37,6 +37,8 @@ function VendorDashboard() {
         console.error('Error fetching vendor dashboard:', error);
 
         if (error.response?.status === 401) {
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('refreshToken');
           navigate('/login');
           return;
         }
@@ -87,17 +89,27 @@ function VendorDashboard() {
 
   if (loading) {
     return (
-      <div className="container py-5">
-        Loading your dashboard...
+      <div className="vendor-dashboard-loading">
+        <div className="vendor-dashboard-spinner"></div>
+        <p>Loading your dashboard...</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="container py-5">
-        <div className="alert alert-danger">
-          {error}
+      <div className="vendor-dashboard-page">
+        <div className="vendor-dashboard-container">
+          <div className="vendor-dashboard-error">
+            <p>{error}</p>
+            <button
+              type="button"
+              className="vendor-dashboard-primary-btn"
+              onClick={() => window.location.reload()}
+            >
+              Try Again
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -107,270 +119,265 @@ function VendorDashboard() {
     return null;
   }
 
+  const isApproved = dashboard.vendor_status === 'approved';
+
+  const statistics = [
+    {
+      label: 'Total Food Experiences',
+      value: dashboard.total_experiences,
+      icon: '✦',
+    },
+    {
+      label: 'Upcoming Experiences',
+      value: dashboard.upcoming_experiences,
+      icon: '◷',
+    },
+    {
+      label: 'Total Bookings',
+      value: dashboard.total_bookings,
+      icon: '♧',
+    },
+    {
+      label: 'Pending Bookings',
+      value: dashboard.pending_bookings,
+      icon: '◌',
+    },
+  ];
+
   return (
-    <div className="container py-5">
+    <div className="vendor-dashboard-page">
+      <div className="vendor-dashboard-container">
 
-      {/* Dashboard Header */}
-      <div className="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+        {/* Dashboard Header */}
+        <div className="vendor-dashboard-header">
+          <div>
+            <span className="vendor-dashboard-eyebrow">
+              FOOD EXPERIENCE PROVIDER
+            </span>
 
-        <div>
-          <h1 className="fw-bold mb-1">
-            Vendor Dashboard
-          </h1>
+            <h1>Welcome, {dashboard.business_name}</h1>
 
-          <p className="text-secondary mb-0">
-            Welcome, {dashboard.business_name}
-          </p>
+            <p>
+              Manage your food experiences, bookings and business activities.
+            </p>
+          </div>
+
+          <Link
+            to="/vendor/create-experience"
+            className="vendor-dashboard-primary-btn"
+          >
+            + Create Food Experience
+          </Link>
         </div>
 
-        <Link
-          to="/vendor/create-experience"
-          className="btn btn-warning"
-        >
-          + Create Food Experience
-        </Link>
-
-      </div>
-
-      {/* Vendor Approval Status */}
-      <div className="card shadow-sm mb-4">
-        <div className="card-body d-flex justify-content-between align-items-center flex-wrap gap-2">
-
+        {/* Vendor Approval Status */}
+        <section className="vendor-dashboard-approval">
           <div>
-            <h6 className="fw-bold mb-1">
-              Business Approval Status
-            </h6>
+            <span className="vendor-dashboard-section-label">
+              ACCOUNT STATUS
+            </span>
 
-            <small className="text-secondary">
-              Your Vendor account status
-            </small>
+            <h2>Business Approval Status</h2>
+
+            <p>
+              {isApproved
+                ? 'Your vendor account is approved. You can create and manage food experiences.'
+                : 'Your vendor account must be approved before you can create food experiences.'}
+            </p>
           </div>
 
           <span
-            className={`badge ${
-              dashboard.vendor_status === 'approved'
-                ? 'bg-success'
+            className={`vendor-dashboard-status ${
+              isApproved
+                ? 'vendor-status-approved'
                 : dashboard.vendor_status === 'rejected'
-                  ? 'bg-danger'
-                  : 'bg-warning text-dark'
+                ? 'vendor-status-rejected'
+                : 'vendor-status-pending'
             }`}
           >
             {dashboard.vendor_status?.toUpperCase()}
           </span>
+        </section>
 
-        </div>
-      </div>
+        {/* Dashboard Statistics */}
+        <section className="vendor-dashboard-stats">
+          {statistics.map((statistic) => (
+            <div
+              className="vendor-dashboard-stat-card"
+              key={statistic.label}
+            >
+              <div className="vendor-dashboard-stat-icon">
+                {statistic.icon}
+              </div>
 
-      {/* Dashboard Statistics */}
-      <div className="row g-4 mb-5">
+              <p>{statistic.label}</p>
 
-        <div className="col-md-6 col-lg-3">
-          <div className="card shadow-sm h-100">
-            <div className="card-body">
-              <p className="text-secondary mb-2">
-                Total Food Experiences
-              </p>
-
-              <h2 className="fw-bold">
-                {dashboard.total_experiences}
-              </h2>
+              <h2>{statistic.value ?? 0}</h2>
             </div>
-          </div>
-        </div>
+          ))}
+        </section>
 
-        <div className="col-md-6 col-lg-3">
-          <div className="card shadow-sm h-100">
-            <div className="card-body">
-              <p className="text-secondary mb-2">
-                Upcoming Experiences
-              </p>
+        {/* Booking Overview */}
+        <section className="vendor-dashboard-bookings">
+          <div className="vendor-dashboard-card-heading">
+            <div>
+              <span className="vendor-dashboard-section-label">
+                BOOKING ACTIVITY
+              </span>
 
-              <h2 className="fw-bold">
-                {dashboard.upcoming_experiences}
-              </h2>
+              <h2>Booking Overview</h2>
             </div>
+
+            <Link
+              to="/provider/bookings"
+              className="vendor-dashboard-text-link"
+            >
+              View Bookings →
+            </Link>
           </div>
-        </div>
 
-        <div className="col-md-6 col-lg-3">
-          <div className="card shadow-sm h-100">
-            <div className="card-body">
-              <p className="text-secondary mb-2">
-                Total Bookings
-              </p>
+          <div className="vendor-dashboard-booking-stats">
 
-              <h2 className="fw-bold">
-                {dashboard.total_bookings}
-              </h2>
+            <div>
+              <span className="vendor-booking-dot confirmed"></span>
+              <p>Confirmed Bookings</p>
+              <strong>{dashboard.confirmed_bookings ?? 0}</strong>
             </div>
-          </div>
-        </div>
 
-        <div className="col-md-6 col-lg-3">
-          <div className="card shadow-sm h-100">
-            <div className="card-body">
-              <p className="text-secondary mb-2">
-                Pending Bookings
-              </p>
-
-              <h2 className="fw-bold">
-                {dashboard.pending_bookings}
-              </h2>
+            <div>
+              <span className="vendor-booking-dot pending"></span>
+              <p>Pending Bookings</p>
+              <strong>{dashboard.pending_bookings ?? 0}</strong>
             </div>
+
           </div>
-        </div>
+        </section>
 
-      </div>
+        {/* My Food Experiences */}
+        <section className="vendor-dashboard-experiences">
 
-      {/* Booking Summary */}
-      <div className="card shadow-sm mb-5">
-        <div className="card-body p-4">
+          <div className="vendor-dashboard-card-heading">
+            <div>
+              <span className="vendor-dashboard-section-label">
+                YOUR EXPERIENCES
+              </span>
 
-          <h4 className="fw-bold mb-3">
-            Booking Overview
-          </h4>
+              <h2>My Food Experiences</h2>
 
-          <div className="d-flex justify-content-between align-items-center">
-            <span>Confirmed Bookings</span>
-
-            <span className="badge bg-success fs-6">
-              {dashboard.confirmed_bookings}
-            </span>
-          </div>
-
-          <hr />
-
-          <div className="d-flex justify-content-between align-items-center">
-            <span>Pending Bookings</span>
-
-            <span className="badge bg-warning text-dark fs-6">
-              {dashboard.pending_bookings}
-            </span>
-          </div>
-
-          <Link
-            to="/provider/bookings"
-            className="btn btn-outline-dark mt-4"
-          >
-            Manage Bookings
-          </Link>
-
-        </div>
-      </div>
-
-      {/* My Food Experiences */}
-      <div className="d-flex justify-content-between align-items-center mb-3">
-
-        <h4 className="fw-bold mb-0">
-          My Food Experiences
-        </h4>
-
-        <Link
-          to="/vendor/create-experience"
-          className="btn btn-outline-dark btn-sm"
-        >
-          Create New
-        </Link>
-
-      </div>
-
-      {experiences.length === 0 ? (
-        <div className="card shadow-sm">
-          <div className="card-body text-center p-5">
-
-            <h5>No food experiences yet</h5>
-
-            <p className="text-secondary">
-              Create your first food experience to attract tourists.
-            </p>
+              <p>
+                View and manage the culinary experiences you have created.
+              </p>
+            </div>
 
             <Link
               to="/vendor/create-experience"
-              className="btn btn-warning"
+              className="vendor-dashboard-primary-btn"
             >
-              Create Food Experience
+              + Add New Experience
             </Link>
-
           </div>
-        </div>
-      ) : (
-        <div className="table-responsive">
-          <table className="table table-bordered table-hover align-middle">
 
-            <thead className="table-light">
-              <tr>
-                <th>Experience</th>
-                <th>Date</th>
-                <th>Price</th>
-                <th>Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
+          {experiences.length === 0 ? (
+            <div className="vendor-dashboard-empty">
+              <div className="vendor-dashboard-empty-icon">✦</div>
 
-            <tbody>
-              {experiences.map((experience) => (
-                <tr key={experience.id}>
+              <h3>No Food Experiences Yet</h3>
 
-                  <td className="fw-semibold">
-                    {experience.title}
-                  </td>
+              <p>
+                You have not created any food experiences yet.
+                Start by sharing your first culinary experience.
+              </p>
 
-                  <td>{experience.date}</td>
+              <Link
+                to="/vendor/create-experience"
+                className="vendor-dashboard-primary-btn"
+              >
+                Create Your First Experience
+              </Link>
+            </div>
+          ) : (
+            <div className="vendor-dashboard-table-wrapper">
 
-                  <td>SGD {experience.price}</td>
+              <table className="vendor-dashboard-table">
 
-                  <td>
-                    <span
-                      className={`badge ${
-                        experience.status === 'approved'
-                          ? 'bg-success'
-                          : experience.status === 'rejected'
-                            ? 'bg-danger'
-                            : 'bg-warning text-dark'
-                      }`}
-                    >
-                      {experience.status}
-                    </span>
-                  </td>
+                <thead>
+                  <tr>
+                    <th>Experience</th>
+                    <th>Date</th>
+                    <th>Price</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
 
-                  <td>
-                    <div className="d-flex gap-2 flex-wrap">
+                <tbody>
+                  {experiences.map((experience) => (
+                    <tr key={experience.id}>
 
-                      <Link
-                        to={`/vendor/food-experiences/${experience.id}/edit`}
-                        className="btn btn-sm btn-outline-primary"
-                      >
-                        Edit
-                      </Link>
+                      <td>
+                        <strong>{experience.title}</strong>
+                      </td>
 
-                      <Link
-                        to={`/food-experiences/${experience.id}`}
-                        className="btn btn-sm btn-outline-dark"
-                      >
-                        View
-                      </Link>
+                      <td>{experience.date}</td>
 
-                      <button
-                        type="button"
-                        className="btn btn-sm btn-outline-danger"
-                        onClick={() =>
-                          handleDeleteExperience(experience.id)
-                        }
-                      >
-                        Delete
-                      </button>
+                      <td>SGD {experience.price}</td>
 
-                    </div>
-                  </td>
+                      <td>
+                        <span
+                          className={`vendor-dashboard-status ${
+                            experience.status === 'approved'
+                              ? 'vendor-status-approved'
+                              : experience.status === 'rejected'
+                              ? 'vendor-status-rejected'
+                              : 'vendor-status-pending'
+                          }`}
+                        >
+                          {experience.status}
+                        </span>
+                      </td>
 
-                </tr>
-              ))}
-            </tbody>
+                      <td>
+                        <div className="vendor-dashboard-actions">
 
-          </table>
-        </div>
-      )}
+                          <Link
+                            to={`/food-experiences/${experience.id}`}
+                            className="vendor-action-btn"
+                          >
+                            View
+                          </Link>
 
+                          <Link
+                            to={`/vendor/food-experiences/${experience.id}/edit`}
+                            className="vendor-action-btn vendor-action-edit"
+                          >
+                            Edit
+                          </Link>
+
+                          <button
+                            type="button"
+                            className="vendor-action-btn vendor-action-delete"
+                            onClick={() =>
+                              handleDeleteExperience(experience.id)
+                            }
+                          >
+                            Delete
+                          </button>
+
+                        </div>
+                      </td>
+
+                    </tr>
+                  ))}
+                </tbody>
+
+              </table>
+
+            </div>
+          )}
+
+        </section>
+
+      </div>
     </div>
   );
 }

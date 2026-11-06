@@ -255,248 +255,331 @@ function FoodExperienceDetails() {
     }
   };
 
+  
   if (loading) {
-    return <div className="container py-5">Loading...</div>;
+    return (
+      <div className="experience-details-message">
+        Loading food experience...
+      </div>
+    );
   }
 
   if (error) {
-    return <div className="container py-5 alert alert-danger">{error}</div>;
+    return (
+      <div className="experience-details-message experience-details-error">
+        {error}
+      </div>
+    );
   }
 
   if (!experience) {
-    return <div className="container py-5">Food experience not found.</div>;
+    return (
+      <div className="experience-details-message">
+        Food experience not found.
+      </div>
+    );
   }
 
   return (
-    <div className="container py-5">
+    <div className="experience-details-page">
 
-      <Link to="/food-experiences" className="btn btn-outline-secondary mb-4">
-        ← Back to Food Experiences
-      </Link>
+      <div className="container-custom experience-details-container">
 
-      <div className="card shadow-sm">
-        <div className="card-body p-4 p-md-5">
+        {/* Back Navigation */}
+        <Link
+          to="/food-experiences"
+          className="experience-back-link"
+        >
+          ← Back to Food Experiences
+        </Link>
 
-          <span className="badge bg-warning text-dark mb-3">
+        {/* Experience Header */}
+        <section className="experience-detail-header">
+
+          <span className="experience-category">
             {experience.category}
           </span>
 
-          <h1 className="fw-bold mb-3">{experience.title}</h1>
+          <h1>{experience.title}</h1>
 
-          <p className="text-secondary mb-4">
-            {experience.description}
-          </p>
+          <p>{experience.description}</p>
 
-          <hr />
+        </section>
 
-          <h5 className="fw-bold mb-3">Experience Information</h5>
+        {/* Main Experience Information */}
+        <div className="experience-detail-layout">
 
-          <p><strong>Location:</strong> {experience.address}</p>
-          <p><strong>Area:</strong> {experience.area || 'Not specified'}</p>
-          <p><strong>City:</strong> {experience.city || 'Not specified'}</p>
+          <div className="experience-detail-main">
 
-          <h5 className="fw-bold mt-4 mb-3">Location Map</h5>
+            {/* Experience Information */}
+            <section className="detail-section">
 
-          <FoodMap
-            latitude={experience.latitude}
-            longitude={experience.longitude}
-            title={experience.title}
-            address={experience.address}
-          />
+              <h2>About This Experience</h2>
 
-          <p><strong>Date:</strong> {experience.date}</p>
+              <div className="detail-information-grid">
 
-          <p>
-            <strong>Time:</strong> {experience.start_time} – {experience.end_time}
-          </p>
-
-          <p>
-            <strong>Available capacity:</strong> {experience.capacity} participants
-          </p>
-
-          <h3 className="fw-bold mt-4">
-            SGD {experience.price}
-          </h3>
-
-          <Link
-            to={`/booking?food_experience=${experience.id}`}
-            className="btn btn-warning btn-lg mt-3 me-2"
-          >
-            Book This Experience
-          </Link>
-
-          {/* Favourite Button */}
-          <div className="mt-3">
-            <button
-              type="button"
-              className={`btn ${
-                favourite ? 'btn-danger' : 'btn-outline-danger'
-              }`}
-              onClick={handleToggleFavourite}
-              disabled={favouriteLoading}
-            >
-              {favouriteLoading
-                ? 'Please wait...'
-                : favourite
-                  ? '♥ Remove from Favourites'
-                  : '♡ Add to Favourites'}
-            </button>
-
-            {favouriteMessage && (
-              <div className="alert alert-info mt-3 mb-0">
-                {favouriteMessage}
-              </div>
-            )}
-          </div>
-
-          {/* Add to Itinerary */}
-          <div className="border rounded p-4 mt-4">
-
-            <h5 className="fw-bold mb-3">
-              Add to My Itinerary
-            </h5>
-
-            <p className="text-secondary">
-              Save this food experience to one of your personal food itineraries.
-            </p>
-
-            {itineraries.length === 0 ? (
-              <div>
-                <p className="text-secondary">
-                  No itineraries found. Create one first.
-                </p>
-
-                <Link
-                  to="/my-itineraries"
-                  className="btn btn-outline-dark"
-                >
-                  View My Itineraries
-                </Link>
-              </div>
-            ) : (
-              <div>
-                <label className="form-label fw-bold">
-                  Select an Itinerary
-                </label>
-
-                <select
-                  className="form-select mb-3"
-                  value={selectedItinerary}
-                  onChange={(e) => {
-                    setSelectedItinerary(e.target.value);
-                    setItineraryMessage('');
-                  }}
-                >
-                  <option value="">Choose an itinerary</option>
-
-                  {itineraries.map((itinerary) => (
-                    <option
-                      key={itinerary.id}
-                      value={itinerary.id}
-                    >
-                      {itinerary.title}
-                    </option>
-                  ))}
-                </select>
-
-                <button
-                  type="button"
-                  className="btn btn-dark"
-                  onClick={handleAddToItinerary}
-                  disabled={addingToItinerary || !selectedItinerary}
-                >
-                  {addingToItinerary
-                    ? 'Adding...'
-                    : 'Add to Itinerary'}
-                </button>
-              </div>
-            )}
-
-            {itineraryMessage && (
-              <div className="alert alert-info mt-3 mb-0">
-                {itineraryMessage}
-              </div>
-            )}
-
-          </div>
-
-        </div>
-      </div>
-
-      {/* Reviews Section */}
-      <div className="card shadow-sm mt-5">
-        <div className="card-body p-4">
-
-          <h3 className="fw-bold mb-4">Ratings & Reviews</h3>
-
-          {reviews.length === 0 ? (
-            <p className="text-secondary">
-              No reviews yet. Be the first to share your experience!
-            </p>
-          ) : (
-            reviews.map((review) => (
-              <div key={review.id} className="border-bottom py-3">
-
-                <div className="text-warning fs-5">
-                  {'★'.repeat(review.rating)}
-                  {'☆'.repeat(5 - review.rating)}
+                <div className="detail-information-item">
+                  <span>Address</span>
+                  <strong>{experience.address || 'Not specified'}</strong>
                 </div>
 
-                <p className="mb-1">{review.comment}</p>
+                <div className="detail-information-item">
+                  <span>Area</span>
+                  <strong>{experience.area || 'Not specified'}</strong>
+                </div>
 
-                <small className="text-secondary">
-                  {review.created_at
-                    ? new Date(review.created_at).toLocaleDateString()
-                    : ''}
-                </small>
+                <div className="detail-information-item">
+                  <span>City</span>
+                  <strong>{experience.city || 'Not specified'}</strong>
+                </div>
+
+                <div className="detail-information-item">
+                  <span>Date</span>
+                  <strong>{experience.date || 'Not specified'}</strong>
+                </div>
+
+                <div className="detail-information-item">
+                  <span>Time</span>
+                  <strong>
+                    {experience.start_time} – {experience.end_time}
+                  </strong>
+                </div>
+
+                <div className="detail-information-item">
+                  <span>Available Capacity</span>
+                  <strong>{experience.capacity} participants</strong>
+                </div>
 
               </div>
-            ))
-          )}
+
+            </section>
+
+            {/* Location Map */}
+            <section className="detail-section">
+
+              <h2>Location</h2>
+
+              <p className="detail-section-description">
+                Find out where this food experience takes place.
+              </p>
+
+              <div className="experience-detail-map">
+                <FoodMap
+                  latitude={experience.latitude}
+                  longitude={experience.longitude}
+                  title={experience.title}
+                  address={experience.address}
+                />
+              </div>
+
+            </section>
+
+            {/* Add to Itinerary */}
+            <section className="detail-section itinerary-section">
+
+              <h2>Add to My Itinerary</h2>
+
+              <p className="detail-section-description">
+                Save this food experience to one of your personal
+                food itineraries.
+              </p>
+
+              {itineraries.length === 0 ? (
+                <div>
+                  <p className="detail-muted-text">
+                    No itineraries found. Create one first.
+                  </p>
+
+                  <Link
+                    to="/my-itineraries"
+                    className="taste-btn-secondary"
+                  >
+                    View My Itineraries
+                  </Link>
+                </div>
+              ) : (
+                <div className="itinerary-form">
+
+                  <label htmlFor="select-itinerary">
+                    Select an Itinerary
+                  </label>
+
+                  <select
+                    id="select-itinerary"
+                    value={selectedItinerary}
+                    onChange={(e) => {
+                      setSelectedItinerary(e.target.value);
+                      setItineraryMessage('');
+                    }}
+                  >
+                    <option value="">Choose an itinerary</option>
+
+                    {itineraries.map((itinerary) => (
+                      <option
+                        key={itinerary.id}
+                        value={itinerary.id}
+                      >
+                        {itinerary.title}
+                      </option>
+                    ))}
+                  </select>
+
+                  <button
+                    type="button"
+                    className="taste-btn-primary"
+                    onClick={handleAddToItinerary}
+                    disabled={addingToItinerary || !selectedItinerary}
+                  >
+                    {addingToItinerary
+                      ? 'Adding...'
+                      : 'Add to Itinerary'}
+                  </button>
+
+                </div>
+              )}
+
+              {itineraryMessage && (
+                <div className="detail-feedback-message">
+                  {itineraryMessage}
+                </div>
+              )}
+
+            </section>
+
+          </div>
+
+          {/* Booking and Favourite Panel */}
+          <aside className="experience-detail-sidebar">
+
+            <div className="booking-panel">
+
+              <span className="booking-panel-label">
+                EXPERIENCE PRICE
+              </span>
+
+              <h2>SGD {experience.price}</h2>
+
+              <p>Per participant</p>
+
+              <Link
+                to={`/booking?food_experience=${experience.id}`}
+                className="experience-book-btn"
+              >
+                Book This Experience
+              </Link>
+
+              <button
+                type="button"
+                className={`experience-favourite-btn ${
+                  favourite ? 'is-favourite' : ''
+                }`}
+                onClick={handleToggleFavourite}
+                disabled={favouriteLoading}
+              >
+                {favouriteLoading
+                  ? 'Please wait...'
+                  : favourite
+                    ? '♥ Remove from Favourites'
+                    : '♡ Add to Favourites'}
+              </button>
+
+              {favouriteMessage && (
+                <div className="detail-feedback-message">
+                  {favouriteMessage}
+                </div>
+              )}
+
+            </div>
+
+          </aside>
 
         </div>
-      </div>
 
-      {/* Submit Review Section */}
-      <div className="card shadow-sm mt-4">
-        <div className="card-body p-4">
+        {/* Reviews Section */}
+        <section className="experience-reviews-section">
 
-          <h4 className="fw-bold mb-3">Write a Review</h4>
+          <div className="detail-section">
 
-          <p className="text-secondary">
-            Only tourists with a confirmed booking can submit a rating and review.
+            <h2>Ratings & Reviews</h2>
+
+            {reviews.length === 0 ? (
+              <p className="detail-muted-text">
+                No reviews yet. Be the first to share your experience!
+              </p>
+            ) : (
+              <div className="experience-reviews-list">
+
+                {reviews.map((review) => (
+                  <div
+                    key={review.id}
+                    className="experience-review-card"
+                  >
+
+                    <div className="review-stars">
+                      {'★'.repeat(review.rating)}
+                      {'☆'.repeat(5 - review.rating)}
+                    </div>
+
+                    <p>{review.comment}</p>
+
+                    <small>
+                      {review.created_at
+                        ? new Date(review.created_at).toLocaleDateString()
+                        : ''}
+                    </small>
+
+                  </div>
+                ))}
+
+              </div>
+            )}
+
+          </div>
+
+        </section>
+
+        {/* Submit Review */}
+        <section className="experience-write-review">
+
+          <h2>Write a Review</h2>
+
+          <p className="detail-section-description">
+            Only tourists with a confirmed booking can submit a
+            rating and review.
           </p>
 
           <form onSubmit={handleSubmitReview}>
 
-            <label className="form-label fw-bold">
+            <label className="review-form-label">
               Your Rating
             </label>
 
-            <div className="mb-3">
+            <div className="review-rating-selector">
+
               {[1, 2, 3, 4, 5].map((number) => (
                 <button
                   key={number}
                   type="button"
-                  className="btn btn-link p-1 text-decoration-none"
+                  className={number <= rating ? 'active' : ''}
                   onClick={() => setRating(number)}
-                  style={{
-                    color: number <= rating ? '#ffc107' : '#adb5bd',
-                    fontSize: '2rem',
-                  }}
                   aria-label={`Rate ${number} out of 5`}
+                  aria-pressed={rating === number}
                 >
                   ★
                 </button>
               ))}
+
             </div>
 
-            <label className="form-label fw-bold">
+            <label
+              htmlFor="review-comment"
+              className="review-form-label"
+            >
               Your Review
             </label>
 
             <textarea
-              className="form-control mb-3"
+              id="review-comment"
               rows="4"
               placeholder="Share your experience..."
               value={comment}
@@ -505,14 +588,14 @@ function FoodExperienceDetails() {
             />
 
             {reviewMessage && (
-              <div className="alert alert-info">
+              <div className="detail-feedback-message">
                 {reviewMessage}
               </div>
             )}
 
             <button
               type="submit"
-              className="btn btn-warning"
+              className="taste-btn-primary review-submit-btn"
               disabled={submitting}
             >
               {submitting ? 'Submitting...' : 'Submit Review'}
@@ -520,9 +603,9 @@ function FoodExperienceDetails() {
 
           </form>
 
-        </div>
-      </div>
+        </section>
 
+      </div>
     </div>
   );
 }

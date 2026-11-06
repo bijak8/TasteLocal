@@ -44,66 +44,75 @@ function Login() {
   };
 
   return (
-    <div className="container py-5">
-      <div className="row justify-content-center">
-        <div className="col-md-6 col-lg-5">
-          <div className="card shadow-sm">
-            <div className="card-body p-4">
-              <h2 className="fw-bold text-center mb-2">
-                Welcome Back
-              </h2>
+    <section className="login-page">
+      <div className="login-container">
+        <div className="login-card">
+          <div className="login-heading">
+            <span className="login-eyebrow">WELCOME BACK TO TASTELOCAL</span>
 
-              <p className="text-secondary text-center mb-4">
-                Log in to your TasteLocal account.
-              </p>
+            <h1>Welcome Back</h1>
 
-              {error && (
-                <div className="alert alert-danger">{error}</div>
-              )}
+            <p>
+              Sign in to continue discovering local food,
+              memorable experiences and hidden gems.
+            </p>
+          </div>
 
-              <form onSubmit={handleSubmit}>
-                <div className="mb-3">
-                  <label className="form-label">Username</label>
-                  <input
-                    type="text"
-                    name="username"
-                    className="form-control"
-                    value={formData.username}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-
-                <div className="mb-4">
-                  <label className="form-label">Password</label>
-                  <input
-                    type="password"
-                    name="password"
-                    className="form-control"
-                    value={formData.password}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  className="btn btn-warning w-100"
-                  disabled={loading}
-                >
-                  {loading ? 'Logging in...' : 'Login'}
-                </button>
-              </form>
-
-              <p className="text-center mt-4 mb-0">
-                Don't have an account?{' '}
-                <Link to="/register">Register here</Link>
-              </p>
+          {error && (
+            <div className="login-error" role="alert">
+              {error}
             </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="login-form">
+            <div className="login-field">
+              <label htmlFor="login-username">Username</label>
+              <input
+                id="login-username"
+                type="text"
+                name="username"
+                placeholder="Enter your username"
+                value={formData.username}
+                onChange={handleChange}
+                autoComplete="username"
+                required
+              />
+            </div>
+
+            <div className="login-field">
+              <label htmlFor="login-password">Password</label>
+              <input
+                id="login-password"
+                type="password"
+                name="password"
+                placeholder="Enter your password"
+                value={formData.password}
+                onChange={handleChange}
+                autoComplete="current-password"
+                required
+              />
+            </div>
+
+            <button
+              type="submit"
+              className="login-submit-btn"
+              disabled={loading}
+            >
+              {loading ? 'Logging in...' : 'Log In'}
+            </button>
+          </form>
+
+          <div className="login-register-prompt">
+            Don't have an account?{' '}
+            <Link to="/register">Create an account</Link>
           </div>
         </div>
+
+        <p className="login-footer-note">
+          Good food. Great stories. Local discoveries.
+        </p>
       </div>
-    </div>
+    </section>
   );
 }
 

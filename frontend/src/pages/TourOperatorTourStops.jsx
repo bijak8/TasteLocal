@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import API from '../services/api';
@@ -9,6 +10,7 @@ function TourOperatorTourStops() {
   const [stops, setStops] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [selectedTourId, setSelectedTourId] = useState(
     searchParams.get('tour_id') || ''
   );
@@ -34,7 +36,6 @@ function TourOperatorTourStops() {
         : 'operator/tour-stops/';
 
       const response = await API.get(url);
-
       const data = response.data.results || response.data;
 
       setStops(data);
@@ -64,6 +65,9 @@ function TourOperatorTourStops() {
 
     if (!confirmed) return;
 
+    setError('');
+    setSuccess('');
+
     try {
       await API.delete(`operator/tour-stops/${stopId}/`);
 
@@ -71,11 +75,11 @@ function TourOperatorTourStops() {
         previousStops.filter((stop) => stop.id !== stopId)
       );
 
-      alert('Tour stop deleted successfully!');
+      setSuccess('Tour stop deleted successfully!');
     } catch (err) {
       console.error('Error deleting tour stop:', err);
 
-      alert(
+      setError(
         err.response?.data?.detail ||
         'Unable to delete tour stop. Please try again.'
       );
@@ -84,95 +88,128 @@ function TourOperatorTourStops() {
 
   if (loading) {
     return (
-      <div className="container py-5 text-center">
-        Loading tour stops...
+      <div className="operator-stops-page">
+        <div className="operator-stops-loading">
+          <div className="operator-stops-spinner" />
+          <p>Loading your tour stops...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="container py-5">
+    <div className="operator-stops-page">
+      <div className="operator-stops-container">
 
-      <div className="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
-        <div>
-          <h2 className="fw-bold">Tour Stop Management</h2>
-          <p className="text-muted mb-0">
-            Manage the destinations included in your food tours.
-          </p>
+        <div className="operator-stops-heading">
+          <span className="operator-stops-eyebrow">
+            TOUR MANAGEMENT
+          </span>
+
+          <div className="operator-stops-heading-row">
+            <div>
+              <h1>Tour Stop Management</h1>
+              <p>
+                Manage the restaurants and destinations included
+                in your food tour itineraries.
+              </p>
+            </div>
+
+            <Link
+              to="/operator/dashboard"
+              className="operator-stops-back-btn"
+            >
+              ← Back to Dashboard
+            </Link>
+          </div>
         </div>
 
-        <Link
-          to="/operator/dashboard"
-          className="btn btn-outline-secondary"
-        >
-          Back to Dashboard
-        </Link>
-      </div>
+        {error && (
+          <div className="operator-stops-error">
+            <span>{error}</span>
+            <button onClick={fetchStops}>
+              Retry
+            </button>
+          </div>
+        )}
 
-      {error && (
-        <div className="alert alert-danger">
-          {error}
-          <button
-            className="btn btn-sm btn-outline-danger ms-3"
-            onClick={fetchStops}
-          >
-            Retry
-          </button>
-        </div>
-      )}
+        {success && (
+          <div className="operator-stops-success" role="status">
+            <strong>Success!</strong> {success}
+          </div>
+        )}
 
-      <div className="card shadow-sm mb-4">
-        <div className="card-body">
-          <label className="form-label fw-bold">
-            Filter by Food Tour ID
-          </label>
+        <div className="operator-stops-filter-card">
+          <div className="operator-stops-filter-heading">
+            <div>
+              <h2>Filter Tour Stops</h2>
+              <p>Find destinations belonging to a particular food tour.</p>
+            </div>
+            <span className="operator-stops-filter-icon">⌕</span>
+          </div>
 
-          <div className="d-flex gap-2">
-            <input
-              type="number"
-              min="1"
-              className="form-control"
-              placeholder="Enter food tour ID"
-              value={selectedTourId}
-              onChange={(event) => setSelectedTourId(event.target.value)}
-            />
+          <div className="operator-stops-filter-controls">
+            <div className="operator-stops-filter-field">
+              <label htmlFor="tourFilter">Food Tour ID</label>
+              <input
+                id="tourFilter"
+                type="number"
+                min="1"
+                placeholder="Enter food tour ID"
+                value={selectedTourId}
+                onChange={(event) => setSelectedTourId(event.target.value)}
+              />
+            </div>
 
             <button
-              className="btn btn-outline-primary"
+              className="operator-stops-clear-btn"
               onClick={() => setSelectedTourId('')}
+              disabled={!selectedTourId}
             >
-              Clear
+              Clear Filter
             </button>
           </div>
         </div>
-      </div>
 
-      <div className="card shadow-sm">
-        <div className="card-body">
+        <div className="operator-stops-list-card">
+          <div className="operator-stops-list-header">
+            <div>
+              <h2>Your Tour Stops</h2>
+              <p>Manage the destinations in your itineraries.</p>
+            </div>
 
-          <div className="d-flex justify-content-between align-items-center mb-3">
-            <h5 className="fw-bold mb-0">
-              Tour Stops ({stops.length})
-            </h5>
+            <div className="operator-stops-count">
+              {stops.length} {stops.length === 1 ? 'Stop' : 'Stops'}
+            </div>
           </div>
 
           {stops.length === 0 ? (
-            <div className="text-center py-4">
-              <p className="text-muted">
-                No tour stops found.
+            <div className="operator-stops-empty">
+              <div className="operator-stops-empty-icon">✦</div>
+              <h3>No Tour Stops Found</h3>
+              <p>
+                There are currently no destinations matching your selection.
               </p>
+              {selectedTourId && (
+                <button
+                  className="operator-stops-clear-link"
+                  onClick={() => setSelectedTourId('')}
+                >
+                  View all tour stops
+                </button>
+              )}
             </div>
           ) : (
-            <div className="table-responsive">
-              <table className="table table-hover align-middle">
-                <thead className="table-light">
+            <div className="operator-stops-table-wrapper">
+              <table className="operator-stops-table">
+                <thead>
                   <tr>
-                    <th>Order</th>
-                    <th>Stop Name</th>
-                    <th>Food Tour</th>
-                    <th>Location</th>
-                    <th>Address</th>
-                    <th>Actions</th>
+                    <th>ORDER</th>
+                    <th>DESTINATION</th>
+                    <th>FOOD TOUR</th>
+                    <th>LOCATION</th>
+                    <th>ADDRESS</th>
+                    <th>ACTIONS</th>
                   </tr>
                 </thead>
 
@@ -180,17 +217,21 @@ function TourOperatorTourStops() {
                   {stops.map((stop) => (
                     <tr key={stop.id}>
                       <td>
-                        <span className="badge bg-primary">
+                        <span className="operator-stops-order">
                           {stop.stop_order}
                         </span>
                       </td>
 
                       <td>
-                        <strong>{stop.name}</strong>
+                        <strong className="operator-stops-name">
+                          {stop.name}
+                        </strong>
                       </td>
 
                       <td>
-                        {stop.food_tour_title || `Tour #${stop.food_tour}`}
+                        <span className="operator-stops-tour">
+                          {stop.food_tour_title || `Tour #${stop.food_tour}`}
+                        </span>
                       </td>
 
                       <td>
@@ -199,19 +240,21 @@ function TourOperatorTourStops() {
                           .join(', ') || 'Not specified'}
                       </td>
 
-                      <td>{stop.address}</td>
+                      <td className="operator-stops-address">
+                        {stop.address}
+                      </td>
 
                       <td>
-                        <div className="d-flex gap-2">
+                        <div className="operator-stops-actions">
                           <Link
                             to={`/operator/tour-stops/${stop.id}/edit`}
-                            className="btn btn-outline-warning btn-sm"
+                            className="operator-stops-edit-btn"
                           >
                             Edit
                           </Link>
 
                           <button
-                            className="btn btn-outline-danger btn-sm"
+                            className="operator-stops-delete-btn"
                             onClick={() => handleDelete(stop.id)}
                           >
                             Delete
@@ -224,8 +267,8 @@ function TourOperatorTourStops() {
               </table>
             </div>
           )}
-
         </div>
+
       </div>
     </div>
   );

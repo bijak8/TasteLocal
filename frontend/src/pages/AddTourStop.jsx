@@ -7,11 +7,11 @@ function AddTourStop() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
-const [foodTourId, setFoodTourId] = useState(
-  searchParams.get('tour_id') ||
-  searchParams.get('tour') ||
-  ''
-);
+  const [foodTourId, setFoodTourId] = useState(
+    searchParams.get('tour_id') ||
+    searchParams.get('tour') ||
+    ''
+  );
 
   const [formData, setFormData] = useState({
     name: '',
@@ -25,18 +25,22 @@ const [foodTourId, setFoodTourId] = useState(
   });
 
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleChange = (event) => {
-    setFormData({
-      ...formData,
-      [event.target.name]: event.target.value,
-    });
+    const { name, value } = event.target;
+
+    setFormData((previous) => ({
+      ...previous,
+      [name]: value,
+    }));
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     setError('');
+    setSuccess('');
 
     if (!foodTourId) {
       setError('Please enter a food tour ID.');
@@ -58,9 +62,9 @@ const [foodTourId, setFoodTourId] = useState(
 
       console.log('Tour stop created:', response.data);
 
-      alert('Tour stop added successfully!');
+      setSuccess('Tour stop added successfully!');
 
-      setFormData({
+      setFormData((previous) => ({
         name: '',
         description: '',
         address: '',
@@ -68,8 +72,8 @@ const [foodTourId, setFoodTourId] = useState(
         area: '',
         latitude: '',
         longitude: '',
-        stop_order: Number(formData.stop_order) + 1,
-      });
+        stop_order: Number(previous.stop_order) + 1,
+      }));
 
     } catch (error) {
       console.error('Error adding tour stop:', error);
@@ -86,152 +90,210 @@ const [foodTourId, setFoodTourId] = useState(
   };
 
   return (
-    <div className="container py-5">
-      <div className="row justify-content-center">
-        <div className="col-lg-8">
+    <div className="add-stop-page">
+      <div className="add-stop-container">
 
-          <div className="card shadow-sm">
-            <div className="card-body p-4 p-md-5">
+        <div className="add-stop-heading">
+          <span className="add-stop-eyebrow">TOUR MANAGEMENT</span>
+          <h1>Add a Tour Stop</h1>
+          <p>
+            Build your food tour itinerary by adding restaurants,
+            food destinations and local culinary experiences.
+          </p>
+        </div>
 
-              <h2 className="fw-bold mb-2">Add Tour Stop</h2>
+        <div className="add-stop-card">
 
-              <p className="text-secondary mb-4">
-                Add a food destination to your food tour itinerary.
-              </p>
-
-              {error && (
-                <div className="alert alert-danger">{error}</div>
-              )}
-
-              <form onSubmit={handleSubmit}>
-
-                <div className="mb-4">
-                  <label className="form-label">Food Tour ID</label>
-                  <input
-                    type="number"
-                    className="form-control"
-                    value={foodTourId}
-                    onChange={(event) => setFoodTourId(event.target.value)}
-                    min="1"
-                    required
-                  />
-                </div>
-
-                <hr />
-
-                <h5 className="fw-bold mb-3">Stop Information</h5>
-
-                <div className="mb-3">
-                  <label className="form-label">Stop Name</label>
-                  <input
-                    type="text"
-                    name="name"
-                    className="form-control"
-                    value={formData.name}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-
-                <div className="mb-3">
-                  <label className="form-label">Description</label>
-                  <textarea
-                    name="description"
-                    className="form-control"
-                    rows="3"
-                    value={formData.description}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-
-                <div className="mb-3">
-                  <label className="form-label">Address</label>
-                  <input
-                    type="text"
-                    name="address"
-                    className="form-control"
-                    value={formData.address}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-
-                <div className="row">
-                  <div className="col-md-6 mb-3">
-                    <label className="form-label">City</label>
-                    <input
-                      type="text"
-                      name="city"
-                      className="form-control"
-                      value={formData.city}
-                      onChange={handleChange}
-                    />
-                  </div>
-
-                  <div className="col-md-6 mb-3">
-                    <label className="form-label">Area</label>
-                    <input
-                      type="text"
-                      name="area"
-                      className="form-control"
-                      value={formData.area}
-                      onChange={handleChange}
-                    />
-                  </div>
-                </div>
-
-                <div className="row">
-                  <div className="col-md-6 mb-3">
-                    <label className="form-label">Latitude (Optional)</label>
-                    <input
-                      type="number"
-                      step="any"
-                      name="latitude"
-                      className="form-control"
-                      value={formData.latitude}
-                      onChange={handleChange}
-                    />
-                  </div>
-
-                  <div className="col-md-6 mb-3">
-                    <label className="form-label">Longitude (Optional)</label>
-                    <input
-                      type="number"
-                      step="any"
-                      name="longitude"
-                      className="form-control"
-                      value={formData.longitude}
-                      onChange={handleChange}
-                    />
-                  </div>
-                </div>
-
-                <div className="mb-4">
-                  <label className="form-label">Stop Order</label>
-                  <input
-                    type="number"
-                    name="stop_order"
-                    className="form-control"
-                    min="1"
-                    value={formData.stop_order}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  className="btn btn-warning btn-lg w-100"
-                  disabled={loading}
-                >
-                  {loading ? 'Adding Stop...' : 'Add Tour Stop'}
-                </button>
-
-              </form>
+          <div className="add-stop-card-header">
+            <div>
+              <h2>Stop Details</h2>
+              <p>Complete the information below to add a destination.</p>
             </div>
+            <div className="add-stop-icon">✦</div>
           </div>
 
+          {error && (
+            <div className="add-stop-error">
+              {error}
+            </div>
+          )}
+
+          {success && (
+  <div className="add-stop-success" role="status">
+    <strong>Success!</strong> {success}
+  </div>
+)}
+
+          <form onSubmit={handleSubmit}>
+
+            <section className="add-stop-section">
+              <div className="add-stop-section-heading">
+                <span className="add-stop-section-number">01</span>
+                <div>
+                  <h3>Food Tour</h3>
+                  <p>Choose the tour this stop belongs to.</p>
+                </div>
+              </div>
+
+              <div className="add-stop-field">
+                <label htmlFor="foodTourId">Food Tour ID</label>
+                <input
+                  id="foodTourId"
+                  type="number"
+                  value={foodTourId}
+                  onChange={(event) => setFoodTourId(event.target.value)}
+                  min="1"
+                  required
+                  placeholder="Enter food tour ID"
+                />
+              </div>
+            </section>
+
+            <div className="add-stop-divider" />
+
+            <section className="add-stop-section">
+              <div className="add-stop-section-heading">
+                <span className="add-stop-section-number">02</span>
+                <div>
+                  <h3>Destination Information</h3>
+                  <p>Tell visitors about this food destination.</p>
+                </div>
+              </div>
+
+              <div className="add-stop-field">
+                <label htmlFor="name">Stop Name</label>
+                <input
+                  id="name"
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  required
+                  placeholder="e.g. Traditional Dim Sum Restaurant"
+                />
+              </div>
+
+              <div className="add-stop-field">
+                <label htmlFor="description">Description</label>
+                <textarea
+                  id="description"
+                  name="description"
+                  rows="4"
+                  value={formData.description}
+                  onChange={handleChange}
+                  required
+                  placeholder="Describe the food, atmosphere and experience..."
+                />
+              </div>
+
+              <div className="add-stop-field">
+                <label htmlFor="address">Full Address</label>
+                <input
+                  id="address"
+                  type="text"
+                  name="address"
+                  value={formData.address}
+                  onChange={handleChange}
+                  required
+                  placeholder="Enter the complete street address"
+                />
+              </div>
+
+              <div className="add-stop-field-row">
+                <div className="add-stop-field">
+                  <label htmlFor="city">City</label>
+                  <input
+                    id="city"
+                    type="text"
+                    name="city"
+                    value={formData.city}
+                    onChange={handleChange}
+                    placeholder="e.g. Singapore"
+                  />
+                </div>
+
+                <div className="add-stop-field">
+                  <label htmlFor="area">Area / Neighbourhood</label>
+                  <input
+                    id="area"
+                    type="text"
+                    name="area"
+                    value={formData.area}
+                    onChange={handleChange}
+                    placeholder="e.g. Chinatown"
+                  />
+                </div>
+              </div>
+            </section>
+
+            <div className="add-stop-divider" />
+
+            <section className="add-stop-section">
+              <div className="add-stop-section-heading">
+                <span className="add-stop-section-number">03</span>
+                <div>
+                  <h3>Location & Sequence</h3>
+                  <p>Set the map coordinates and itinerary order.</p>
+                </div>
+              </div>
+
+              <div className="add-stop-field-row">
+                <div className="add-stop-field">
+                  <label htmlFor="latitude">Latitude <span>(Optional)</span></label>
+                  <input
+                    id="latitude"
+                    type="number"
+                    step="any"
+                    name="latitude"
+                    value={formData.latitude}
+                    onChange={handleChange}
+                    placeholder="e.g. 1.3521"
+                  />
+                </div>
+
+                <div className="add-stop-field">
+                  <label htmlFor="longitude">Longitude <span>(Optional)</span></label>
+                  <input
+                    id="longitude"
+                    type="number"
+                    step="any"
+                    name="longitude"
+                    value={formData.longitude}
+                    onChange={handleChange}
+                    placeholder="e.g. 103.8198"
+                  />
+                </div>
+              </div>
+
+              <div className="add-stop-field add-stop-order-field">
+                <label htmlFor="stop_order">Stop Order</label>
+                <input
+                  id="stop_order"
+                  type="number"
+                  name="stop_order"
+                  min="1"
+                  value={formData.stop_order}
+                  onChange={handleChange}
+                  required
+                />
+                <small>
+                  Determines where this destination appears in the tour itinerary.
+                </small>
+              </div>
+            </section>
+
+            <div className="add-stop-submit-area">
+              <button
+                type="submit"
+                className="add-stop-submit-btn"
+                disabled={loading}
+              >
+                {loading ? 'Adding Stop...' : 'Add Tour Stop'}
+              </button>
+              <p>Your destination will be added to the selected food tour.</p>
+            </div>
+
+          </form>
         </div>
       </div>
     </div>

@@ -30,7 +30,7 @@ function FoodExperiences() {
       });
   }, []);
 
-  // Get unique filter options from available experiences
+  // Get unique filter options
   const cities = [...new Set(
     experiences.map((item) => item.city).filter(Boolean)
   )];
@@ -89,37 +89,51 @@ function FoodExperiences() {
   };
 
   return (
-    <div className="container py-5">
+    <div className="experiences-page">
 
-      <div className="text-center mb-5">
-        <h1 className="fw-bold">Explore Food Experiences</h1>
-        <p className="text-secondary">
-          Discover authentic local food activities and culinary experiences.
-        </p>
-      </div>
+      {/* Page Heading */}
+      <section className="experiences-hero">
+        <div className="container-custom">
+          <span className="home-eyebrow">TASTE SOMETHING DIFFERENT</span>
 
-      {/* Search and Filter Section */}
-      <div className="card shadow-sm mb-5">
-        <div className="card-body p-4">
+          <h1>Explore Food Experiences</h1>
 
-          <h5 className="fw-bold mb-3">Find Your Food Experience</h5>
+          <p>
+            Discover authentic local food activities, cooking classes,
+            food tastings and unique culinary experiences.
+          </p>
+        </div>
+      </section>
 
-          <div className="mb-3">
+      <div className="container-custom experiences-content">
+
+        {/* Search and Filters */}
+        <section className="experiences-filter-panel">
+
+          <div className="filter-heading">
+            <div>
+              <h2>Find Your Food Experience</h2>
+              <p>Search and filter experiences to find your perfect match.</p>
+            </div>
+          </div>
+
+          <div className="experience-search">
+            <label htmlFor="experience-search">Search experiences</label>
             <input
+              id="experience-search"
               type="text"
-              className="form-control"
-              placeholder="Search by experience name or keyword..."
+              placeholder="Search by name, description or keyword..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
 
-          <div className="row g-3">
+          <div className="experience-filter-grid">
 
-            <div className="col-md-4">
-              <label className="form-label fw-semibold">City</label>
+            <div className="experience-filter-field">
+              <label htmlFor="filter-city">City</label>
               <select
-                className="form-select"
+                id="filter-city"
                 value={selectedCity}
                 onChange={(e) => setSelectedCity(e.target.value)}
               >
@@ -130,10 +144,10 @@ function FoodExperiences() {
               </select>
             </div>
 
-            <div className="col-md-4">
-              <label className="form-label fw-semibold">Area</label>
+            <div className="experience-filter-field">
+              <label htmlFor="filter-area">Area</label>
               <select
-                className="form-select"
+                id="filter-area"
                 value={selectedArea}
                 onChange={(e) => setSelectedArea(e.target.value)}
               >
@@ -144,10 +158,10 @@ function FoodExperiences() {
               </select>
             </div>
 
-            <div className="col-md-4">
-              <label className="form-label fw-semibold">Food Category</label>
+            <div className="experience-filter-field">
+              <label htmlFor="filter-category">Food Category</label>
               <select
-                className="form-select"
+                id="filter-category"
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
               >
@@ -160,24 +174,24 @@ function FoodExperiences() {
               </select>
             </div>
 
-            <div className="col-md-6">
-              <label className="form-label fw-semibold">Minimum Price (SGD)</label>
+            <div className="experience-filter-field">
+              <label htmlFor="filter-min-price">Minimum Price (SGD)</label>
               <input
+                id="filter-min-price"
                 type="number"
                 min="0"
-                className="form-control"
                 placeholder="Minimum price"
                 value={minPrice}
                 onChange={(e) => setMinPrice(e.target.value)}
               />
             </div>
 
-            <div className="col-md-6">
-              <label className="form-label fw-semibold">Maximum Price (SGD)</label>
+            <div className="experience-filter-field">
+              <label htmlFor="filter-max-price">Maximum Price (SGD)</label>
               <input
+                id="filter-max-price"
                 type="number"
                 min="0"
-                className="form-control"
                 placeholder="Maximum price"
                 value={maxPrice}
                 onChange={(e) => setMaxPrice(e.target.value)}
@@ -186,83 +200,120 @@ function FoodExperiences() {
 
           </div>
 
-          <button
-            type="button"
-            className="btn btn-outline-secondary mt-3"
-            onClick={clearFilters}
-          >
-            Clear Filters
-          </button>
+          <div className="filter-actions">
+            <button
+              type="button"
+              className="filter-clear-btn"
+              onClick={clearFilters}
+            >
+              Clear All Filters
+            </button>
+          </div>
 
-        </div>
-      </div>
+        </section>
 
-      {loading && (
-        <p className="text-center">Loading food experiences...</p>
-      )}
+        {/* Loading */}
+        {loading && (
+          <div className="experiences-message">
+            <p>Loading food experiences...</p>
+          </div>
+        )}
 
-      {error && (
-        <div className="alert alert-danger">{error}</div>
-      )}
+        {/* Error */}
+        {error && (
+          <div className="experiences-error">
+            {error}
+          </div>
+        )}
 
-      {!loading && !error && (
-        <>
-          <p className="text-secondary mb-4">
-            Showing {filteredExperiences.length} of {experiences.length} food experiences
-          </p>
+        {/* Results */}
+        {!loading && !error && (
+          <section className="experiences-results">
 
-          {filteredExperiences.length === 0 ? (
-            <p className="text-center">
-              No matching food experiences found. Try changing your filters.
-            </p>
-          ) : (
-            <div className="row g-4">
-              {filteredExperiences.map((experience) => (
-                <div className="col-md-6 col-lg-4" key={experience.id}>
-                  <div className="card h-100 shadow-sm">
+            <div className="experiences-results-heading">
+              <div>
+                <span className="home-eyebrow">EXPLORE LOCAL FLAVOURS</span>
+                <h2>Available Experiences</h2>
+              </div>
 
-                    <div className="card-body">
-                      <span className="badge bg-warning text-dark mb-3">
+              <p>
+                Showing <strong>{filteredExperiences.length}</strong> of{' '}
+                <strong>{experiences.length}</strong> experiences
+              </p>
+            </div>
+
+            {filteredExperiences.length === 0 ? (
+              <div className="experiences-empty">
+                <h3>No matching experiences found</h3>
+                <p>Try changing your search or filters.</p>
+
+                <button
+                  type="button"
+                  className="taste-btn-primary"
+                  onClick={clearFilters}
+                >
+                  Clear Filters
+                </button>
+              </div>
+            ) : (
+
+              <div className="experiences-grid">
+
+                {filteredExperiences.map((experience) => (
+                  <article
+                    className="experience-card"
+                    key={experience.id}
+                  >
+
+                    <div className="experience-card-content">
+
+                      <span className="experience-category">
                         {experience.category}
                       </span>
 
-                      <h5 className="card-title fw-bold">
-                        {experience.title}
-                      </h5>
+                      <h3>{experience.title}</h3>
 
-                      <p className="card-text text-secondary">
+                      <p className="experience-description">
                         {experience.description}
                       </p>
 
-                      <p className="mb-1">
-                        <strong>Location:</strong>{' '}
-                        {experience.area || experience.city || 'Location not specified'}
-                      </p>
+                      <div className="experience-details">
 
-                      <p className="mb-1">
-                        <strong>Date:</strong> {experience.date}
-                      </p>
+                        <p>
+                          <span>Location</span>
+                          {experience.area || experience.city || 'Not specified'}
+                        </p>
 
-                      <p className="mb-3">
-                        <strong>Price:</strong> SGD {experience.price}
-                      </p>
+                        <p>
+                          <span>Date</span>
+                          {experience.date}
+                        </p>
+
+                        <p>
+                          <span>Price</span>
+                          <strong>SGD {experience.price}</strong>
+                        </p>
+
+                      </div>
 
                       <Link
                         to={`/food-experiences/${experience.id}`}
-                        className="btn btn-dark w-100"
+                        className="experience-details-btn"
                       >
-                        View Details
+                        View Details →
                       </Link>
 
                     </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </>
-      )}
+                  </article>
+                ))}
 
+              </div>
+            )}
+
+          </section>
+        )}
+
+      </div>
     </div>
   );
 }

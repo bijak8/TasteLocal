@@ -22,7 +22,6 @@ function EditFoodTour() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
-  // Fetch existing food tour
   useEffect(() => {
     const fetchTour = async () => {
       try {
@@ -58,7 +57,6 @@ function EditFoodTour() {
     fetchTour();
   }, [id]);
 
-  // Handle form changes
   const handleChange = (event) => {
     setFormData((previousData) => ({
       ...previousData,
@@ -66,7 +64,6 @@ function EditFoodTour() {
     }));
   };
 
-  // Update food tour
   const handleSubmit = async (event) => {
     event.preventDefault();
 
@@ -102,214 +99,232 @@ function EditFoodTour() {
 
   if (loading) {
     return (
-      <div className="container py-5">
-        Loading food tour...
+      <div className="edit-tour-loading">
+        <div className="edit-tour-spinner"></div>
+        <p>Loading food tour...</p>
       </div>
     );
   }
 
   return (
-    <div className="container py-5">
-      <div className="row justify-content-center">
-        <div className="col-lg-8">
-          <div className="card shadow-sm">
-            <div className="card-body p-4 p-md-5">
+    <div className="edit-tour-page">
+      <div className="edit-tour-container">
 
-              <h2 className="fw-bold mb-2">
-                Edit Food Tour
-              </h2>
+        <div className="edit-tour-heading">
+          <span className="edit-tour-eyebrow">
+            TOUR OPERATOR
+          </span>
 
-              <p className="text-secondary mb-4">
-                Update your food tour information.
-              </p>
+          <h1>Edit Food Tour</h1>
 
-              {error && (
-                <div className="alert alert-danger">
-                  {error}
+          <p>
+            Update your tour details, schedule and location.
+          </p>
+        </div>
+
+        <div className="edit-tour-card">
+
+          <form onSubmit={handleSubmit}>
+
+            {error && (
+              <div className="edit-tour-error">
+                {error}
+              </div>
+            )}
+
+            {/* Basic Information */}
+            <section className="edit-tour-section">
+
+              <div className="edit-tour-section-heading">
+                <span className="edit-tour-section-number">01</span>
+                <div>
+                  <h2>Basic Information</h2>
+                  <p>Tell travellers about your food tour.</p>
                 </div>
-              )}
+              </div>
 
-              <form onSubmit={handleSubmit}>
+              <div className="edit-tour-field">
+                <label htmlFor="title">Tour Title</label>
+                <input
+                  id="title"
+                  type="text"
+                  name="title"
+                  value={formData.title}
+                  onChange={handleChange}
+                  placeholder="Enter your tour title"
+                  required
+                />
+              </div>
 
-                <h5 className="fw-bold mb-3">
-                  Basic Information
-                </h5>
+              <div className="edit-tour-field">
+                <label htmlFor="description">Description</label>
+                <textarea
+                  id="description"
+                  name="description"
+                  rows="5"
+                  value={formData.description}
+                  onChange={handleChange}
+                  placeholder="Describe the food tour experience..."
+                  required
+                />
+              </div>
 
-                <div className="mb-3">
-                  <label className="form-label">
-                    Tour Title
-                  </label>
-
+              <div className="edit-tour-field">
+                <label htmlFor="price">Price per Person (SGD)</label>
+                <div className="edit-tour-price-input">
+                  <span>SGD</span>
                   <input
-                    type="text"
-                    name="title"
-                    className="form-control"
-                    value={formData.title}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-
-                <div className="mb-3">
-                  <label className="form-label">
-                    Description
-                  </label>
-
-                  <textarea
-                    name="description"
-                    className="form-control"
-                    rows="4"
-                    value={formData.description}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-
-                <div className="mb-3">
-                  <label className="form-label">
-                    Price (SGD)
-                  </label>
-
-                  <input
+                    id="price"
                     type="number"
                     name="price"
-                    className="form-control"
                     min="0"
                     step="0.01"
                     value={formData.price}
                     onChange={handleChange}
+                    placeholder="0.00"
                     required
                   />
                 </div>
+              </div>
 
-                <hr />
+            </section>
 
-                <h5 className="fw-bold mb-3">
-                  Schedule and Capacity
-                </h5>
+            <div className="edit-tour-divider"></div>
 
-                <div className="mb-3">
-                  <label className="form-label">
-                    Date
-                  </label>
+            {/* Schedule and Capacity */}
+            <section className="edit-tour-section">
 
+              <div className="edit-tour-section-heading">
+                <span className="edit-tour-section-number">02</span>
+                <div>
+                  <h2>Schedule and Capacity</h2>
+                  <p>Set the date, duration and group size.</p>
+                </div>
+              </div>
+
+              <div className="edit-tour-field">
+                <label htmlFor="date">Tour Date</label>
+                <input
+                  id="date"
+                  type="date"
+                  name="date"
+                  value={formData.date}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+
+              <div className="edit-tour-field-row">
+
+                <div className="edit-tour-field">
+                  <label htmlFor="start_time">Start Time</label>
                   <input
-                    type="date"
-                    name="date"
-                    className="form-control"
-                    value={formData.date}
+                    id="start_time"
+                    type="time"
+                    name="start_time"
+                    value={formData.start_time}
                     onChange={handleChange}
                     required
                   />
                 </div>
 
-                <div className="row">
-                  <div className="col-md-6 mb-3">
-                    <label className="form-label">
-                      Start Time
-                    </label>
-
-                    <input
-                      type="time"
-                      name="start_time"
-                      className="form-control"
-                      value={formData.start_time}
-                      onChange={handleChange}
-                      required
-                    />
-                  </div>
-
-                  <div className="col-md-6 mb-3">
-                    <label className="form-label">
-                      End Time
-                    </label>
-
-                    <input
-                      type="time"
-                      name="end_time"
-                      className="form-control"
-                      value={formData.end_time}
-                      onChange={handleChange}
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div className="mb-3">
-                  <label className="form-label">
-                    Maximum Participants
-                  </label>
-
+                <div className="edit-tour-field">
+                  <label htmlFor="end_time">End Time</label>
                   <input
-                    type="number"
-                    name="capacity"
-                    className="form-control"
-                    min="1"
-                    step="1"
-                    value={formData.capacity}
+                    id="end_time"
+                    type="time"
+                    name="end_time"
+                    value={formData.end_time}
                     onChange={handleChange}
                     required
                   />
                 </div>
 
-                <hr />
+              </div>
 
-                <h5 className="fw-bold mb-3">
-                  Location
-                </h5>
+              <div className="edit-tour-field">
+                <label htmlFor="capacity">Maximum Participants</label>
+                <input
+                  id="capacity"
+                  type="number"
+                  name="capacity"
+                  min="1"
+                  step="1"
+                  value={formData.capacity}
+                  onChange={handleChange}
+                  placeholder="Enter maximum participants"
+                  required
+                />
+              </div>
 
-                <div className="row">
-                  <div className="col-md-6 mb-3">
-                    <label className="form-label">
-                      City
-                    </label>
+            </section>
 
-                    <input
-                      type="text"
-                      name="city"
-                      className="form-control"
-                      value={formData.city}
-                      onChange={handleChange}
-                    />
-                  </div>
+            <div className="edit-tour-divider"></div>
 
-                  <div className="col-md-6 mb-3">
-                    <label className="form-label">
-                      Area
-                    </label>
+            {/* Location */}
+            <section className="edit-tour-section">
 
-                    <input
-                      type="text"
-                      name="area"
-                      className="form-control"
-                      value={formData.area}
-                      onChange={handleChange}
-                    />
-                  </div>
+              <div className="edit-tour-section-heading">
+                <span className="edit-tour-section-number">03</span>
+                <div>
+                  <h2>Location</h2>
+                  <p>Where will your food tour take place?</p>
+                </div>
+              </div>
+
+              <div className="edit-tour-field-row">
+
+                <div className="edit-tour-field">
+                  <label htmlFor="city">City</label>
+                  <input
+                    id="city"
+                    type="text"
+                    name="city"
+                    value={formData.city}
+                    onChange={handleChange}
+                    placeholder="Enter city"
+                  />
                 </div>
 
-                <button
-                  type="submit"
-                  className="btn btn-warning btn-lg w-100 mt-3"
-                  disabled={saving}
-                >
-                  {saving
-                    ? 'Saving Changes...'
-                    : 'Update Food Tour'}
-                </button>
+                <div className="edit-tour-field">
+                  <label htmlFor="area">Area</label>
+                  <input
+                    id="area"
+                    type="text"
+                    name="area"
+                    value={formData.area}
+                    onChange={handleChange}
+                    placeholder="Enter area"
+                  />
+                </div>
 
-                <button
-                  type="button"
-                  className="btn btn-outline-secondary w-100 mt-2"
-                  onClick={() => navigate('/operator/dashboard')}
-                >
-                  Cancel
-                </button>
+              </div>
 
-              </form>
+            </section>
+
+            {/* Form Actions */}
+            <div className="edit-tour-actions">
+
+              <button
+                type="button"
+                className="edit-tour-cancel-btn"
+                onClick={() => navigate('/operator/dashboard')}
+              >
+                Cancel
+              </button>
+
+              <button
+                type="submit"
+                className="edit-tour-save-btn"
+                disabled={saving}
+              >
+                {saving ? 'Saving Changes...' : 'Update Food Tour'}
+              </button>
 
             </div>
-          </div>
+
+          </form>
+
         </div>
       </div>
     </div>

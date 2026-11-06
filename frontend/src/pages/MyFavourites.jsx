@@ -39,6 +39,8 @@ function MyFavourites() {
   const handleRemoveFavourite = async (favouriteId) => {
     try {
       setRemovingId(favouriteId);
+      setError('');
+
       await API.delete(`favourites/${favouriteId}/`);
 
       setFavourites((previousFavourites) =>
@@ -54,110 +56,141 @@ function MyFavourites() {
     }
   };
 
-  if (loading) {
-    return <div className="container py-5">Loading favourites...</div>;
-  }
-
   return (
-    <div className="container py-5">
+    <section className="my-favourites-page">
+      <div className="my-favourites-container">
 
-      <h1 className="fw-bold mb-2">My Favourites</h1>
+        <div className="my-favourites-heading">
+          <span className="my-favourites-eyebrow">
+            YOUR PERSONAL COLLECTION
+          </span>
 
-      <p className="text-secondary mb-4">
-        Your saved food experiences and food tours.
-      </p>
+          <h1>My Favourites</h1>
 
-      {error && (
-        <div className="alert alert-danger">
-          {error}
+          <p>
+            Keep all your favourite food experiences and food tours
+            together in one place.
+          </p>
         </div>
-      )}
 
-      {favourites.length === 0 ? (
-        <div className="card shadow-sm">
-          <div className="card-body p-5 text-center">
-            <h4>No favourites yet</h4>
+        {!loading && !error && favourites.length > 0 && (
+          <div className="favourites-summary">
+            <span className="favourites-summary-number">
+              {favourites.length}
+            </span>
+            <span className="favourites-summary-label">
+              {favourites.length === 1 ? 'Saved Favourite' : 'Saved Favourites'}
+            </span>
+          </div>
+        )}
 
-            <p className="text-secondary">
-              Explore food experiences and food tours and save the ones you like.
+        {loading && (
+          <div className="favourites-loading">
+            <div className="favourites-loader"></div>
+            <p>Loading your favourites...</p>
+          </div>
+        )}
+
+        {error && (
+          <div className="favourites-error" role="alert">
+            {error}
+          </div>
+        )}
+
+        {!loading && !error && favourites.length === 0 && (
+          <div className="favourites-empty">
+            <div className="favourites-empty-icon">♥</div>
+
+            <h2>No Favourites Yet</h2>
+
+            <p>
+              You haven't saved any favourites yet. Explore our food
+              experiences and food tours and save the ones you love.
             </p>
 
-            <Link
-              to="/food-experiences"
-              className="btn btn-warning me-2"
-            >
-              Explore Food Experiences
-            </Link>
+            <div className="favourites-empty-actions">
+              <Link
+                to="/food-experiences"
+                className="favourites-explore-btn"
+              >
+                Explore Food Experiences
+              </Link>
 
-            <Link
-              to="/food-tours"
-              className="btn btn-outline-dark"
-            >
-              Explore Food Tours
-            </Link>
+              <Link
+                to="/food-tours"
+                className="favourites-secondary-btn"
+              >
+                Explore Food Tours
+              </Link>
+            </div>
           </div>
-        </div>
-      ) : (
-        <div className="row g-4">
+        )}
 
-          {favourites.map((item) => {
-            const isExperience = Boolean(item.food_experience);
-            const title = isExperience
-              ? item.food_experience_title
-              : item.food_tour_title;
+        {!loading && favourites.length > 0 && (
+          <div className="favourites-grid">
+            {favourites.map((item) => {
+              const isExperience = Boolean(item.food_experience);
 
-            const detailsLink = isExperience
-              ? `/food-experiences/${item.food_experience}`
-              : `/food-tours/${item.food_tour}`;
+              const title = isExperience
+                ? item.food_experience_title
+                : item.food_tour_title;
 
-            return (
-              <div className="col-md-6 col-lg-4" key={item.id}>
-                <div className="card shadow-sm h-100">
+              const detailsLink = isExperience
+                ? `/food-experiences/${item.food_experience}`
+                : `/food-tours/${item.food_tour}`;
 
-                  <div className="card-body d-flex flex-column">
-
-                    <span className="badge bg-warning text-dark align-self-start mb-3">
+              return (
+                <article className="favourite-card" key={item.id}>
+                  <div className="favourite-card-top">
+                    <span
+                      className={`favourite-type ${
+                        isExperience
+                          ? 'favourite-type-experience'
+                          : 'favourite-type-tour'
+                      }`}
+                    >
                       {isExperience ? 'Food Experience' : 'Food Tour'}
                     </span>
 
-                    <h5 className="fw-bold">
-                      {title || 'Untitled'}
-                    </h5>
+                    <span className="favourite-heart" aria-label="Favourite">
+                      ♥
+                    </span>
+                  </div>
 
-                    <p className="text-secondary">
+                  <div className="favourite-card-body">
+                    <h2>{title || 'Untitled'}</h2>
+
+                    <p className="favourite-date">
                       Saved on {new Date(item.created_at).toLocaleDateString()}
                     </p>
 
-                    <div className="mt-auto d-flex gap-2">
-
+                    <div className="favourite-card-actions">
                       <Link
                         to={detailsLink}
-                        className="btn btn-dark flex-grow-1"
+                        className="favourite-view-btn"
                       >
                         View Details
                       </Link>
 
                       <button
                         type="button"
-                        className="btn btn-outline-danger"
+                        className="favourite-remove-btn"
                         onClick={() => handleRemoveFavourite(item.id)}
                         disabled={removingId === item.id}
+                        aria-label={`Remove ${title || 'favourite'}`}
                       >
-                        {removingId === item.id ? '...' : '♥'}
+                        {removingId === item.id ? 'Removing...' : 'Remove'}
                       </button>
-
                     </div>
-
                   </div>
-                </div>
-              </div>
-            );
-          })}
+                </article>
+              );
+            })}
+          </div>
+        )}
 
-        </div>
-      )}
-
-    </div>
+      </div>
+    </section>
   );
 }
 

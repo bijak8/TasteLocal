@@ -58,7 +58,7 @@ function MyItineraries() {
 
       await API.post('itineraries/', {
         title: title.trim(),
-        description: description.trim()
+        description: description.trim(),
       });
 
       setTitle('');
@@ -134,224 +134,196 @@ function MyItineraries() {
   };
 
   return (
-    <div className="min-vh-100 bg-light">
+    <section className="my-itineraries-page">
+      <div className="my-itineraries-container">
 
-      {/* Navigation */}
-      <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div className="container">
-          <Link className="navbar-brand fw-bold" to="/">
-            TasteLocal
-          </Link>
-
-          <div className="navbar-nav ms-auto">
-            <Link className="nav-link" to="/">
-              Home
-            </Link>
-
-            <Link className="nav-link" to="/food-experiences">
-              Food Experiences
-            </Link>
-
-            <Link className="nav-link" to="/food-tours">
-              Food Tours
-            </Link>
-
-            <Link className="nav-link active" to="/my-itineraries">
-              My Itineraries
-            </Link>
-          </div>
-        </div>
-      </nav>
-
-      <div className="container py-5">
-
-        {/* Page heading */}
-        <div className="mb-4">
-          <h1 className="fw-bold">My Food Itineraries</h1>
-
-          <p className="text-secondary">
+        <div className="my-itineraries-heading">
+          <span className="my-itineraries-eyebrow">
+            YOUR PERSONAL FOOD JOURNEY
+          </span>
+          <h1>My Food Itineraries</h1>
+          <p>
             Plan your food adventures by saving food experiences
             and food tours in your personal itineraries.
           </p>
         </div>
 
-        {/* Create itinerary form */}
-        <div className="card shadow-sm mb-5">
-          <div className="card-body p-4">
-            <h4 className="fw-bold mb-3">
-              Create a New Itinerary
-            </h4>
-
-            <form onSubmit={handleSubmit}>
-              <div className="mb-3">
-                <label className="form-label">
-                  Itinerary Name
-                </label>
-
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="e.g. Singapore Food Adventure"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  maxLength={200}
-                  required
-                />
-              </div>
-
-              <div className="mb-3">
-                <label className="form-label">
-                  Description
-                </label>
-
-                <textarea
-                  className="form-control"
-                  rows="3"
-                  placeholder="Describe your food travel plans..."
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                />
-              </div>
-
-              <button
-                type="submit"
-                className="btn btn-warning"
-                disabled={creating}
-              >
-                {creating ? 'Creating...' : 'Create Itinerary'}
-              </button>
-            </form>
+        <div className="create-itinerary-card">
+          <div className="create-itinerary-heading">
+            <div className="create-itinerary-icon">✦</div>
+            <div>
+              <h2>Create a New Itinerary</h2>
+              <p>Give your next food adventure a name.</p>
+            </div>
           </div>
+
+          <form onSubmit={handleSubmit} className="itinerary-form">
+            <div className="itinerary-form-field">
+              <label htmlFor="itinerary-title">Itinerary Name</label>
+              <input
+                id="itinerary-title"
+                type="text"
+                placeholder="e.g. Singapore Food Adventure"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                maxLength={200}
+                required
+              />
+            </div>
+
+            <div className="itinerary-form-field">
+              <label htmlFor="itinerary-description">Description</label>
+              <textarea
+                id="itinerary-description"
+                rows="3"
+                placeholder="Describe your food travel plans..."
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+              />
+            </div>
+
+            <button
+              type="submit"
+              className="itinerary-create-btn"
+              disabled={creating}
+            >
+              {creating ? 'Creating...' : 'Create Itinerary'}
+            </button>
+          </form>
         </div>
 
-        {/* Error and success messages */}
         {error && (
-          <div className="alert alert-danger">
-            {error}
+          <div className="itineraries-alert itineraries-alert-error" role="alert">
+            <span>{error}</span>
 
             {error.toLowerCase().includes('log in') && (
-              <div className="mt-2">
-                <Link to="/login" className="btn btn-sm btn-dark">
-                  Login
-                </Link>
-              </div>
+              <Link to="/login" className="itineraries-login-link">
+                Log In
+              </Link>
             )}
           </div>
         )}
 
         {success && (
-          <div className="alert alert-success">
+          <div className="itineraries-alert itineraries-alert-success" role="status">
             {success}
           </div>
         )}
 
-        {/* Itinerary list */}
-        <div>
-          <h4 className="fw-bold mb-3">
-            My Saved Itineraries
-          </h4>
+        <div className="saved-itineraries-section">
+          <div className="saved-itineraries-heading">
+            <div>
+              <span className="my-itineraries-eyebrow">YOUR COLLECTION</span>
+              <h2>My Saved Itineraries</h2>
+            </div>
+
+            {!loading && !error && (
+              <span className="itinerary-count">
+                {itineraries.length} {itineraries.length === 1 ? 'Itinerary' : 'Itineraries'}
+              </span>
+            )}
+          </div>
 
           {loading ? (
-            <p>Loading your itineraries...</p>
-          ) : itineraries.length === 0 ? (
-            <div className="card shadow-sm">
-              <div className="card-body text-center py-5">
-                <h5>No itineraries yet</h5>
-
-                <p className="text-secondary">
-                  Create your first itinerary to start planning
-                  your food adventure.
-                </p>
-              </div>
+            <div className="itineraries-loading">
+              <div className="itineraries-loader"></div>
+              <p>Loading your itineraries...</p>
+            </div>
+          ) : !error && itineraries.length === 0 ? (
+            <div className="itineraries-empty">
+              <div className="itineraries-empty-icon">✦</div>
+              <h3>No Itineraries Yet</h3>
+              <p>
+                Create your first itinerary to start planning
+                your food adventure.
+              </p>
             </div>
           ) : (
-            <div className="row g-4">
-
+            <div className="itineraries-grid">
               {itineraries.map((itinerary) => (
-                <div className="col-md-6" key={itinerary.id}>
+                <article className="itinerary-card" key={itinerary.id}>
+                  <div className="itinerary-card-header">
+                    <div>
+                      <span className="itinerary-card-label">
+                        FOOD ADVENTURE
+                      </span>
+                      <h3>{itinerary.title}</h3>
+                    </div>
 
-                  <div className="card h-100 shadow-sm">
+                    <span className="itinerary-activity-count">
+                      {itinerary.items?.length || 0} saved
+                    </span>
+                  </div>
 
-                    <div className="card-body p-4">
+                  <div className="itinerary-card-body">
+                    <p className="itinerary-description">
+                      {itinerary.description || 'No description provided.'}
+                    </p>
 
-                      <h5 className="fw-bold">
-                        {itinerary.title}
-                      </h5>
+                    <p className="itinerary-created">
+                      Created: {new Date(itinerary.created_at).toLocaleDateString()}
+                    </p>
 
-                      <p className="text-secondary">
-                        {itinerary.description || 'No description provided.'}
-                      </p>
+                    <div className="itinerary-activities-heading">
+                      <h4>Saved Activities</h4>
+                    </div>
 
-                      <p className="small text-secondary">
-                        Activities saved: {itinerary.items?.length || 0}
-                      </p>
-
-                      <p className="small text-secondary">
-                        Created: {new Date(itinerary.created_at).toLocaleDateString()}
-                      </p>
-
-                      <hr />
-
-                      <h6 className="fw-bold mb-3">
-                        Saved Activities
-                      </h6>
-
-                      {!itinerary.items || itinerary.items.length === 0 ? (
-                        <p className="text-secondary">
-                          No activities added yet.
-                        </p>
-                      ) : (
-                        itinerary.items.map((item) => (
-                          <div
-                            key={item.id}
-                            className="border rounded p-3 mb-3"
-                          >
-
+                    {!itinerary.items || itinerary.items.length === 0 ? (
+                      <div className="itinerary-no-activities">
+                        <p>No activities added yet.</p>
+                        <Link to="/food-experiences">
+                          Explore Food Experiences
+                        </Link>
+                      </div>
+                    ) : (
+                      <div className="itinerary-activities-list">
+                        {itinerary.items.map((item) => (
+                          <div className="itinerary-activity" key={item.id}>
                             {item.food_experience ? (
-                              <div>
-                                <span className="badge bg-warning text-dark mb-2">
+                              <>
+                                <span className="itinerary-activity-type experience-type">
                                   Food Experience
                                 </span>
 
-                                <h6 className="fw-bold">
+                                <h5>
                                   {item.food_experience_title || 'Food Experience'}
-                                </h6>
+                                </h5>
 
                                 <Link
                                   to={`/food-experiences/${item.food_experience}`}
-                                  className="btn btn-sm btn-outline-dark"
+                                  className="itinerary-view-link"
                                 >
                                   View Experience
                                 </Link>
-                              </div>
+                              </>
                             ) : (
-                              <div>
-                                <span className="badge bg-info text-dark mb-2">
+                              <>
+                                <span className="itinerary-activity-type tour-type">
                                   Food Tour
                                 </span>
 
-                                <h6 className="fw-bold">
+                                <h5>
                                   {item.food_tour_title || 'Food Tour'}
-                                </h6>
+                                </h5>
 
                                 <Link
                                   to={`/food-tours/${item.food_tour}`}
-                                  className="btn btn-sm btn-outline-dark"
+                                  className="itinerary-view-link"
                                 >
                                   View Food Tour
                                 </Link>
-                              </div>
+                              </>
                             )}
 
                             {item.notes && (
-                              <p className="text-secondary mt-2 mb-0">
+                              <p className="itinerary-activity-notes">
                                 {item.notes}
                               </p>
                             )}
 
                             <button
                               type="button"
-                              className="btn btn-sm btn-outline-danger mt-3"
+                              className="itinerary-remove-btn"
                               onClick={() => handleRemoveItem(item.id)}
                               disabled={deletingItem === item.id}
                             >
@@ -359,35 +331,32 @@ function MyItineraries() {
                                 ? 'Removing...'
                                 : 'Remove Activity'}
                             </button>
-
                           </div>
-                        ))
-                      )}
-
-                      <hr />
-
-                      <button
-                        type="button"
-                        className="btn btn-outline-danger btn-sm"
-                        onClick={() => handleDeleteItinerary(itinerary.id)}
-                        disabled={deletingItinerary === itinerary.id}
-                      >
-                        {deletingItinerary === itinerary.id
-                          ? 'Deleting...'
-                          : 'Delete Itinerary'}
-                      </button>
-
-                    </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
-                </div>
-              ))}
 
+                  <div className="itinerary-card-footer">
+                    <button
+                      type="button"
+                      className="itinerary-delete-btn"
+                      onClick={() => handleDeleteItinerary(itinerary.id)}
+                      disabled={deletingItinerary === itinerary.id}
+                    >
+                      {deletingItinerary === itinerary.id
+                        ? 'Deleting...'
+                        : 'Delete Itinerary'}
+                    </button>
+                  </div>
+                </article>
+              ))}
             </div>
           )}
         </div>
 
       </div>
-    </div>
+    </section>
   );
 }
 

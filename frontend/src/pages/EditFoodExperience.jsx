@@ -121,277 +121,314 @@ function EditFoodExperience() {
 
   if (loading) {
     return (
-      <div className="container py-5">
-        Loading food experience...
+      <div className="edit-experience-page">
+        <div className="edit-experience-loading">
+          <div className="edit-experience-spinner" />
+          <p>Loading food experience...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="container py-5">
-      <div className="row justify-content-center">
-        <div className="col-lg-8">
+    <div className="edit-experience-page">
+      <div className="edit-experience-container">
 
-          <div className="card shadow-sm">
-            <div className="card-body p-4 p-md-5">
+        <div className="edit-experience-heading">
+          <span className="edit-experience-eyebrow">
+            VENDOR STUDIO
+          </span>
 
-              <h2 className="fw-bold mb-2">
-                Edit Food Experience
-              </h2>
+          <h1>Edit Food Experience</h1>
 
-              <p className="text-secondary mb-4">
-                Update your food experience information.
-              </p>
+          <p>
+            Update your experience details and keep your listing
+            accurate for visitors.
+          </p>
+        </div>
 
-              {error && (
-                <div className="alert alert-danger">
-                  {error}
+        <div className="edit-experience-card">
+
+          <div className="edit-experience-card-header">
+            <div>
+              <h2>Experience Details</h2>
+              <p>Make changes to your existing food experience.</p>
+            </div>
+
+            <span className="edit-experience-icon">🍽️</span>
+          </div>
+
+          {error && (
+            <div className="edit-experience-error">
+              <strong>Something went wrong</strong>
+              <p>{error}</p>
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit}>
+
+            {/* Basic Information */}
+            <div className="edit-experience-section">
+              <div className="edit-experience-section-heading">
+                <span className="edit-experience-section-number">01</span>
+                <div>
+                  <h3>Basic Information</h3>
+                  <p>Tell visitors about your food experience.</p>
                 </div>
-              )}
+              </div>
 
-              <form onSubmit={handleSubmit}>
+              <div className="edit-experience-field">
+                <label htmlFor="experience-title">
+                  Experience Title
+                </label>
+                <input
+                  id="experience-title"
+                  type="text"
+                  name="title"
+                  placeholder="Enter experience title"
+                  value={formData.title}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
 
-                <h5 className="fw-bold mb-3">
-                  Basic Information
-                </h5>
+              <div className="edit-experience-field">
+                <label htmlFor="experience-description">
+                  Description
+                </label>
+                <textarea
+                  id="experience-description"
+                  name="description"
+                  rows="5"
+                  placeholder="Describe your food experience..."
+                  value={formData.description}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
 
-                <div className="mb-3">
-                  <label className="form-label">
-                    Experience Title
-                  </label>
-
-                  <input
-                    type="text"
-                    name="title"
-                    className="form-control"
-                    value={formData.title}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-
-                <div className="mb-3">
-                  <label className="form-label">
-                    Description
-                  </label>
-
-                  <textarea
-                    name="description"
-                    className="form-control"
-                    rows="4"
-                    value={formData.description}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-
-                <div className="mb-3">
-                  <label className="form-label">
+              <div className="edit-experience-field-row">
+                <div className="edit-experience-field">
+                  <label htmlFor="experience-category">
                     Category
                   </label>
-
                   <input
+                    id="experience-category"
                     type="text"
                     name="category"
-                    className="form-control"
+                    placeholder="e.g. Chinese Cuisine"
                     value={formData.category}
                     onChange={handleChange}
                     required
                   />
                 </div>
 
-                <div className="mb-3">
-                  <label className="form-label">
-                    Price (SGD)
+                <div className="edit-experience-field">
+                  <label htmlFor="experience-price">
+                    Price per Participant (SGD)
                   </label>
-
-                  <input
-                    type="number"
-                    name="price"
-                    className="form-control"
-                    min="0"
-                    step="0.01"
-                    value={formData.price}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-
-                <hr />
-
-                <h5 className="fw-bold mb-3">
-                  Schedule and Capacity
-                </h5>
-
-                <div className="mb-3">
-                  <label className="form-label">
-                    Date
-                  </label>
-
-                  <input
-                    type="date"
-                    name="date"
-                    className="form-control"
-                    value={formData.date}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-
-                <div className="row">
-                  <div className="col-md-6 mb-3">
-                    <label className="form-label">
-                      Start Time
-                    </label>
-
+                  <div className="edit-experience-price-input">
+                    <span>SGD</span>
                     <input
-                      type="time"
-                      name="start_time"
-                      className="form-control"
-                      value={formData.start_time}
-                      onChange={handleChange}
-                      required
-                    />
-                  </div>
-
-                  <div className="col-md-6 mb-3">
-                    <label className="form-label">
-                      End Time
-                    </label>
-
-                    <input
-                      type="time"
-                      name="end_time"
-                      className="form-control"
-                      value={formData.end_time}
+                      id="experience-price"
+                      type="number"
+                      name="price"
+                      min="0"
+                      step="0.01"
+                      placeholder="0.00"
+                      value={formData.price}
                       onChange={handleChange}
                       required
                     />
                   </div>
                 </div>
-
-                <div className="mb-3">
-                  <label className="form-label">
-                    Maximum Participants
-                  </label>
-
-                  <input
-                    type="number"
-                    name="capacity"
-                    className="form-control"
-                    min="1"
-                    value={formData.capacity}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-
-                <hr />
-
-                <h5 className="fw-bold mb-3">
-                  Location
-                </h5>
-
-                <div className="mb-3">
-                  <label className="form-label">
-                    Address
-                  </label>
-
-                  <input
-                    type="text"
-                    name="address"
-                    className="form-control"
-                    value={formData.address}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-
-                <div className="row">
-                  <div className="col-md-6 mb-3">
-                    <label className="form-label">
-                      City
-                    </label>
-
-                    <input
-                      type="text"
-                      name="city"
-                      className="form-control"
-                      value={formData.city}
-                      onChange={handleChange}
-                    />
-                  </div>
-
-                  <div className="col-md-6 mb-3">
-                    <label className="form-label">
-                      Area
-                    </label>
-
-                    <input
-                      type="text"
-                      name="area"
-                      className="form-control"
-                      value={formData.area}
-                      onChange={handleChange}
-                    />
-                  </div>
-                </div>
-
-                <div className="row">
-                  <div className="col-md-6 mb-3">
-                    <label className="form-label">
-                      Latitude (Optional)
-                    </label>
-
-                    <input
-                      type="number"
-                      step="any"
-                      name="latitude"
-                      className="form-control"
-                      value={formData.latitude}
-                      onChange={handleChange}
-                    />
-                  </div>
-
-                  <div className="col-md-6 mb-3">
-                    <label className="form-label">
-                      Longitude (Optional)
-                    </label>
-
-                    <input
-                      type="number"
-                      step="any"
-                      name="longitude"
-                      className="form-control"
-                      value={formData.longitude}
-                      onChange={handleChange}
-                    />
-                  </div>
-                </div>
-
-                <button
-                  type="submit"
-                  className="btn btn-warning btn-lg w-100 mt-3"
-                  disabled={saving}
-                >
-                  {saving
-                    ? 'Saving Changes...'
-                    : 'Update Food Experience'}
-                </button>
-
-                <button
-                  type="button"
-                  className="btn btn-outline-secondary w-100 mt-2"
-                  onClick={() => navigate('/vendor/dashboard')}
-                >
-                  Cancel
-                </button>
-
-              </form>
-
+              </div>
             </div>
-          </div>
 
+            <div className="edit-experience-divider" />
+
+            {/* Schedule and Capacity */}
+            <div className="edit-experience-section">
+              <div className="edit-experience-section-heading">
+                <span className="edit-experience-section-number">02</span>
+                <div>
+                  <h3>Schedule & Capacity</h3>
+                  <p>Manage the date, timing and available spaces.</p>
+                </div>
+              </div>
+
+              <div className="edit-experience-field">
+                <label htmlFor="experience-date">Date</label>
+                <input
+                  id="experience-date"
+                  type="date"
+                  name="date"
+                  value={formData.date}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+
+              <div className="edit-experience-field-row">
+                <div className="edit-experience-field">
+                  <label htmlFor="experience-start-time">
+                    Start Time
+                  </label>
+                  <input
+                    id="experience-start-time"
+                    type="time"
+                    name="start_time"
+                    value={formData.start_time}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+
+                <div className="edit-experience-field">
+                  <label htmlFor="experience-end-time">
+                    End Time
+                  </label>
+                  <input
+                    id="experience-end-time"
+                    type="time"
+                    name="end_time"
+                    value={formData.end_time}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="edit-experience-field">
+                <label htmlFor="experience-capacity">
+                  Maximum Participants
+                </label>
+                <input
+                  id="experience-capacity"
+                  type="number"
+                  name="capacity"
+                  min="1"
+                  placeholder="e.g. 10"
+                  value={formData.capacity}
+                  onChange={handleChange}
+                  required
+                />
+                <small>
+                  Enter the maximum number of participants for this experience.
+                </small>
+              </div>
+            </div>
+
+            <div className="edit-experience-divider" />
+
+            {/* Location */}
+            <div className="edit-experience-section">
+              <div className="edit-experience-section-heading">
+                <span className="edit-experience-section-number">03</span>
+                <div>
+                  <h3>Location Details</h3>
+                  <p>Help visitors find where your experience takes place.</p>
+                </div>
+              </div>
+
+              <div className="edit-experience-field">
+                <label htmlFor="experience-address">Address</label>
+                <input
+                  id="experience-address"
+                  type="text"
+                  name="address"
+                  placeholder="Enter full address"
+                  value={formData.address}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+
+              <div className="edit-experience-field-row">
+                <div className="edit-experience-field">
+                  <label htmlFor="experience-city">City</label>
+                  <input
+                    id="experience-city"
+                    type="text"
+                    name="city"
+                    placeholder="Enter city"
+                    value={formData.city}
+                    onChange={handleChange}
+                  />
+                </div>
+
+                <div className="edit-experience-field">
+                  <label htmlFor="experience-area">Area</label>
+                  <input
+                    id="experience-area"
+                    type="text"
+                    name="area"
+                    placeholder="Enter area"
+                    value={formData.area}
+                    onChange={handleChange}
+                  />
+                </div>
+              </div>
+
+              <div className="edit-experience-coordinate-note">
+                <strong>Map Coordinates</strong>
+                <span>Optional. Keep these values if your location is already mapped.</span>
+              </div>
+
+              <div className="edit-experience-field-row">
+                <div className="edit-experience-field">
+                  <label htmlFor="experience-latitude">
+                    Latitude
+                  </label>
+                  <input
+                    id="experience-latitude"
+                    type="number"
+                    step="any"
+                    name="latitude"
+                    placeholder="e.g. 1.3521"
+                    value={formData.latitude}
+                    onChange={handleChange}
+                  />
+                </div>
+
+                <div className="edit-experience-field">
+                  <label htmlFor="experience-longitude">
+                    Longitude
+                  </label>
+                  <input
+                    id="experience-longitude"
+                    type="number"
+                    step="any"
+                    name="longitude"
+                    placeholder="e.g. 103.8198"
+                    value={formData.longitude}
+                    onChange={handleChange}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Form Actions */}
+            <div className="edit-experience-actions">
+              <button
+                type="submit"
+                className="edit-experience-save-btn"
+                disabled={saving}
+              >
+                {saving ? 'Saving Changes...' : 'Save Changes'}
+              </button>
+
+              <button
+                type="button"
+                className="edit-experience-cancel-btn"
+                onClick={() => navigate('/vendor/dashboard')}
+                disabled={saving}
+              >
+                Cancel
+              </button>
+            </div>
+
+          </form>
         </div>
       </div>
     </div>

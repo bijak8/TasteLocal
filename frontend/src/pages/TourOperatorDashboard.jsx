@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import API from '../services/api';
@@ -85,7 +86,8 @@ function TourOperatorDashboard() {
 
   if (loading) {
     return (
-      <div className="container mt-5 text-center">
+      <div className="operator-dashboard-loading">
+        <div className="operator-dashboard-spinner"></div>
         <p>Loading your dashboard...</p>
       </div>
     );
@@ -93,187 +95,203 @@ function TourOperatorDashboard() {
 
   if (error) {
     return (
-      <div className="container mt-5">
-        <div className="alert alert-danger">{error}</div>
-
-        <button className="btn btn-primary" onClick={fetchDashboard}>
-          Try Again
-        </button>
+      <div className="operator-dashboard-page">
+        <div className="operator-dashboard-container">
+          <div className="operator-dashboard-error">
+            <p>{error}</p>
+            <button
+              className="operator-dashboard-primary-btn"
+              onClick={fetchDashboard}
+            >
+              Try Again
+            </button>
+          </div>
+        </div>
       </div>
     );
   }
 
   if (!dashboard) return null;
 
+  const isApproved = dashboard.operator_status === 'approved';
+
+  const statistics = [
+    {
+      label: 'Total Food Tours',
+      value: dashboard.total_tours,
+      icon: '✦',
+    },
+    {
+      label: 'Upcoming Tours',
+      value: dashboard.upcoming_tours,
+      icon: '◷',
+    },
+    {
+      label: 'Total Bookings',
+      value: dashboard.total_bookings,
+      icon: '♧',
+    },
+    {
+      label: 'Pending Bookings',
+      value: dashboard.pending_bookings,
+      icon: '◌',
+    },
+  ];
+
   return (
-    <div className="container mt-4 mb-5">
+    <div className="operator-dashboard-page">
+      <div className="operator-dashboard-container">
 
-      {/* Dashboard Heading and Actions */}
-      <div className="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
-        <div>
-          <h2 className="fw-bold">Tour Operator Dashboard</h2>
+        {/* Dashboard Header */}
+        <div className="operator-dashboard-header">
+          <div>
+            <span className="operator-dashboard-eyebrow">
+              TOUR OPERATOR PORTAL
+            </span>
 
-          <p className="text-muted mb-0">
-            Welcome, {dashboard.business_name}
-          </p>
+            <h1>Welcome, {dashboard.business_name}</h1>
+
+            <p>
+              Manage your food tours, destinations and bookings from one place.
+            </p>
+          </div>
+
+          <div className="operator-dashboard-header-actions">
+            <Link
+              to="/operator/tour-stops"
+              className="operator-dashboard-secondary-btn"
+            >
+              Manage Tour Stops
+            </Link>
+
+            <Link
+              to="/operator/create-tour"
+              className="operator-dashboard-primary-btn"
+            >
+              + Create Food Tour
+            </Link>
+          </div>
         </div>
 
-        <div className="d-flex flex-wrap gap-2">
+        {/* Account Approval Status */}
+        <section className="operator-dashboard-approval">
+          <div>
+            <span className="operator-dashboard-section-label">
+              ACCOUNT STATUS
+            </span>
 
-          <Link
-            to="/operator/tour-stops"
-            className="btn btn-outline-primary"
-          >
-            Manage Tour Stops
-          </Link>
+            <h2>Account Approval Status</h2>
 
-          <Link
-            to="/operator/create-tour"
-            className="btn btn-primary"
-          >
-            + Create Food Tour
-          </Link>
-
-        </div>
-      </div>
-
-      {/* Operator Approval Status */}
-      <div className="card shadow-sm mb-4">
-        <div className="card-body">
-
-          <h5 className="fw-bold">Account Approval Status</h5>
+            <p>
+              {isApproved
+                ? 'Your operator account is approved. You can create and manage food tours.'
+                : 'Your account must be approved before you can create food tours.'}
+            </p>
+          </div>
 
           <span
-            className={`badge ${
-              dashboard.operator_status === 'approved'
-                ? 'bg-success'
+            className={`operator-dashboard-status ${
+              isApproved
+                ? 'operator-status-approved'
                 : dashboard.operator_status === 'rejected'
-                ? 'bg-danger'
-                : 'bg-warning text-dark'
+                ? 'operator-status-rejected'
+                : 'operator-status-pending'
             }`}
           >
             {dashboard.operator_status?.toUpperCase()}
           </span>
+        </section>
 
-          {dashboard.operator_status !== 'approved' && (
-            <p className="text-muted mt-2 mb-0">
-              Your account must be approved before you can create food tours.
-            </p>
-          )}
+        {/* Dashboard Statistics */}
+        <section className="operator-dashboard-stats">
+          {statistics.map((statistic) => (
+            <div
+              className="operator-dashboard-stat-card"
+              key={statistic.label}
+            >
+              <div className="operator-dashboard-stat-icon">
+                {statistic.icon}
+              </div>
 
-        </div>
-      </div>
+              <p>{statistic.label}</p>
 
-      {/* Dashboard Statistics */}
-      <div className="row g-3 mb-4">
-
-        <div className="col-md-3 col-sm-6">
-          <div className="card shadow-sm h-100">
-            <div className="card-body">
-              <p className="text-muted mb-1">Total Food Tours</p>
-              <h3 className="fw-bold">{dashboard.total_tours}</h3>
+              <h2>{statistic.value ?? 0}</h2>
             </div>
-          </div>
-        </div>
+          ))}
+        </section>
 
-        <div className="col-md-3 col-sm-6">
-          <div className="card shadow-sm h-100">
-            <div className="card-body">
-              <p className="text-muted mb-1">Upcoming Tours</p>
-              <h3 className="fw-bold">{dashboard.upcoming_tours}</h3>
-            </div>
-          </div>
-        </div>
-
-        <div className="col-md-3 col-sm-6">
-          <div className="card shadow-sm h-100">
-            <div className="card-body">
-              <p className="text-muted mb-1">Total Bookings</p>
-              <h3 className="fw-bold">{dashboard.total_bookings}</h3>
-            </div>
-          </div>
-        </div>
-
-        <div className="col-md-3 col-sm-6">
-          <div className="card shadow-sm h-100">
-            <div className="card-body">
-              <p className="text-muted mb-1">Pending Bookings</p>
-              <h3 className="fw-bold">{dashboard.pending_bookings}</h3>
-            </div>
-          </div>
-        </div>
-
-      </div>
-
-      {/* Booking Overview */}
-      <div className="card shadow-sm mb-4">
-        <div className="card-body">
-
-          <h5 className="fw-bold mb-3">Booking Overview</h5>
-
-          <div className="row">
-
-            <div className="col-md-6 mb-2">
-              <span className="text-muted">Confirmed Bookings: </span>
-              <strong>{dashboard.confirmed_bookings}</strong>
+        {/* Booking Overview */}
+        <section className="operator-dashboard-bookings">
+          <div className="operator-dashboard-card-heading">
+            <div>
+              <span className="operator-dashboard-section-label">
+                BOOKING ACTIVITY
+              </span>
+              <h2>Booking Overview</h2>
             </div>
 
-            <div className="col-md-6 mb-2">
-              <span className="text-muted">Pending Bookings: </span>
-              <strong>{dashboard.pending_bookings}</strong>
-            </div>
-
+            <Link
+              to="/provider/bookings"
+              className="operator-dashboard-text-link"
+            >
+              View Bookings →
+            </Link>
           </div>
 
-          <Link
-            to="/provider/bookings"
-            className="btn btn-outline-primary btn-sm mt-2"
-          >
-            Manage Bookings
-          </Link>
+          <div className="operator-dashboard-booking-stats">
+            <div>
+              <span className="operator-booking-dot confirmed"></span>
+              <p>Confirmed Bookings</p>
+              <strong>{dashboard.confirmed_bookings ?? 0}</strong>
+            </div>
 
-        </div>
-      </div>
+            <div>
+              <span className="operator-booking-dot pending"></span>
+              <p>Pending Bookings</p>
+              <strong>{dashboard.pending_bookings ?? 0}</strong>
+            </div>
+          </div>
+        </section>
 
-      {/* Food Tours Table */}
-      <div className="card shadow-sm">
-        <div className="card-body">
-
-          <div className="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
-
-            <h5 className="fw-bold mb-0">My Food Tours</h5>
+        {/* Food Tours */}
+        <section className="operator-dashboard-tours">
+          <div className="operator-dashboard-card-heading">
+            <div>
+              <span className="operator-dashboard-section-label">
+                YOUR EXPERIENCES
+              </span>
+              <h2>My Food Tours</h2>
+              <p>View and manage the food tours you have created.</p>
+            </div>
 
             <Link
               to="/operator/create-tour"
-              className="btn btn-success btn-sm"
+              className="operator-dashboard-primary-btn"
             >
-              Add New Tour
+              + Add New Tour
             </Link>
-
           </div>
 
           {tours.length === 0 ? (
-
-            <div className="text-center py-4">
-              <p className="text-muted">
-                You have not created any food tours yet.
+            <div className="operator-dashboard-empty">
+              <div className="operator-dashboard-empty-icon">✦</div>
+              <h3>No Food Tours Yet</h3>
+              <p>
+                You have not created any food tours yet. Start by creating
+                your first culinary experience.
               </p>
 
               <Link
                 to="/operator/create-tour"
-                className="btn btn-primary"
+                className="operator-dashboard-primary-btn"
               >
                 Create Your First Food Tour
               </Link>
             </div>
-
           ) : (
-
-            <div className="table-responsive">
-
-              <table className="table table-hover align-middle">
-
-                <thead className="table-light">
+            <div className="operator-dashboard-table-wrapper">
+              <table className="operator-dashboard-table">
+                <thead>
                   <tr>
                     <th>Food Tour</th>
                     <th>Location</th>
@@ -286,11 +304,8 @@ function TourOperatorDashboard() {
                 </thead>
 
                 <tbody>
-
                   {tours.map((tour) => (
-
                     <tr key={tour.id}>
-
                       <td>
                         <strong>{tour.title}</strong>
                       </td>
@@ -308,12 +323,12 @@ function TourOperatorDashboard() {
 
                       <td>
                         <span
-                          className={`badge ${
+                          className={`operator-dashboard-status ${
                             tour.status === 'approved'
-                              ? 'bg-success'
+                              ? 'operator-status-approved'
                               : tour.status === 'rejected'
-                              ? 'bg-danger'
-                              : 'bg-warning text-dark'
+                              ? 'operator-status-rejected'
+                              : 'operator-status-pending'
                           }`}
                         >
                           {tour.status}
@@ -321,43 +336,39 @@ function TourOperatorDashboard() {
                       </td>
 
                       <td>
-                        <div className="d-flex flex-wrap gap-2">
+                        <div className="operator-dashboard-actions">
 
-                          {/* View Food Tour */}
                           <Link
                             to={`/food-tours/${tour.id}`}
-                            className="btn btn-outline-primary btn-sm"
+                            className="operator-action-btn"
                           >
                             View
                           </Link>
 
-                          {/* Add Tour Stop */}
                           <Link
                             to={`/operator/add-tour-stop?tour_id=${tour.id}`}
-                            className="btn btn-outline-success btn-sm"
+                            className="operator-action-btn"
                           >
                             Add Stop
                           </Link>
 
-                          {/* Manage Existing Stops */}
                           <Link
                             to={`/operator/tour-stops?tour_id=${tour.id}`}
-                            className="btn btn-outline-info btn-sm"
+                            className="operator-action-btn"
                           >
                             Manage Stops
                           </Link>
 
-                          {/* Edit Food Tour */}
                           <Link
                             to={`/operator/food-tours/${tour.id}/edit`}
-                            className="btn btn-outline-warning btn-sm"
+                            className="operator-action-btn operator-action-edit"
                           >
                             Edit
                           </Link>
 
-                          {/* Delete Food Tour */}
                           <button
-                            className="btn btn-outline-danger btn-sm"
+                            type="button"
+                            className="operator-action-btn operator-action-delete"
                             onClick={() => handleDeleteTour(tour.id)}
                           >
                             Delete
@@ -365,22 +376,15 @@ function TourOperatorDashboard() {
 
                         </div>
                       </td>
-
                     </tr>
-
                   ))}
-
                 </tbody>
-
               </table>
-
             </div>
-
           )}
+        </section>
 
-        </div>
       </div>
-
     </div>
   );
 }

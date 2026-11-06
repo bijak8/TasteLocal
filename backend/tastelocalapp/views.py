@@ -32,7 +32,6 @@ from .serializers import (
     ItinerarySerializer,
     ItineraryItemSerializer,
     FavouriteSerializer,
-    ReviewSerializer,
     ReviewUpdateSerializer,
 )
 
@@ -64,6 +63,7 @@ class TouristProfileView(generics.RetrieveUpdateAPIView):
 
         return user
 
+
 # ==========================================
 # VENDOR REGISTRATION
 # ==========================================
@@ -89,21 +89,6 @@ class TourOperatorRegistrationView(generics.CreateAPIView):
 class FoodExperienceCreateView(generics.CreateAPIView):
     serializer_class = FoodExperienceSerializer
     permission_classes = [IsAuthenticated]
-
-    def perform_create(self, serializer):
-        vendor = self.request.user.vendors.first()
-
-        if not vendor:
-            raise PermissionDenied(
-                "Only vendors can create food experiences."
-            )
-
-        if vendor.status != 'approved':
-            raise PermissionDenied(
-                "Your Vendor profile must be approved."
-            )
-
-        serializer.save(vendor=vendor)
 
 
 # ==========================================
@@ -230,6 +215,7 @@ class TourOperatorTourStopDetailView(
             )
 
         serializer.save()
+
 
 # ==========================================
 # FOOD EXPERIENCE LISTING

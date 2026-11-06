@@ -78,83 +78,110 @@ function FoodTours() {
   };
 
   return (
-    <div className="container py-5">
+    <div className="food-tours-page">
 
-      <div className="text-center mb-5">
-        <h1 className="fw-bold">Explore Food Tours</h1>
-        <p className="text-secondary">
-          Discover local food destinations through guided multi-stop food tours.
-        </p>
-      </div>
+      {/* Page Heading */}
+      <section className="food-tours-hero">
+        <div className="container-custom">
+          <span className="home-eyebrow">
+            EXPLORE LOCAL FOOD CULTURE
+          </span>
 
-      {/* Search and Filter Section */}
-      <div className="card shadow-sm mb-5">
-        <div className="card-body p-4">
+          <h1>Discover Food Tours</h1>
 
-          <h5 className="fw-bold mb-3">Find Your Food Tour</h5>
+          <p>
+            Explore local food destinations through guided,
+            multi-stop culinary journeys created by local tour operators.
+          </p>
+        </div>
+      </section>
 
-          <div className="mb-3">
+      <div className="container-custom food-tours-content">
+
+        {/* Search and Filters */}
+        <section className="food-tours-filter-panel">
+
+          <div className="food-tours-filter-heading">
+            <h2>Find Your Food Tour</h2>
+            <p>
+              Search and filter tours to find your next culinary adventure.
+            </p>
+          </div>
+
+          <div className="food-tour-search">
+            <label htmlFor="tour-search">Search food tours</label>
+
             <input
+              id="tour-search"
               type="text"
-              className="form-control"
               placeholder="Search by tour name or keyword..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
 
-          <div className="row g-3">
+          <div className="food-tour-filter-grid">
 
-            <div className="col-md-6">
-              <label className="form-label fw-semibold">City</label>
+            <div className="food-tour-filter-field">
+              <label htmlFor="tour-city">City</label>
+
               <select
-                className="form-select"
+                id="tour-city"
                 value={selectedCity}
                 onChange={(e) => setSelectedCity(e.target.value)}
               >
                 <option value="">All Cities</option>
+
                 {cities.map((city) => (
-                  <option key={city} value={city}>{city}</option>
+                  <option key={city} value={city}>
+                    {city}
+                  </option>
                 ))}
               </select>
             </div>
 
-            <div className="col-md-6">
-              <label className="form-label fw-semibold">Area</label>
+            <div className="food-tour-filter-field">
+              <label htmlFor="tour-area">Area</label>
+
               <select
-                className="form-select"
+                id="tour-area"
                 value={selectedArea}
                 onChange={(e) => setSelectedArea(e.target.value)}
               >
                 <option value="">All Areas</option>
+
                 {areas.map((area) => (
-                  <option key={area} value={area}>{area}</option>
+                  <option key={area} value={area}>
+                    {area}
+                  </option>
                 ))}
               </select>
             </div>
 
-            <div className="col-md-6">
-              <label className="form-label fw-semibold">
+            <div className="food-tour-filter-field">
+              <label htmlFor="tour-min-price">
                 Minimum Price (SGD)
               </label>
+
               <input
+                id="tour-min-price"
                 type="number"
                 min="0"
-                className="form-control"
                 placeholder="Minimum price"
                 value={minPrice}
                 onChange={(e) => setMinPrice(e.target.value)}
               />
             </div>
 
-            <div className="col-md-6">
-              <label className="form-label fw-semibold">
+            <div className="food-tour-filter-field">
+              <label htmlFor="tour-max-price">
                 Maximum Price (SGD)
               </label>
+
               <input
+                id="tour-max-price"
                 type="number"
                 min="0"
-                className="form-control"
                 placeholder="Maximum price"
                 value={maxPrice}
                 onChange={(e) => setMaxPrice(e.target.value)}
@@ -163,81 +190,133 @@ function FoodTours() {
 
           </div>
 
-          <button
-            type="button"
-            className="btn btn-outline-secondary mt-3"
-            onClick={clearFilters}
-          >
-            Clear Filters
-          </button>
+          <div className="food-tour-filter-actions">
+            <button
+              type="button"
+              onClick={clearFilters}
+            >
+              Clear All Filters
+            </button>
+          </div>
 
-        </div>
-      </div>
+        </section>
 
-      {loading && (
-        <p className="text-center">Loading food tours...</p>
-      )}
+        {/* Loading */}
+        {loading && (
+          <div className="food-tours-message">
+            Loading food tours...
+          </div>
+        )}
 
-      {error && (
-        <div className="alert alert-danger">{error}</div>
-      )}
+        {/* Error */}
+        {error && (
+          <div className="food-tours-error">
+            {error}
+          </div>
+        )}
 
-      {!loading && !error && (
-        <>
-          <p className="text-secondary mb-4">
-            Showing {filteredTours.length} of {tours.length} food tours
-          </p>
+        {/* Results */}
+        {!loading && !error && (
+          <section className="food-tours-results">
 
-          {filteredTours.length === 0 ? (
-            <p className="text-center">
-              No matching food tours found. Try changing your filters.
-            </p>
-          ) : (
-            <div className="row g-4">
-              {filteredTours.map((tour) => (
-                <div className="col-md-6 col-lg-4" key={tour.id}>
-                  <div className="card h-100 shadow-sm">
-                    <div className="card-body">
-                      <h5 className="card-title fw-bold">
-                        {tour.title}
-                      </h5>
+            <div className="food-tours-results-heading">
 
-                      <p className="card-text text-secondary">
+              <div>
+                <span className="home-eyebrow">
+                  EXPLORE CULINARY JOURNEYS
+                </span>
+
+                <h2>Available Food Tours</h2>
+              </div>
+
+              <p>
+                Showing <strong>{filteredTours.length}</strong> of{' '}
+                <strong>{tours.length}</strong> food tours
+              </p>
+
+            </div>
+
+            {filteredTours.length === 0 ? (
+              <div className="food-tours-empty">
+                <h3>No matching food tours found</h3>
+
+                <p>
+                  Try changing your search or filters.
+                </p>
+
+                <button
+                  type="button"
+                  className="taste-btn-primary"
+                  onClick={clearFilters}
+                >
+                  Clear Filters
+                </button>
+              </div>
+            ) : (
+
+              <div className="food-tours-grid">
+
+                {filteredTours.map((tour) => (
+                  <article
+                    className="food-tour-card"
+                    key={tour.id}
+                  >
+
+                    <div className="food-tour-card-content">
+
+                      <span className="food-tour-label">
+                        GUIDED FOOD TOUR
+                      </span>
+
+                      <h3>{tour.title}</h3>
+
+                      <p className="food-tour-description">
                         {tour.description}
                       </p>
 
-                      <p className="mb-1">
-                        <strong>Location:</strong>{' '}
-                        {tour.area || tour.city || 'Location not specified'}
-                      </p>
+                      <div className="food-tour-details">
 
-                      <p className="mb-1">
-                        <strong>Date:</strong> {tour.date}
-                      </p>
+                        <p>
+                          <span>Location</span>
+                          {tour.area || tour.city || 'Not specified'}
+                        </p>
 
-                      <p className="mb-1">
-                        <strong>Time:</strong> {tour.start_time} – {tour.end_time}
-                      </p>
+                        <p>
+                          <span>Date</span>
+                          {tour.date || 'Not specified'}
+                        </p>
 
-                      <p className="mb-3">
-                        <strong>Price:</strong> SGD {tour.price}
-                      </p>
+                        <p>
+                          <span>Time</span>
+                          {tour.start_time} – {tour.end_time}
+                        </p>
+
+                        <p>
+                          <span>Price</span>
+                          <strong>SGD {tour.price}</strong>
+                        </p>
+
+                      </div>
 
                       <Link
                         to={`/food-tours/${tour.id}`}
-                        className="btn btn-dark w-100"
+                        className="experience-details-btn"
                       >
-                        View Tour Details
+                        View Tour Details →
                       </Link>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </>
-      )}
 
+                    </div>
+
+                  </article>
+                ))}
+
+              </div>
+            )}
+
+          </section>
+        )}
+
+      </div>
     </div>
   );
 }

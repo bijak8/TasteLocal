@@ -38,13 +38,13 @@ function ProviderBookings() {
 
     try {
       await API.patch(`bookings/${bookingId}/update/`, {
-        status: status,
+        status,
       });
 
       setBookings((previousBookings) =>
         previousBookings.map((booking) =>
           booking.id === bookingId
-            ? { ...booking, status: status }
+            ? { ...booking, status }
             : booking
         )
       );
@@ -61,120 +61,198 @@ function ProviderBookings() {
     }
   };
 
-  const getStatusBadge = (status) => {
+  const getStatusClass = (status) => {
     const styles = {
-      pending: 'bg-warning text-dark',
-      confirmed: 'bg-success',
-      rejected: 'bg-danger',
-      cancelled: 'bg-secondary',
+      pending: 'provider-status-pending',
+      confirmed: 'provider-status-confirmed',
+      rejected: 'provider-status-rejected',
+      cancelled: 'provider-status-cancelled',
     };
 
-    return (
-      <span className={`badge ${styles[status] || 'bg-secondary'}`}>
-        {status.toUpperCase()}
-      </span>
-    );
+    return styles[status] || 'provider-status-cancelled';
   };
 
   return (
-    <div className="container py-5">
-      <h1 className="fw-bold mb-2">Manage Bookings</h1>
+    <section className="provider-bookings-page">
+      <div className="provider-bookings-container">
 
-      <p className="text-secondary mb-4">
-        Review and manage incoming booking requests.
-      </p>
+        {/* Page heading */}
+        <div className="provider-bookings-heading">
+          <div>
+            <span className="provider-bookings-eyebrow">
+              PROVIDER MANAGEMENT
+            </span>
+            <h1>Manage Bookings</h1>
+            <p>
+              Review incoming booking requests and manage
+              your customers' reservations.
+            </p>
+          </div>
 
-      <button
-        className="btn btn-outline-dark mb-4"
-        onClick={fetchBookings}
-        disabled={loading}
-      >
-        Refresh Bookings
-      </button>
-
-      {loading && <p>Loading bookings...</p>}
-
-      {error && (
-        <div className="alert alert-danger">{error}</div>
-      )}
-
-      {!loading && !error && bookings.length === 0 && (
-        <div className="alert alert-info">
-          No booking requests received yet.
+          <button
+            type="button"
+            className="provider-refresh-btn"
+            onClick={fetchBookings}
+            disabled={loading}
+          >
+            ↻ {loading ? 'Refreshing...' : 'Refresh Bookings'}
+          </button>
         </div>
-      )}
 
-      <div className="row g-4">
-        {bookings.map((booking) => (
-          <div className="col-md-6" key={booking.id}>
-            <div className="card shadow-sm h-100">
-              <div className="card-body p-4">
+        {/* Booking summary */}
+        <div className="provider-booking-summary">
+          <div className="provider-summary-card">
+            <span>Total Bookings</span>
+            <strong>{bookings.length}</strong>
+          </div>
 
-                <h5 className="fw-bold">
-                  Booking #{booking.id}
-                </h5>
+          <div className="provider-summary-card">
+            <span>Pending</span>
+            <strong>
+              {bookings.filter((booking) => booking.status === 'pending').length}
+            </strong>
+          </div>
 
-                <p>
-                  <strong>Booking Type:</strong>{' '}
+          <div className="provider-summary-card">
+            <span>Confirmed</span>
+            <strong>
+              {bookings.filter((booking) => booking.status === 'confirmed').length}
+            </strong>
+          </div>
+
+          <div className="provider-summary-card">
+            <span>Rejected</span>
+            <strong>
+              {bookings.filter((booking) => booking.status === 'rejected').length}
+            </strong>
+          </div>
+        </div>
+
+        {/* Error message */}
+        {error && (
+          <div className="provider-booking-alert" role="alert">
+            {error}
+          </div>
+        )}
+
+        {/* Loading */}
+        {loading && (
+          <div className="provider-bookings-loading">
+            <div className="provider-bookings-loader"></div>
+            <p>Loading booking requests...</p>
+          </div>
+        )}
+
+        {/* Empty state */}
+        {!loading && !error && bookings.length === 0 && (
+          <div className="provider-bookings-empty">
+            <div className="provider-empty-icon">▣</div>
+            <h2>No Booking Requests Yet</h2>
+            <p>
+              New customer bookings will appear here when
+              someone reserves your food experiences or tours.
+            </p>
+          </div>
+        )}
+
+        {/* Booking cards */}
+        {!loading && bookings.length > 0 && (
+          <div className="provider-bookings-grid">
+            {bookings.map((booking) => (
+              <article
+                className="provider-booking-card"
+                key={booking.id}
+              >
+                <div className="provider-booking-card-header">
+                  <div>
+                    <span className="provider-booking-reference">
+                      BOOKING REFERENCE
+                    </span>
+                    <h2>#{booking.id}</h2>
+                  </div>
+
+                  <span
+                    className={`provider-booking-status ${getStatusClass(booking.status)}`}
+                  >
+                    {booking.status}
+                  </span>
+                </div>
+
+                <div className="provider-booking-type">
                   {booking.food_experience
                     ? 'Food Experience'
                     : 'Food Tour'}
-                </p>
+                </div>
 
-                <p>
-                  <strong>Reference ID:</strong>{' '}
-                  {booking.food_experience || booking.food_tour}
-                </p>
+                <div className="provider-booking-details">
 
-                <p>
-                  <strong>Participants:</strong>{' '}
-                  {booking.number_of_participants}
-                </p>
+                  <div className="provider-booking-detail">
+                    <span>Reference ID</span>
+                    <strong>
+                      {booking.food_experience || booking.food_tour}
+                    </strong>
+                  </div>
 
-                <p>
-                  <strong>Special Request:</strong>{' '}
-                  {booking.special_request || 'None'}
-                </p>
+                  <div className="provider-booking-detail">
+                    <span>Participants</span>
+                    <strong>
+                      {booking.number_of_participants}
+                    </strong>
+                  </div>
 
-                <p>
-                  <strong>Status:</strong>{' '}
-                  {getStatusBadge(booking.status)}
-                </p>
+                  <div className="provider-booking-detail provider-booking-request">
+                    <span>Special Request</span>
+                    <p>
+                      {booking.special_request || 'No special requests'}
+                    </p>
+                  </div>
 
-                <small className="text-secondary">
-                  Submitted: {new Date(booking.created_at).toLocaleString()}
-                </small>
+                  <div className="provider-booking-detail provider-booking-submitted">
+                    <span>Submitted</span>
+                    <strong>
+                      {new Date(booking.created_at).toLocaleString()}
+                    </strong>
+                  </div>
+
+                </div>
 
                 {booking.status === 'pending' && (
-                  <div className="d-flex gap-2 mt-4">
-
+                  <div className="provider-booking-actions">
                     <button
-                      className="btn btn-success flex-fill"
+                      type="button"
+                      className="provider-confirm-btn"
                       disabled={updatingId === booking.id}
                       onClick={() => updateBooking(booking.id, 'confirmed')}
                     >
                       {updatingId === booking.id
                         ? 'Updating...'
-                        : 'Confirm'}
+                        : '✓ Confirm Booking'}
                     </button>
 
                     <button
-                      className="btn btn-danger flex-fill"
+                      type="button"
+                      className="provider-reject-btn"
                       disabled={updatingId === booking.id}
                       onClick={() => updateBooking(booking.id, 'rejected')}
                     >
                       Reject
                     </button>
-
                   </div>
                 )}
 
-              </div>
-            </div>
+                {booking.status !== 'pending' && (
+                  <div className="provider-booking-completed">
+                    This booking has been {booking.status}.
+                  </div>
+                )}
+
+              </article>
+            ))}
           </div>
-        ))}
+        )}
+
       </div>
-    </div>
+    </section>
   );
 }
 

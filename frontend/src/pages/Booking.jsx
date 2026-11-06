@@ -7,20 +7,27 @@ function Booking() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
-  const initialType = searchParams.get('type') || 'experience';
+ const experienceId = searchParams.get('food_experience');
+const tourId = searchParams.get('food_tour');
+const genericId = searchParams.get('id');
 
-  const [bookingType, setBookingType] = useState(initialType);
+const initialType =
+  searchParams.get('type') ||
+  (tourId ? 'tour' : 'experience');
 
-  const [formData, setFormData] = useState({
-    food_experience: initialType === 'experience'
-      ? searchParams.get('id') || ''
-      : '',
-    food_tour: initialType === 'tour'
-      ? searchParams.get('id') || ''
-      : '',
-    number_of_participants: 1,
-    special_request: '',
-  });
+const initialId =
+  genericId ||
+  (initialType === 'tour' ? tourId : experienceId) ||
+  '';
+
+const [bookingType, setBookingType] = useState(initialType);
+
+const [formData, setFormData] = useState({
+  food_experience: initialType === 'experience' ? initialId : '',
+  food_tour: initialType === 'tour' ? initialId : '',
+  number_of_participants: 1,
+  special_request: '',
+});
 
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -100,7 +107,6 @@ function Booking() {
 
       console.log('Booking created:', response.data);
 
-      // Redirect to booking history after successful submission
       navigate('/my-bookings', { replace: true });
 
     } catch (error) {
@@ -120,127 +126,128 @@ function Booking() {
   };
 
   return (
-    <div className="container py-5">
-      <div className="row justify-content-center">
-        <div className="col-md-7 col-lg-6">
+    <section className="booking-page">
+      <div className="booking-container">
+        <div className="booking-card">
+          <div className="booking-heading">
+            <span className="booking-eyebrow">PLAN YOUR EXPERIENCE</span>
 
-          <div className="card shadow-sm">
-            <div className="card-body p-4">
+            <h1>Make a Booking</h1>
 
-              <h2 className="fw-bold text-center mb-2">
-                Make a Booking
-              </h2>
+            <p>
+              You're one step closer to discovering authentic
+              local food and memorable experiences.
+            </p>
+          </div>
 
-              <p className="text-secondary text-center mb-4">
-                Submit your booking request through TasteLocal.
+          <div className="booking-intro">
+            <div className="booking-intro-icon">✦</div>
+            <div>
+              <h3>Your next food adventure</h3>
+              <p>
+                Complete the details below to send your booking request.
               </p>
-
-              {error && (
-                <div className="alert alert-danger">
-                  {error}
-                </div>
-              )}
-
-              <form onSubmit={handleSubmit}>
-
-                <div className="mb-3">
-                  <label className="form-label">
-                    Booking Type
-                  </label>
-
-                  <select
-                    className="form-select"
-                    value={bookingType}
-                    onChange={handleTypeChange}
-                  >
-                    <option value="experience">
-                      Food Experience
-                    </option>
-
-                    <option value="tour">
-                      Food Tour
-                    </option>
-                  </select>
-                </div>
-
-                <div className="mb-3">
-                  <label className="form-label">
-                    {bookingType === 'experience'
-                      ? 'Food Experience ID'
-                      : 'Food Tour ID'}
-                  </label>
-
-                  <input
-                    type="number"
-                    className="form-control"
-                    name={
-                      bookingType === 'experience'
-                        ? 'food_experience'
-                        : 'food_tour'
-                    }
-                    value={
-                      bookingType === 'experience'
-                        ? formData.food_experience
-                        : formData.food_tour
-                    }
-                    onChange={handleChange}
-                    min="1"
-                    required
-                  />
-
-                  <small className="text-secondary">
-                    You can find the ID in the experience or tour URL.
-                  </small>
-                </div>
-
-                <div className="mb-3">
-                  <label className="form-label">
-                    Number of Participants
-                  </label>
-
-                  <input
-                    type="number"
-                    name="number_of_participants"
-                    className="form-control"
-                    value={formData.number_of_participants}
-                    onChange={handleChange}
-                    min="1"
-                    required
-                  />
-                </div>
-
-                <div className="mb-4">
-                  <label className="form-label">
-                    Special Requests (Optional)
-                  </label>
-
-                  <textarea
-                    name="special_request"
-                    className="form-control"
-                    rows="3"
-                    value={formData.special_request}
-                    onChange={handleChange}
-                    placeholder="Dietary requirements or other requests..."
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  className="btn btn-warning w-100"
-                  disabled={loading}
-                >
-                  {loading
-                    ? 'Submitting...'
-                    : 'Submit Booking Request'}
-                </button>
-
-              </form>
             </div>
           </div>
 
+          {error && (
+            <div className="booking-error" role="alert">
+              {error}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="booking-form">
+            <div className="booking-field">
+              <label htmlFor="booking-type">Booking Type</label>
+
+              <select
+                id="booking-type"
+                value={bookingType}
+                onChange={handleTypeChange}
+              >
+                <option value="experience">Food Experience</option>
+                <option value="tour">Food Tour</option>
+              </select>
+            </div>
+
+            <div className="booking-field">
+              <label htmlFor="booking-item-id">
+                {bookingType === 'experience'
+                  ? 'Food Experience ID'
+                  : 'Food Tour ID'}
+              </label>
+
+              <input
+                id="booking-item-id"
+                type="number"
+                name={
+                  bookingType === 'experience'
+                    ? 'food_experience'
+                    : 'food_tour'
+                }
+                value={
+                  bookingType === 'experience'
+                    ? formData.food_experience
+                    : formData.food_tour
+                }
+                onChange={handleChange}
+                min="1"
+                placeholder="Enter the ID"
+                required
+              />
+
+              <span className="booking-field-hint">
+                Find the ID in the food experience or tour URL.
+              </span>
+            </div>
+
+            <div className="booking-field">
+              <label htmlFor="booking-participants">
+                Number of Participants
+              </label>
+
+              <input
+                id="booking-participants"
+                type="number"
+                name="number_of_participants"
+                value={formData.number_of_participants}
+                onChange={handleChange}
+                min="1"
+                required
+              />
+            </div>
+
+            <div className="booking-field">
+              <label htmlFor="booking-special-request">
+                Special Requests <span>(Optional)</span>
+              </label>
+
+              <textarea
+                id="booking-special-request"
+                name="special_request"
+                rows="4"
+                value={formData.special_request}
+                onChange={handleChange}
+                placeholder="Dietary requirements or other requests..."
+              />
+            </div>
+
+            <button
+              type="submit"
+              className="booking-submit-btn"
+              disabled={loading}
+            >
+              {loading ? 'Submitting...' : 'Submit Booking Request'}
+            </button>
+          </form>
+
+          <p className="booking-note">
+            Your booking request will be available in My Bookings
+            after successful submission.
+          </p>
         </div>
       </div>
-    </div>
+    </section>
   );
 }
 

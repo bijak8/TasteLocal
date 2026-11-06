@@ -59,90 +59,105 @@ function Register() {
   };
 
   return (
-    <div className="container py-5">
-      <div className="row justify-content-center">
-        <div className="col-md-6 col-lg-5">
-          <div className="card shadow-sm">
-            <div className="card-body p-4">
-              <h2 className="fw-bold text-center mb-2">
-                Create Your Account
-              </h2>
+    <section className="register-page">
+      <div className="register-container">
+        <div className="register-card">
+          <div className="register-heading">
+            <span className="register-eyebrow">WELCOME TO TASTELOCAL</span>
 
-              <p className="text-secondary text-center mb-4">
-                Join TasteLocal and discover authentic local food experiences.
-              </p>
+            <h1>Create Your Account</h1>
 
-              {error && (
-                <div className="alert alert-danger">{error}</div>
-              )}
+            <p>
+              Discover authentic local food, explore new flavours
+              and experience the culture behind every dish.
+            </p>
+          </div>
 
-              <form onSubmit={handleSubmit}>
-                <div className="mb-3">
-                  <label className="form-label">Username</label>
-                  <input
-                    type="text"
-                    name="username"
-                    className="form-control"
-                    value={formData.username}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-
-                <div className="mb-3">
-                  <label className="form-label">Email Address</label>
-                  <input
-                    type="email"
-                    name="email"
-                    className="form-control"
-                    value={formData.email}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-
-                <div className="mb-3">
-                  <label className="form-label">Password</label>
-                  <input
-                    type="password"
-                    name="password"
-                    className="form-control"
-                    value={formData.password}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-
-                <div className="mb-4">
-                  <label className="form-label">Confirm Password</label>
-                  <input
-                    type="password"
-                    name="confirmPassword"
-                    className="form-control"
-                    value={formData.confirmPassword}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  className="btn btn-warning w-100"
-                  disabled={loading}
-                >
-                  {loading ? 'Creating Account...' : 'Register'}
-                </button>
-              </form>
-
-              <p className="text-center mt-4 mb-0">
-                Already have an account?{' '}
-                <Link to="/login">Login here</Link>
-              </p>
+          {error && (
+            <div className="register-error" role="alert">
+              {error}
             </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="register-form">
+            <div className="register-field">
+              <label htmlFor="register-username">Username</label>
+              <input
+                id="register-username"
+                type="text"
+                name="username"
+                placeholder="Choose a username"
+                value={formData.username}
+                onChange={handleChange}
+                autoComplete="username"
+                required
+              />
+            </div>
+
+            <div className="register-field">
+              <label htmlFor="register-email">Email Address</label>
+              <input
+                id="register-email"
+                type="email"
+                name="email"
+                placeholder="Enter your email address"
+                value={formData.email}
+                onChange={handleChange}
+                autoComplete="email"
+                required
+              />
+            </div>
+
+            <div className="register-field">
+              <label htmlFor="register-password">Password</label>
+              <input
+                id="register-password"
+                type="password"
+                name="password"
+                placeholder="Create a password"
+                value={formData.password}
+                onChange={handleChange}
+                autoComplete="new-password"
+                required
+              />
+            </div>
+
+            <div className="register-field">
+              <label htmlFor="register-confirm-password">
+                Confirm Password
+              </label>
+              <input
+                id="register-confirm-password"
+                type="password"
+                name="confirmPassword"
+                placeholder="Enter your password again"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                autoComplete="new-password"
+                required
+              />
+            </div>
+
+            <button
+              type="submit"
+              className="register-submit-btn"
+              disabled={loading}
+            >
+              {loading ? 'Creating Account...' : 'Create Account'}
+            </button>
+          </form>
+
+          <div className="register-login-prompt">
+            Already have an account?{' '}
+            <Link to="/login">Log in</Link>
           </div>
         </div>
+
+        <p className="register-footer-note">
+          Your next local food discovery starts here.
+        </p>
       </div>
-    </div>
+    </section>
   );
 }
 

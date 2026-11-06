@@ -22,10 +22,12 @@ function CreateFoodTour() {
   const [loading, setLoading] = useState(false);
 
   const handleChange = (event) => {
-    setFormData({
-      ...formData,
-      [event.target.name]: event.target.value,
-    });
+    const { name, value } = event.target;
+
+    setFormData((previousData) => ({
+      ...previousData,
+      [name]: value,
+    }));
   };
 
   const handleSubmit = async (event) => {
@@ -62,163 +64,240 @@ function CreateFoodTour() {
   };
 
   return (
-    <div className="container py-5">
-      <div className="row justify-content-center">
-        <div className="col-lg-8">
+    <div className="create-tour-page">
+      <div className="create-tour-container">
 
-          <div className="card shadow-sm">
-            <div className="card-body p-4 p-md-5">
+        {/* Page Heading */}
+        <div className="create-tour-heading">
+          <span className="create-tour-eyebrow">
+            TOUR OPERATOR STUDIO
+          </span>
 
-              <h2 className="fw-bold mb-2">
-                Create Food Tour
-              </h2>
+          <h1>Create a Food Tour</h1>
 
-              <p className="text-secondary mb-4">
-                Create a guided food tour and introduce tourists
-                to local culinary destinations.
-              </p>
+          <p>
+            Bring local flavours and memorable culinary destinations
+            together in a guided food tour.
+          </p>
+        </div>
 
-              {error && (
-                <div className="alert alert-danger">{error}</div>
-              )}
+        <div className="create-tour-card">
 
-              <form onSubmit={handleSubmit}>
+          {/* Form Header */}
+          <div className="create-tour-card-header">
+            <div>
+              <h2>Tour Details</h2>
+              <p>Complete the information below to create your tour.</p>
+            </div>
 
-                <h5 className="fw-bold mb-3">Tour Information</h5>
+            <span className="create-tour-icon">🍜</span>
+          </div>
 
-                <div className="mb-3">
-                  <label className="form-label">Tour Title</label>
+          {error && (
+            <div className="create-tour-error">
+              <strong>Unable to create tour</strong>
+              <p>{error}</p>
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit}>
+
+            {/* Section 1: Tour Information */}
+            <div className="create-tour-section">
+
+              <div className="create-tour-section-heading">
+                <span className="create-tour-section-number">01</span>
+
+                <div>
+                  <h3>Tour Information</h3>
+                  <p>Tell visitors what makes your food tour special.</p>
+                </div>
+              </div>
+
+              <div className="create-tour-field">
+                <label htmlFor="tour-title">Tour Title</label>
+
+                <input
+                  id="tour-title"
+                  type="text"
+                  name="title"
+                  placeholder="e.g. Traditional Chinese Food Adventure"
+                  value={formData.title}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+
+              <div className="create-tour-field">
+                <label htmlFor="tour-description">Description</label>
+
+                <textarea
+                  id="tour-description"
+                  name="description"
+                  rows="5"
+                  placeholder="Describe the food, culture and experiences visitors can expect..."
+                  value={formData.description}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+
+              <div className="create-tour-field-row">
+
+                <div className="create-tour-field">
+                  <label htmlFor="tour-city">City</label>
+
                   <input
+                    id="tour-city"
                     type="text"
-                    name="title"
-                    className="form-control"
-                    value={formData.title}
+                    name="city"
+                    placeholder="e.g. Singapore"
+                    value={formData.city}
                     onChange={handleChange}
                     required
                   />
                 </div>
 
-                <div className="mb-3">
-                  <label className="form-label">Description</label>
-                  <textarea
-                    name="description"
-                    className="form-control"
-                    rows="4"
-                    value={formData.description}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
+                <div className="create-tour-field">
+                  <label htmlFor="tour-area">Area</label>
 
-                <div className="row">
-                  <div className="col-md-6 mb-3">
-                    <label className="form-label">City</label>
-                    <input
-                      type="text"
-                      name="city"
-                      className="form-control"
-                      value={formData.city}
-                      onChange={handleChange}
-                      required
-                    />
-                  </div>
-
-                  <div className="col-md-6 mb-3">
-                    <label className="form-label">Area</label>
-                    <input
-                      type="text"
-                      name="area"
-                      className="form-control"
-                      value={formData.area}
-                      onChange={handleChange}
-                    />
-                  </div>
-                </div>
-
-                <div className="mb-3">
-                  <label className="form-label">Price (SGD)</label>
                   <input
+                    id="tour-area"
+                    type="text"
+                    name="area"
+                    placeholder="e.g. Chinatown"
+                    value={formData.area}
+                    onChange={handleChange}
+                  />
+                </div>
+
+              </div>
+
+              <div className="create-tour-field">
+                <label htmlFor="tour-price">
+                  Price per Participant (SGD)
+                </label>
+
+                <div className="create-tour-price-input">
+                  <span>SGD</span>
+
+                  <input
+                    id="tour-price"
                     type="number"
                     name="price"
-                    className="form-control"
                     min="0"
                     step="0.01"
+                    placeholder="0.00"
                     value={formData.price}
                     onChange={handleChange}
                     required
                   />
                 </div>
+              </div>
 
-                <hr />
-
-                <h5 className="fw-bold mb-3">Schedule and Capacity</h5>
-
-                <div className="mb-3">
-                  <label className="form-label">Tour Date</label>
-                  <input
-                    type="date"
-                    name="date"
-                    className="form-control"
-                    value={formData.date}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-
-                <div className="row">
-                  <div className="col-md-6 mb-3">
-                    <label className="form-label">Start Time</label>
-                    <input
-                      type="time"
-                      name="start_time"
-                      className="form-control"
-                      value={formData.start_time}
-                      onChange={handleChange}
-                      required
-                    />
-                  </div>
-
-                  <div className="col-md-6 mb-3">
-                    <label className="form-label">End Time</label>
-                    <input
-                      type="time"
-                      name="end_time"
-                      className="form-control"
-                      value={formData.end_time}
-                      onChange={handleChange}
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div className="mb-4">
-                  <label className="form-label">
-                    Maximum Participants
-                  </label>
-                  <input
-                    type="number"
-                    name="capacity"
-                    className="form-control"
-                    min="1"
-                    value={formData.capacity}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  className="btn btn-warning btn-lg w-100"
-                  disabled={loading}
-                >
-                  {loading ? 'Creating...' : 'Publish Food Tour'}
-                </button>
-
-              </form>
             </div>
-          </div>
 
+            <div className="create-tour-divider" />
+
+            {/* Section 2: Schedule and Capacity */}
+            <div className="create-tour-section">
+
+              <div className="create-tour-section-heading">
+                <span className="create-tour-section-number">02</span>
+
+                <div>
+                  <h3>Schedule & Capacity</h3>
+                  <p>Set the date, duration and number of participants.</p>
+                </div>
+              </div>
+
+              <div className="create-tour-field">
+                <label htmlFor="tour-date">Tour Date</label>
+
+                <input
+                  id="tour-date"
+                  type="date"
+                  name="date"
+                  value={formData.date}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+
+              <div className="create-tour-field-row">
+
+                <div className="create-tour-field">
+                  <label htmlFor="tour-start-time">Start Time</label>
+
+                  <input
+                    id="tour-start-time"
+                    type="time"
+                    name="start_time"
+                    value={formData.start_time}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+
+                <div className="create-tour-field">
+                  <label htmlFor="tour-end-time">End Time</label>
+
+                  <input
+                    id="tour-end-time"
+                    type="time"
+                    name="end_time"
+                    value={formData.end_time}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+
+              </div>
+
+              <div className="create-tour-field">
+                <label htmlFor="tour-capacity">
+                  Maximum Participants
+                </label>
+
+                <input
+                  id="tour-capacity"
+                  type="number"
+                  name="capacity"
+                  min="1"
+                  step="1"
+                  placeholder="e.g. 12"
+                  value={formData.capacity}
+                  onChange={handleChange}
+                  required
+                />
+
+                <small>
+                  Enter the maximum number of guests for this tour.
+                </small>
+              </div>
+
+            </div>
+
+            {/* Submit */}
+            <div className="create-tour-submit-area">
+
+              <button
+                type="submit"
+                className="create-tour-submit-btn"
+                disabled={loading}
+              >
+                {loading ? 'Creating Tour...' : 'Publish Food Tour'}
+              </button>
+
+              <p>
+                Please review your tour details before publishing.
+              </p>
+
+            </div>
+
+          </form>
         </div>
+
       </div>
     </div>
   );

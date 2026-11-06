@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import API from '../services/api';
@@ -30,6 +31,7 @@ function FoodTourDetails() {
   const [favouriteLoading, setFavouriteLoading] = useState(false);
   const [favouriteMessage, setFavouriteMessage] = useState('');
 
+  // Fetch food tour and stops
   useEffect(() => {
     Promise.all([
       API.get(`food-tours/${id}/`),
@@ -190,7 +192,6 @@ function FoodTourDetails() {
       console.error('Error adding food tour:', error);
 
       const data = error.response?.data;
-
       let message = 'Unable to add this food tour to your itinerary.';
 
       if (data?.detail) {
@@ -273,332 +274,435 @@ function FoodTourDetails() {
       Number.isFinite(Number(stop.longitude))
   );
 
+  // Loading state
   if (loading) {
-    return <div className="container py-5">Loading...</div>;
+    return (
+      <div className="food-tour-details-page">
+        <div className="food-tour-details-container container-custom">
+          <div className="food-tour-details-message">
+            Loading food tour details...
+          </div>
+        </div>
+      </div>
+    );
   }
 
+  // Error state
   if (error) {
-    return <div className="container py-5 alert alert-danger">{error}</div>;
+    return (
+      <div className="food-tour-details-page">
+        <div className="food-tour-details-container container-custom">
+          <div className="food-tour-details-message food-tour-details-error">
+            {error}
+          </div>
+          <Link to="/food-tours" className="experience-back-link">
+            ← Back to Food Tours
+          </Link>
+        </div>
+      </div>
+    );
   }
 
+  // Tour not found
   if (!tour) {
-    return <div className="container py-5">Food tour not found.</div>;
+    return (
+      <div className="food-tour-details-page">
+        <div className="food-tour-details-container container-custom">
+          <div className="food-tour-details-message">
+            Food tour not found.
+          </div>
+          <Link to="/food-tours" className="experience-back-link">
+            ← Back to Food Tours
+          </Link>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="container py-5">
+    <div className="food-tour-details-page">
+      <div className="container-custom food-tour-details-container">
 
-      <Link to="/food-tours" className="btn btn-outline-secondary mb-4">
-        ← Back to Food Tours
-      </Link>
+        {/* Back Link */}
+        <Link to="/food-tours" className="experience-back-link">
+          ← Back to Food Tours
+        </Link>
 
-      <div className="card shadow-sm mb-4">
-        <div className="card-body p-4 p-md-5">
+        {/* Tour Header */}
+        <header className="food-tour-detail-header">
+          <span className="home-eyebrow">
+            GUIDED CULINARY JOURNEY
+          </span>
 
-          <h1 className="fw-bold mb-3">{tour.title}</h1>
+          <h1>{tour.title}</h1>
 
-          <p className="text-secondary mb-4">
-            {tour.description}
-          </p>
+          <p>{tour.description}</p>
+        </header>
 
-          <hr />
+        {/* Main Tour Information */}
+        <div className="food-tour-detail-layout">
 
-          <h5 className="fw-bold mb-3">Tour Information</h5>
+          <div className="food-tour-detail-main">
 
-          <p>
-            <strong>Location:</strong> {tour.area || tour.city || 'Not specified'}
-          </p>
+            {/* Tour Information */}
+            <section className="detail-section">
+              <h2>Tour Information</h2>
 
-          <p>
-            <strong>City:</strong> {tour.city || 'Not specified'}
-          </p>
+              <div className="detail-information-grid">
 
-          <p><strong>Date:</strong> {tour.date}</p>
-
-          <p>
-            <strong>Time:</strong> {tour.start_time} – {tour.end_time}
-          </p>
-
-          <p>
-            <strong>Capacity:</strong> {tour.capacity} participants
-          </p>
-
-          <h3 className="fw-bold mt-4">SGD {tour.price}</h3>
-
-          <Link
-            to={`/booking?food_tour=${tour.id}`}
-            className="btn btn-warning btn-lg mt-3"
-          >
-            Book This Tour
-          </Link>
-
-          {/* Favourite Button */}
-          <div className="mt-3">
-            <button
-              type="button"
-              className={`btn ${
-                favourite ? 'btn-danger' : 'btn-outline-danger'
-              }`}
-              onClick={handleToggleFavourite}
-              disabled={favouriteLoading}
-            >
-              {favouriteLoading
-                ? 'Please wait...'
-                : favourite
-                  ? '♥ Remove from Favourites'
-                  : '♡ Add to Favourites'}
-            </button>
-
-            {favouriteMessage && (
-              <div className="alert alert-info mt-3 mb-0">
-                {favouriteMessage}
-              </div>
-            )}
-          </div>
-
-          {/* Add to Itinerary */}
-          <div className="border rounded p-4 mt-4">
-
-            <h5 className="fw-bold mb-3">
-              Add to My Itinerary
-            </h5>
-
-            <p className="text-secondary">
-              Save this food tour to one of your personal food itineraries.
-            </p>
-
-            {itineraries.length === 0 ? (
-              <div>
-                <p className="text-secondary">
-                  No itineraries found. Create one first.
-                </p>
-
-                <Link
-                  to="/my-itineraries"
-                  className="btn btn-outline-dark"
-                >
-                  View My Itineraries
-                </Link>
-              </div>
-            ) : (
-              <div>
-                <label className="form-label fw-bold">
-                  Select an Itinerary
-                </label>
-
-                <select
-                  className="form-select mb-3"
-                  value={selectedItinerary}
-                  onChange={(e) => {
-                    setSelectedItinerary(e.target.value);
-                    setItineraryMessage('');
-                  }}
-                >
-                  <option value="">Choose an itinerary</option>
-
-                  {itineraries.map((itinerary) => (
-                    <option
-                      key={itinerary.id}
-                      value={itinerary.id}
-                    >
-                      {itinerary.title}
-                    </option>
-                  ))}
-                </select>
-
-                <button
-                  type="button"
-                  className="btn btn-dark"
-                  onClick={handleAddToItinerary}
-                  disabled={addingToItinerary || !selectedItinerary}
-                >
-                  {addingToItinerary
-                    ? 'Adding...'
-                    : 'Add to Itinerary'}
-                </button>
-              </div>
-            )}
-
-            {itineraryMessage && (
-              <div className="alert alert-info mt-3 mb-0">
-                {itineraryMessage}
-              </div>
-            )}
-
-          </div>
-
-        </div>
-      </div>
-
-      {/* Tour Itinerary */}
-      <h2 className="fw-bold mb-4">Tour Itinerary</h2>
-
-      {stops.length === 0 ? (
-        <p>No tour stops have been added yet.</p>
-      ) : (
-        <div className="list-group">
-          {stops.map((stop, index) => (
-            <div className="list-group-item p-4" key={stop.id}>
-              <h5 className="fw-bold">
-                Stop {index + 1}: {stop.name}
-              </h5>
-
-              <p className="text-secondary mb-2">
-                {stop.description}
-              </p>
-
-              <p className="mb-0">
-                <strong>Address:</strong> {stop.address}
-              </p>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Food Tour Map */}
-      <div className="mt-5">
-        <h2 className="fw-bold mb-3">Explore Tour Locations</h2>
-
-        {mappedStops.length === 0 ? (
-          <div className="alert alert-info">
-            Map locations are not available for these tour stops yet.
-          </div>
-        ) : (
-          <div style={{ height: '450px', width: '100%' }}>
-            <MapContainer
-              center={[
-                Number(mappedStops[0].latitude),
-                Number(mappedStops[0].longitude)
-              ]}
-              zoom={14}
-              scrollWheelZoom={false}
-              style={{ height: '100%', width: '100%' }}
-            >
-              <TileLayer
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              />
-
-              {mappedStops.map((stop, index) => (
-                <Marker
-                  key={stop.id}
-                  position={[
-                    Number(stop.latitude),
-                    Number(stop.longitude)
-                  ]}
-                >
-                  <Popup>
-                    <strong>Stop {index + 1}: {stop.name}</strong>
-                    <br />
-                    {stop.address}
-                  </Popup>
-                </Marker>
-              ))}
-            </MapContainer>
-          </div>
-        )}
-      </div>
-
-      {/* Reviews Section */}
-      <div className="card shadow-sm mt-5">
-        <div className="card-body p-4">
-
-          <h3 className="fw-bold mb-4">Ratings & Reviews</h3>
-
-          {reviews.length === 0 ? (
-            <p className="text-secondary">
-              No reviews yet. Be the first to share your experience!
-            </p>
-          ) : (
-            reviews.map((review) => (
-              <div key={review.id} className="border-bottom py-3">
-
-                <div className="text-warning fs-5">
-                  {'★'.repeat(review.rating)}
-                  {'☆'.repeat(5 - review.rating)}
+                <div className="detail-information-item">
+                  <span>Location</span>
+                  <strong>
+                    {tour.area || tour.city || 'Not specified'}
+                  </strong>
                 </div>
 
-                <p className="mb-1">{review.comment}</p>
+                <div className="detail-information-item">
+                  <span>City</span>
+                  <strong>{tour.city || 'Not specified'}</strong>
+                </div>
 
-                <small className="text-secondary">
-                  {review.created_at
-                    ? new Date(review.created_at).toLocaleDateString()
-                    : ''}
-                </small>
+                <div className="detail-information-item">
+                  <span>Date</span>
+                  <strong>{tour.date || 'Not specified'}</strong>
+                </div>
+
+                <div className="detail-information-item">
+                  <span>Time</span>
+                  <strong>
+                    {tour.start_time} – {tour.end_time}
+                  </strong>
+                </div>
+
+                <div className="detail-information-item">
+                  <span>Capacity</span>
+                  <strong>
+                    {tour.capacity} participants
+                  </strong>
+                </div>
+
+                <div className="detail-information-item">
+                  <span>Tour Price</span>
+                  <strong>SGD {tour.price}</strong>
+                </div>
 
               </div>
-            ))
-          )}
+            </section>
 
-        </div>
-      </div>
+            {/* Tour Itinerary */}
+            <section className="detail-section">
+              <h2>Tour Itinerary</h2>
 
-      {/* Submit Review Section */}
-      <div className="card shadow-sm mt-4">
-        <div className="card-body p-4">
+              <p className="detail-section-description">
+                Discover the places included in this guided food tour.
+              </p>
 
-          <h4 className="fw-bold mb-3">Write a Review</h4>
+              {stops.length === 0 ? (
+                <p className="detail-muted-text">
+                  No tour stops have been added yet.
+                </p>
+              ) : (
+                <div className="food-tour-stops-list">
 
-          <p className="text-secondary">
-            Only tourists with a confirmed booking can submit a rating and review.
-          </p>
+                  {stops.map((stop, index) => (
+                    <article
+                      className="food-tour-stop-card"
+                      key={stop.id}
+                    >
+                      <div className="food-tour-stop-number">
+                        {index + 1}
+                      </div>
 
-          <form onSubmit={handleSubmitReview}>
+                      <div className="food-tour-stop-content">
+                        <span className="food-tour-stop-label">
+                          STOP {index + 1}
+                        </span>
 
-            <label className="form-label fw-bold">
-              Your Rating
-            </label>
+                        <h3>{stop.name}</h3>
 
-            <div className="mb-3">
-              {[1, 2, 3, 4, 5].map((number) => (
+                        <p>{stop.description}</p>
+
+                        <div className="food-tour-stop-address">
+                          <strong>Address:</strong> {stop.address}
+                        </div>
+                      </div>
+                    </article>
+                  ))}
+
+                </div>
+              )}
+            </section>
+
+            {/* Tour Map */}
+            <section className="detail-section">
+              <h2>Explore Tour Locations</h2>
+
+              <p className="detail-section-description">
+                View the locations included in this food tour.
+              </p>
+
+              {mappedStops.length === 0 ? (
+                <div className="detail-feedback-message">
+                  Map locations are not available for these tour stops yet.
+                </div>
+              ) : (
+                <div className="food-tour-detail-map">
+
+                  <MapContainer
+                    center={[
+                      Number(mappedStops[0].latitude),
+                      Number(mappedStops[0].longitude)
+                    ]}
+                    zoom={14}
+                    scrollWheelZoom={false}
+                    style={{ height: '100%', width: '100%' }}
+                  >
+                    <TileLayer
+                      attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                      url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    />
+
+                    {mappedStops.map((stop, index) => (
+                      <Marker
+                        key={stop.id}
+                        position={[
+                          Number(stop.latitude),
+                          Number(stop.longitude)
+                        ]}
+                      >
+                        <Popup>
+                          <strong>
+                            Stop {index + 1}: {stop.name}
+                          </strong>
+                          <br />
+                          {stop.address}
+                        </Popup>
+                      </Marker>
+                    ))}
+
+                  </MapContainer>
+
+                </div>
+              )}
+            </section>
+
+            {/* Ratings and Reviews */}
+            <section className="detail-section food-tour-reviews">
+              <h2>Ratings & Reviews</h2>
+
+              {reviews.length === 0 ? (
+                <p className="detail-muted-text">
+                  No reviews yet. Be the first to share your experience!
+                </p>
+              ) : (
+                <div className="experience-reviews-list">
+
+                  {reviews.map((review) => (
+                    <article
+                      key={review.id}
+                      className="experience-review-card"
+                    >
+                      <div className="review-stars">
+                        {'★'.repeat(review.rating)}
+                        {'☆'.repeat(5 - review.rating)}
+                      </div>
+
+                      <p>{review.comment}</p>
+
+                      <small>
+                        {review.created_at
+                          ? new Date(review.created_at).toLocaleDateString()
+                          : ''}
+                      </small>
+                    </article>
+                  ))}
+
+                </div>
+              )}
+            </section>
+
+            {/* Submit Review */}
+            <section className="experience-write-review">
+              <h2>Write a Review</h2>
+
+              <p className="detail-section-description">
+                Only tourists with a confirmed booking can submit a rating and review.
+              </p>
+
+              <form onSubmit={handleSubmitReview}>
+
+                <label className="review-form-label">
+                  Your Rating
+                </label>
+
+                <div className="review-rating-selector">
+                  {[1, 2, 3, 4, 5].map((number) => (
+                    <button
+                      key={number}
+                      type="button"
+                      className={number <= rating ? 'active' : ''}
+                      onClick={() => setRating(number)}
+                      aria-label={`Rate ${number} out of 5`}
+                    >
+                      ★
+                    </button>
+                  ))}
+                </div>
+
+                <label className="review-form-label">
+                  Your Review
+                </label>
+
+                <textarea
+                  rows="4"
+                  placeholder="Share your food tour experience..."
+                  value={comment}
+                  onChange={(e) => setComment(e.target.value)}
+                  required
+                />
+
+                {reviewMessage && (
+                  <div className="detail-feedback-message">
+                    {reviewMessage}
+                  </div>
+                )}
+
                 <button
-                  key={number}
-                  type="button"
-                  className="btn btn-link p-1 text-decoration-none"
-                  onClick={() => setRating(number)}
-                  style={{
-                    color: number <= rating ? '#ffc107' : '#adb5bd',
-                    fontSize: '2rem',
-                  }}
-                  aria-label={`Rate ${number} out of 5`}
+                  type="submit"
+                  className="experience-book-btn review-submit-btn"
+                  disabled={submitting}
                 >
-                  ★
+                  {submitting ? 'Submitting...' : 'Submit Review'}
                 </button>
-              ))}
-            </div>
 
-            <label className="form-label fw-bold">
-              Your Review
-            </label>
+              </form>
+            </section>
 
-            <textarea
-              className="form-control mb-3"
-              rows="4"
-              placeholder="Share your food tour experience..."
-              value={comment}
-              onChange={(e) => setComment(e.target.value)}
-              required
-            />
+          </div>
 
-            {reviewMessage && (
-              <div className="alert alert-info">
-                {reviewMessage}
-              </div>
-            )}
+          {/* Sidebar */}
+          <aside className="food-tour-detail-sidebar">
 
-            <button
-              type="submit"
-              className="btn btn-warning"
-              disabled={submitting}
-            >
-              {submitting ? 'Submitting...' : 'Submit Review'}
-            </button>
+            {/* Booking Panel */}
+            <section className="booking-panel">
 
-          </form>
+              <span className="booking-panel-label">
+                TOUR PRICE
+              </span>
+
+              <h2>SGD {tour.price}</h2>
+
+              <p>Per participant</p>
+
+              <Link
+                to={`/booking?food_tour=${tour.id}`}
+                className="experience-book-btn"
+              >
+                Book This Tour
+              </Link>
+
+              {/* Favourite Button */}
+              <button
+                type="button"
+                className={`experience-favourite-btn ${
+                  favourite ? 'is-favourite' : ''
+                }`}
+                onClick={handleToggleFavourite}
+                disabled={favouriteLoading}
+              >
+                {favouriteLoading
+                  ? 'Please wait...'
+                  : favourite
+                    ? '♥ Remove from Favourites'
+                    : '♡ Add to Favourites'}
+              </button>
+
+              {favouriteMessage && (
+                <div className="detail-feedback-message">
+                  {favouriteMessage}
+                </div>
+              )}
+
+            </section>
+
+            {/* Add to Itinerary */}
+            <section className="booking-panel food-tour-itinerary-panel">
+
+              <h2>Add to My Itinerary</h2>
+
+              <p>
+                Save this food tour to one of your personal food itineraries.
+              </p>
+
+              {itineraries.length === 0 ? (
+                <div>
+                  <p className="detail-muted-text">
+                    No itineraries found. Create one first.
+                  </p>
+
+                  <Link
+                    to="/my-itineraries"
+                    className="experience-favourite-btn"
+                  >
+                    View My Itineraries
+                  </Link>
+                </div>
+              ) : (
+                <div className="itinerary-form">
+
+                  <label htmlFor="food-tour-itinerary">
+                    Select an Itinerary
+                  </label>
+
+                  <select
+                    id="food-tour-itinerary"
+                    value={selectedItinerary}
+                    onChange={(e) => {
+                      setSelectedItinerary(e.target.value);
+                      setItineraryMessage('');
+                    }}
+                  >
+                    <option value="">
+                      Choose an itinerary
+                    </option>
+
+                    {itineraries.map((itinerary) => (
+                      <option
+                        key={itinerary.id}
+                        value={itinerary.id}
+                      >
+                        {itinerary.title}
+                      </option>
+                    ))}
+
+                  </select>
+
+                  <button
+                    type="button"
+                    className="experience-book-btn"
+                    onClick={handleAddToItinerary}
+                    disabled={addingToItinerary || !selectedItinerary}
+                  >
+                    {addingToItinerary
+                      ? 'Adding...'
+                      : 'Add to Itinerary'}
+                  </button>
+
+                </div>
+              )}
+
+              {itineraryMessage && (
+                <div className="detail-feedback-message">
+                  {itineraryMessage}
+                </div>
+              )}
+
+            </section>
+
+          </aside>
 
         </div>
       </div>
-
     </div>
   );
 }
