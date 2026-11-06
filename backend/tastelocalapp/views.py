@@ -5,9 +5,11 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.exceptions import NotFound, PermissionDenied
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from django.utils import timezone
 
 from .models import (
+    TouristProfile,
     FoodExperience,
     FoodTour,
     TourStop,
@@ -52,6 +54,7 @@ class TouristRegistrationView(generics.CreateAPIView):
 class TouristProfileView(generics.RetrieveUpdateAPIView):
     serializer_class = TouristProfileSerializer
     permission_classes = [IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
 
     def get_object(self):
         user = self.request.user
@@ -61,7 +64,11 @@ class TouristProfileView(generics.RetrieveUpdateAPIView):
                 "Only registered tourists can access this profile."
             )
 
-        return user
+        profile, created = TouristProfile.objects.get_or_create(
+            user=user
+        )
+
+        return profile
 
 
 # ==========================================

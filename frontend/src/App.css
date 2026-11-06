@@ -4103,20 +4103,25 @@
   padding-bottom: 25px;
   border-bottom: 1px solid var(--color-border);
 }
-
 .profile-avatar {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 58px;
-  height: 58px;
   flex-shrink: 0;
+  background-color: var(--color-lavender);
+}
+
+.profile-avatar-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
   border-radius: 50%;
-  background: var(--color-deep-purple);
-  color: var(--color-golden-yellow);
-  font-family: var(--font-heading);
-  font-size: 27px;
-  font-weight: 600;
+  display: block;
 }
 
 .profile-card-heading h2 {

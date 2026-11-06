@@ -2,6 +2,7 @@ from django.contrib.auth.models import User, Group
 from rest_framework import serializers
 
 from .models import (
+    TouristProfile,
     Vendor,
     TourOperator,
     FoodExperience,
@@ -55,21 +56,59 @@ class TouristRegistrationSerializer(serializers.ModelSerializer):
 # TOURIST PROFILE SERIALIZER
 # ==========================================
 
+
 class TouristProfileSerializer(serializers.ModelSerializer):
 
+    username = serializers.CharField(
+        source='user.username',
+        read_only=True
+    )
+
+    first_name = serializers.CharField(
+        source='user.first_name',
+        required=False
+    )
+
+    last_name = serializers.CharField(
+        source='user.last_name',
+        required=False
+    )
+
+    email = serializers.EmailField(
+        source='user.email',
+        required=False
+    )
+
+    profile_image = serializers.ImageField(
+        required=False,
+        allow_null=True
+    )
+
     class Meta:
-        model = User
+        model = TouristProfile
         fields = [
             'id',
             'username',
             'first_name',
             'last_name',
             'email',
+            'profile_image',
+            'phone',
+            'bio',
+            'location',
+            'created_at',
+            'updated_at',
         ]
-        read_only_fields = ['id', 'username']
+
+        read_only_fields = [
+            'id',
+            'username',
+            'created_at',
+            'updated_at',
+        ]
 
     def validate_email(self, value):
-        user = self.instance
+        user = self.instance.user
 
         if User.objects.filter(
             email__iexact=value
@@ -79,6 +118,17 @@ class TouristProfileSerializer(serializers.ModelSerializer):
             )
 
         return value
+
+    def update(self, instance, validated_data):
+        user_data = validated_data.pop('user', {})
+
+        for attribute, value in user_data.items():
+            setattr(instance.user, attribute, value)
+
+        if user_data:
+            instance.user.save()
+
+        return super().update(instance, validated_data)
 
 
 class VendorRegistrationSerializer(serializers.ModelSerializer):
