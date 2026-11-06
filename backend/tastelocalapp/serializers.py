@@ -1,0 +1,615 @@
+from django.contrib.auth.models import User, Group
+from rest_framework import serializers
+
+from .models import (
+    Vendor,
+    TourOperator,
+    FoodExperience,
+    FoodTour,
+    TourStop,
+    Booking,
+    Review,
+    Itinerary,
+    ItineraryItem,
+    Favourite,
+)
+
+
+class TouristRegistrationSerializer(serializers.ModelSerializer):
+
+    password = serializers.CharField(
+        write_only=True,
+        required=True,
+        style={'input_type': 'password'}
+    )
+
+    class Meta:
+        model = User
+        fields = ['username', 'email', 'password']
+
+    def validate_email(self, value):
+        if User.objects.filter(email__iexact=value).exists():
+            raise serializers.ValidationError(
+                "This email address is already registered."
+            )
+        return value
+
+    def create(self, validated_data):
+        password = validated_data.pop('password')
+
+        user = User.objects.create_user(
+            password=password,
+            **validated_data
+        )
+
+        tourist_group, created = Group.objects.get_or_create(
+            name='Tourist'
+        )
+
+        user.groups.add(tourist_group)
+
+        return user
+
+
+# ==========================================
+# TOURIST PROFILE SERIALIZER
+# ==========================================
+
+class TouristProfileSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = [
+            'id',
+            'username',
+            'first_name',
+            'last_name',
+            'email',
+        ]
+        read_only_fields = ['id', 'username']
+
+    def validate_email(self, value):
+        user = self.instance
+
+        if User.objects.filter(
+            email__iexact=value
+        ).exclude(pk=user.pk).exists():
+            raise serializers.ValidationError(
+                "This email address is already registered."
+            )
+
+        return value
+
+
+class VendorRegistrationSerializer(serializers.ModelSerializer):
+
+    username = serializers.CharField(write_only=True)
+
+    password = serializers.CharField(
+        write_only=True,
+        required=True,
+        style={'input_type': 'password'}
+    )
+
+    class Meta:
+        model = Vendor
+        fields = [
+            'username',
+            'password',
+            'business_name',
+            'owner_name',
+            'email',
+            'phone',
+            'description',
+            'address',
+            'city',
+            'area',
+            'latitude',
+            'longitude',
+            'website',
+            'social_media',
+        ]
+
+    def validate_email(self, value):
+        if User.objects.filter(email__iexact=value).exists():
+            raise serializers.ValidationError(
+                "This email address is already registered."
+            )
+        return value
+
+    def create(self, validated_data):
+        username = validated_data.pop('username')
+        password = validated_data.pop('password')
+
+        user = User.objects.create_user(
+            username=username,
+            email=validated_data['email'],
+            password=password
+        )
+
+        vendor_group, created = Group.objects.get_or_create(
+            name='Vendor'
+        )
+
+        user.groups.add(vendor_group)
+
+        vendor = Vendor.objects.create(
+            user=user,
+            **validated_data
+        )
+
+        return vendor
+
+
+class TourOperatorRegistrationSerializer(serializers.ModelSerializer):
+
+    username = serializers.CharField(write_only=True)
+
+    password = serializers.CharField(
+        write_only=True,
+        required=True,
+        style={'input_type': 'password'}
+    )
+
+    class Meta:
+        model = TourOperator
+        fields = [
+            'username',
+            'password',
+            'business_name',
+            'owner_name',
+            'email',
+            'phone',
+            'description',
+            'website',
+            'social_media'
+        ]
+
+    def validate_email(self, value):
+        if User.objects.filter(email__iexact=value).exists():
+            raise serializers.ValidationError(
+                "This email address is already registered."
+            )
+        return value
+
+    def create(self, validated_data):
+        username = validated_data.pop('username')
+        password = validated_data.pop('password')
+
+        user = User.objects.create_user(
+            username=username,
+            email=validated_data['email'],
+            password=password
+        )
+
+        operator_group, created = Group.objects.get_or_create(
+            name='Tour Operator'
+        )
+
+        user.groups.add(operator_group)
+
+        tour_operator = TourOperator.objects.create(
+            user=user,
+            **validated_data
+        )
+
+        return tour_operator
+
+
+class FoodExperienceSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = FoodExperience
+        fields = [
+            'id',
+            'title',
+            'description',
+            'category',
+            'price',
+            'date',
+            'start_time',
+            'end_time',
+            'capacity',
+            'address',
+            'city',
+            'area',
+            'latitude',
+            'longitude',
+            'image',
+            'status',
+            'created_at',
+        ]
+
+        read_only_fields = [
+            'id',
+            'status',
+            'created_at',
+        ]
+
+    def create(self, validated_data):
+        vendor = self.context['request'].user.vendors.first()
+
+        if not vendor:
+            raise serializers.ValidationError(
+                "You do not have a vendor profile."
+            )
+
+        if vendor.status != 'approved':
+            raise serializers.ValidationError(
+                "Your vendor profile must be approved before creating food experiences."
+            )
+
+        return FoodExperience.objects.create(
+            vendor=vendor,
+            status='approved',
+            **validated_data
+        )
+
+
+class FoodTourSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = FoodTour
+        fields = [
+            'id',
+            'title',
+            'description',
+            'city',
+            'area',
+            'price',
+            'date',
+            'start_time',
+            'end_time',
+            'capacity',
+            'image',
+            'status',
+            'created_at',
+        ]
+
+        read_only_fields = [
+            'id',
+            'status',
+            'created_at',
+        ]
+
+    def create(self, validated_data):
+        operator = self.context['request'].user.tour_operators.first()
+
+        if not operator:
+            raise serializers.ValidationError(
+                "You do not have a Tour Operator profile."
+            )
+
+        if operator.status != 'approved':
+            raise serializers.ValidationError(
+                "Your Tour Operator profile must be approved before creating food tours."
+            )
+
+        return FoodTour.objects.create(
+            tour_operator=operator,
+            status='approved',
+            **validated_data
+        )
+
+
+class TourStopSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = TourStop
+        fields = [
+            'id',
+            'food_tour',
+            'name',
+            'description',
+            'address',
+            'city',
+            'area',
+            'latitude',
+            'longitude',
+            'stop_order',
+            'created_at',
+        ]
+
+        read_only_fields = [
+            'id',
+            'created_at',
+        ]
+
+
+class BookingSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Booking
+        fields = [
+            'id',
+            'tourist',
+            'food_experience',
+            'food_tour',
+            'number_of_participants',
+            'status',
+            'special_request',
+            'created_at',
+            'updated_at',
+        ]
+
+        read_only_fields = [
+            'id',
+            'tourist',
+            'status',
+            'created_at',
+            'updated_at',
+        ]
+
+    def validate(self, data):
+        food_experience = data.get('food_experience')
+        food_tour = data.get('food_tour')
+
+        if food_experience and food_tour:
+            raise serializers.ValidationError(
+                "A booking can only be for a food experience or a food tour."
+            )
+
+        if not food_experience and not food_tour:
+            raise serializers.ValidationError(
+                "Please select either a food experience or a food tour."
+            )
+
+        if data.get('number_of_participants', 0) < 1:
+            raise serializers.ValidationError(
+                "At least one participant is required."
+            )
+
+        return data
+
+    def create(self, validated_data):
+        validated_data['tourist'] = self.context['request'].user
+        return Booking.objects.create(**validated_data)
+
+
+class BookingUpdateSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Booking
+        fields = ['status']
+
+
+class ReviewSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Review
+        fields = [
+            'id',
+            'tourist',
+            'food_experience',
+            'food_tour',
+            'rating',
+            'comment',
+            'created_at',
+        ]
+
+        read_only_fields = [
+            'id',
+            'tourist',
+            'created_at',
+        ]
+
+    def validate(self, data):
+        food_experience = data.get('food_experience')
+        food_tour = data.get('food_tour')
+
+        request = self.context['request']
+        tourist = request.user
+
+        # A review must belong to either a food experience or a food tour.
+        if bool(food_experience) == bool(food_tour):
+            raise serializers.ValidationError(
+                'A review must belong to either a food experience or a food tour, not both.'
+            )
+
+        # Check that the tourist has a confirmed booking.
+        booking_filter = {
+            'tourist': tourist,
+            'status': 'confirmed',
+        }
+
+        if food_experience:
+            booking_filter['food_experience'] = food_experience
+        else:
+            booking_filter['food_tour'] = food_tour
+
+        has_booking = Booking.objects.filter(**booking_filter).exists()
+
+        if not has_booking:
+            raise serializers.ValidationError(
+                'You can only review a food experience or food tour that you have booked and had confirmed.'
+            )
+
+        # Prevent the same tourist from reviewing the same item twice.
+        existing_review = Review.objects.filter(tourist=tourist)
+
+        if food_experience:
+            existing_review = existing_review.filter(
+                food_experience=food_experience
+            )
+        else:
+            existing_review = existing_review.filter(
+                food_tour=food_tour
+            )
+
+        if existing_review.exists():
+            raise serializers.ValidationError(
+                'You have already submitted a review for this item.'
+            )
+
+        return data
+
+    def create(self, validated_data):
+        validated_data['tourist'] = self.context['request'].user
+        return Review.objects.create(**validated_data)
+
+
+# ==========================================
+# TOURIST REVIEW UPDATE SERIALIZER
+# ==========================================
+
+class ReviewUpdateSerializer(serializers.ModelSerializer):
+
+    food_experience_title = serializers.CharField(
+        source='food_experience.title',
+        read_only=True,
+        allow_null=True
+    )
+
+    food_tour_title = serializers.CharField(
+        source='food_tour.title',
+        read_only=True,
+        allow_null=True
+    )
+
+    class Meta:
+        model = Review
+        fields = [
+            'id',
+            'food_experience',
+            'food_tour',
+            'food_experience_title',
+            'food_tour_title',
+            'rating',
+            'comment',
+            'created_at',
+        ]
+
+        read_only_fields = [
+            'id',
+            'food_experience',
+            'food_tour',
+            'food_experience_title',
+            'food_tour_title',
+            'created_at',
+        ]
+
+class ItineraryItemSerializer(serializers.ModelSerializer):
+
+    food_experience_title = serializers.CharField(
+        source='food_experience.title',
+        read_only=True
+    )
+
+    food_tour_title = serializers.CharField(
+        source='food_tour.title',
+        read_only=True
+    )
+
+    class Meta:
+        model = ItineraryItem
+        fields = [
+            'id',
+            'itinerary',
+            'food_experience',
+            'food_experience_title',
+            'food_tour',
+            'food_tour_title',
+            'position',
+            'notes',
+            'created_at',
+        ]
+
+        read_only_fields = [
+            'id',
+            'itinerary',
+            'created_at',
+        ]
+
+    def validate(self, data):
+        food_experience = data.get('food_experience')
+        food_tour = data.get('food_tour')
+
+        if bool(food_experience) == bool(food_tour):
+            raise serializers.ValidationError(
+                'An itinerary item must contain either a food experience or a food tour, not both.'
+            )
+
+        if food_experience and food_experience.status != 'approved':
+            raise serializers.ValidationError(
+                'This food experience is not available.'
+            )
+
+        if food_tour and food_tour.status != 'approved':
+            raise serializers.ValidationError(
+                'This food tour is not available.'
+            )
+
+        return data
+
+
+class ItinerarySerializer(serializers.ModelSerializer):
+
+    items = ItineraryItemSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Itinerary
+        fields = [
+            'id',
+            'title',
+            'description',
+            'created_at',
+            'items',
+        ]
+
+        read_only_fields = [
+            'id',
+            'created_at',
+            'items',
+        ]
+
+
+class FavouriteSerializer(serializers.ModelSerializer):
+
+    food_experience_title = serializers.CharField(
+        source='food_experience.title',
+        read_only=True
+    )
+
+    food_tour_title = serializers.CharField(
+        source='food_tour.title',
+        read_only=True
+    )
+
+    class Meta:
+        model = Favourite
+        fields = [
+            'id',
+            'food_experience',
+            'food_experience_title',
+            'food_tour',
+            'food_tour_title',
+            'created_at',
+        ]
+
+        read_only_fields = [
+            'id',
+            'created_at',
+        ]
+
+    def validate(self, attrs):
+        food_experience = attrs.get('food_experience')
+        food_tour = attrs.get('food_tour')
+
+        if bool(food_experience) == bool(food_tour):
+            raise serializers.ValidationError(
+                'Please select either a food experience or a food tour, not both.'
+            )
+
+        # Only allow favourites for approved content
+        if food_experience and food_experience.status != 'approved':
+            raise serializers.ValidationError(
+                'Only approved food experiences can be favourited.'
+            )
+
+        if food_tour and food_tour.status != 'approved':
+            raise serializers.ValidationError(
+                'Only approved food tours can be favourited.'
+            )
+
+        return attrs
+
