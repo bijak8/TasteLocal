@@ -1,15 +1,18 @@
+from django.contrib.auth.models import User
 from django.shortcuts import render
 
 from rest_framework import generics
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated, BasePermission
 from rest_framework.exceptions import NotFound, PermissionDenied
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from django.utils import timezone
 
 from .models import (
     TouristProfile,
+    Vendor,
+    TourOperator,
     FoodExperience,
     FoodTour,
     TourStop,
@@ -1050,3 +1053,101 @@ class TourOperatorFoodTourDetailView(
         return FoodTour.objects.filter(
             tour_operator=operator
         )
+
+
+# ==========================================
+# ADMIN PERMISSION
+# ==========================================
+
+class IsTasteLocalAdmin(BasePermission):
+    """
+    Allow access only to Django staff and superuser accounts.
+    """
+
+    def has_permission(self, request, view):
+        user = request.user
+
+        return bool(
+            user
+            and user.is_authenticated
+            and (user.is_staff or user.is_superuser)
+        )
+
+
+# ==========================================
+# ADMIN DASHBOARD
+# ==========================================
+
+class AdminDashboardView(APIView):
+    permission_classes = [IsTasteLocalAdmin]
+
+    def get(self, request):
+
+        return Response({
+
+            # User statistics
+            'total_users': User.objects.count(),
+
+            'total_tourists': User.objects.filter(
+                groups__name='Tourist'
+            ).distinct().count(),
+
+            # Vendor statistics
+            'total_vendors': Vendor.objects.count(),
+
+            'pending_vendors': Vendor.objects.filter(
+                status='pending'
+            ).count(),
+
+            'approved_vendors': Vendor.objects.filter(
+                status='approved'
+            ).count(),
+
+            'rejected_vendors': Vendor.objects.filter(
+                status='rejected'
+            ).count(),
+
+            # Tour Operator statistics
+            'total_tour_operators': TourOperator.objects.count(),
+
+            'pending_tour_operators': TourOperator.objects.filter(
+                status='pending'
+            ).count(),
+
+            'approved_tour_operators': TourOperator.objects.filter(
+                status='approved'
+            ).count(),
+
+            'rejected_tour_operators': TourOperator.objects.filter(
+                status='rejected'
+            ).count(),
+
+            # Food Experience statistics
+            'total_food_experiences': FoodExperience.objects.count(),
+
+            # Food Tour statistics
+            'total_food_tours': FoodTour.objects.count(),
+
+            # Booking statistics
+            'total_bookings': Booking.objects.count(),
+
+            'pending_bookings': Booking.objects.filter(
+                status='pending'
+            ).count(),
+
+            'confirmed_bookings': Booking.objects.filter(
+                status='confirmed'
+            ).count(),
+
+            'rejected_bookings': Booking.objects.filter(
+                status='rejected'
+            ).count(),
+
+            'cancelled_bookings': Booking.objects.filter(
+                status='cancelled'
+            ).count(),
+
+            # Review statistics
+            'total_reviews': Review.objects.count(),
+
+        })

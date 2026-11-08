@@ -87,6 +87,13 @@ function Navbar() {
     </button>
   );
 
+  // Change password link
+  const renderChangePassword = () => (
+    <Link to="/change-password" onClick={closeMenu}>
+      Change Password
+    </Link>
+  );
+
   // Forgot password link
   const renderForgotPassword = () => (
     <Link to="/forgot-password" onClick={closeMenu}>
@@ -205,12 +212,11 @@ function Navbar() {
                     >
                       Manage Reviews
                     </Link>
+<div className="taste-profile-divider"></div>
 
-                    <div className="taste-profile-divider"></div>
+{renderLogout()}
 
-                    {renderLogout()}
-
-                    {renderForgotPassword()}
+{renderChangePassword()}
                   </>
                 )}
 
@@ -252,11 +258,11 @@ function Navbar() {
                       Manage Reviews
                     </Link>
 
-                    <div className="taste-profile-divider"></div>
+<div className="taste-profile-divider"></div>
 
-                    {renderLogout()}
+{renderLogout()}
 
-                    {renderForgotPassword()}
+{renderChangePassword()}
                   </>
                 )}
 
@@ -305,11 +311,11 @@ function Navbar() {
                       My Reviews
                     </Link>
 
-                    <div className="taste-profile-divider"></div>
+<div className="taste-profile-divider"></div>
 
-                    {renderLogout()}
+{renderLogout()}
 
-                    {renderForgotPassword()}
+{renderChangePassword()}
                   </>
                 )}
 
@@ -323,11 +329,11 @@ function Navbar() {
                       Admin Dashboard
                     </Link>
 
-                    <div className="taste-profile-divider"></div>
+<div className="taste-profile-divider"></div>
 
-                    {renderLogout()}
+{renderLogout()}
 
-                    {renderForgotPassword()}
+{renderChangePassword()}
                   </>
                 )}
 

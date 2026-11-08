@@ -100,6 +100,9 @@ AUTH_PASSWORD_VALIDATORS = [
     },
     {
         'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'OPTIONS': {
+            'min_length': 12,
+        },
     },
     {
         'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
@@ -145,3 +148,15 @@ CORS_ALLOWED_ORIGINS = [
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+# ==========================================
+# TASTELOCAL PASSWORD RESET EMAIL SETTINGS
+# ==========================================
+
+# For local development: display emails in the Django terminal.
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+DEFAULT_FROM_EMAIL = 'TasteLocal <noreply@tastelocal.local>'
+
+# React frontend address used to generate password-reset links.
+FRONTEND_URL = 'http://localhost:5173'

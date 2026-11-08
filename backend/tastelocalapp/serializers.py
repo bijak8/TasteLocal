@@ -1,4 +1,6 @@
 from django.contrib.auth.models import User, Group
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError as DjangoValidationError
 from rest_framework import serializers
 
 from .models import (
@@ -16,7 +18,27 @@ from .models import (
 )
 
 
+def validate_registration_password(password, username, email):
+    user = User(
+        username=username,
+        email=email,
+    )
+
+    try:
+        validate_password(password, user=user)
+    except DjangoValidationError as error:
+        raise serializers.ValidationError({
+            'password': error.messages
+        })
+
+
 class TouristRegistrationSerializer(serializers.ModelSerializer):
+
+    phone = serializers.CharField(
+        write_only=True,
+        required=True,
+        max_length=30
+    )
 
     password = serializers.CharField(
         write_only=True,
@@ -26,7 +48,7 @@ class TouristRegistrationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['username', 'email', 'password']
+        fields = ['username', 'email', 'phone', 'password']
 
     def validate_email(self, value):
         if User.objects.filter(email__iexact=value).exists():
@@ -35,7 +57,16 @@ class TouristRegistrationSerializer(serializers.ModelSerializer):
             )
         return value
 
+    def validate(self, attrs):
+        validate_registration_password(
+            password=attrs['password'],
+            username=attrs['username'],
+            email=attrs['email'],
+        )
+        return attrs
+
     def create(self, validated_data):
+        phone = validated_data.pop('phone')
         password = validated_data.pop('password')
 
         user = User.objects.create_user(
@@ -48,6 +79,11 @@ class TouristRegistrationSerializer(serializers.ModelSerializer):
         )
 
         user.groups.add(tourist_group)
+
+        TouristProfile.objects.create(
+            user=user,
+            phone=phone
+        )
 
         return user
 
@@ -134,6 +170,7 @@ class TouristProfileSerializer(serializers.ModelSerializer):
 class VendorRegistrationSerializer(serializers.ModelSerializer):
 
     username = serializers.CharField(write_only=True)
+    area = serializers.CharField(required=True, allow_blank=False)
 
     password = serializers.CharField(
         write_only=True,
@@ -160,12 +197,27 @@ class VendorRegistrationSerializer(serializers.ModelSerializer):
             'social_media',
         ]
 
+        extra_kwargs = {
+            'description': {
+                'required': False,
+                'allow_blank': True,
+            },
+        }
+
     def validate_email(self, value):
         if User.objects.filter(email__iexact=value).exists():
             raise serializers.ValidationError(
                 "This email address is already registered."
             )
         return value
+
+    def validate(self, attrs):
+        validate_registration_password(
+            password=attrs['password'],
+            username=attrs['username'],
+            email=attrs['email'],
+        )
+        return attrs
 
     def create(self, validated_data):
         username = validated_data.pop('username')
@@ -215,12 +267,27 @@ class TourOperatorRegistrationSerializer(serializers.ModelSerializer):
             'social_media'
         ]
 
+        extra_kwargs = {
+            'description': {
+                'required': False,
+                'allow_blank': True,
+            },
+        }
+
     def validate_email(self, value):
         if User.objects.filter(email__iexact=value).exists():
             raise serializers.ValidationError(
                 "This email address is already registered."
             )
         return value
+
+    def validate(self, attrs):
+        validate_registration_password(
+            password=attrs['password'],
+            username=attrs['username'],
+            email=attrs['email'],
+        )
+        return attrs
 
     def create(self, validated_data):
         username = validated_data.pop('username')
@@ -780,4 +847,3 @@ class FavouriteSerializer(serializers.ModelSerializer):
             )
 
         return attrs
-

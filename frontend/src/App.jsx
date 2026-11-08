@@ -14,6 +14,9 @@ import FoodTourDetails from './pages/FoodTourDetails';
 // Authentication
 import Register from './pages/Register';
 import Login from './pages/Login';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
+import ChangePassword from './pages/ChangePassword';
 
 // Booking pages
 import Booking from './pages/Booking';
@@ -62,37 +65,78 @@ function App() {
 
           {/* Public pages */}
           <Route path="/" element={<Home />} />
-          <Route path="/food-experiences" element={<FoodExperiences />} />
-          <Route path="/food-experiences/:id" element={<FoodExperienceDetails />} />
+          <Route
+            path="/food-experiences"
+            element={<FoodExperiences />}
+          />
+          <Route
+            path="/food-experiences/:id"
+            element={<FoodExperienceDetails />}
+          />
           <Route path="/food-tours" element={<FoodTours />} />
-          <Route path="/food-tours/:id" element={<FoodTourDetails />} />
+          <Route
+            path="/food-tours/:id"
+            element={<FoodTourDetails />}
+          />
 
           {/* Authentication */}
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
 
+          {/* Forgot and Reset Password */}
+          <Route
+            path="/forgot-password"
+            element={<ForgotPassword />}
+          />
+          <Route
+            path="/reset-password/:uidb64/:token"
+            element={<ResetPassword />}
+          />
+          <Route
+            path="/change-password"
+            element={<ChangePassword />}
+          />
+
           {/* Booking pages */}
           <Route path="/booking" element={<Booking />} />
           <Route path="/my-bookings" element={<MyBookings />} />
-          <Route path="/provider/bookings" element={<ProviderBookings />} />
+          <Route
+            path="/provider/bookings"
+            element={<ProviderBookings />}
+          />
 
           {/* Provider Reviews */}
           <Route
-          path="/provider/reviews"
-          element={<ProviderReviews />}
+            path="/provider/reviews"
+            element={<ProviderReviews />}
           />
 
           {/* Itinerary and favourites */}
-          <Route path="/my-itineraries" element={<MyItineraries />} />
-          <Route path="/my-favourites" element={<MyFavourites />} />
+          <Route
+            path="/my-itineraries"
+            element={<MyItineraries />}
+          />
+          <Route
+            path="/my-favourites"
+            element={<MyFavourites />}
+          />
 
           {/* Tourist pages */}
-          <Route path="/tourist/dashboard" element={<TouristDashboard />} />
-          <Route path="/tourist/profile" element={<TouristProfile />} />
+          <Route
+            path="/tourist/dashboard"
+            element={<TouristDashboard />}
+          />
+          <Route
+            path="/tourist/profile"
+            element={<TouristProfile />}
+          />
           <Route path="/my-reviews" element={<MyReviews />} />
 
           {/* Vendor pages */}
-          <Route path="/vendor/dashboard" element={<VendorDashboard />} />
+          <Route
+            path="/vendor/dashboard"
+            element={<VendorDashboard />}
+          />
           <Route
             path="/vendor/profile"
             element={<VendorProfile />}

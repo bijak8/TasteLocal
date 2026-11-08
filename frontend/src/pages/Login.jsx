@@ -76,6 +76,7 @@ function Login() {
     <section className="login-page">
       <div className="login-container">
         <div className="login-card">
+
           <div className="login-heading">
             <span className="login-eyebrow">
               WELCOME BACK TO TASTELOCAL
@@ -96,8 +97,11 @@ function Login() {
           )}
 
           <form onSubmit={handleSubmit} className="login-form">
+
             <div className="login-field">
-              <label htmlFor="login-username">Username</label>
+              <label htmlFor="login-username">
+                Username
+              </label>
 
               <input
                 id="login-username"
@@ -112,7 +116,9 @@ function Login() {
             </div>
 
             <div className="login-field">
-              <label htmlFor="login-password">Password</label>
+              <label htmlFor="login-password">
+                Password
+              </label>
 
               <input
                 id="login-password"
@@ -126,6 +132,13 @@ function Login() {
               />
             </div>
 
+            {/* Forgot Password Link */}
+            <div className="login-forgot-password">
+              <Link to="/forgot-password">
+                Forgot password?
+              </Link>
+            </div>
+
             <button
               type="submit"
               className="login-submit-btn"
@@ -133,12 +146,14 @@ function Login() {
             >
               {loading ? 'Logging in...' : 'Log In'}
             </button>
+
           </form>
 
           <div className="login-register-prompt">
             Don't have an account?{' '}
             <Link to="/register">Create an account</Link>
           </div>
+
         </div>
 
         <p className="login-footer-note">
