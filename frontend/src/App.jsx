@@ -46,11 +46,17 @@ import TourOperatorTourStops from './pages/TourOperatorTourStops';
 import TouristProfile from './pages/TouristProfile';
 import MyReviews from './pages/MyReviews';
 
+// Vendor and Tour Operator profile pages
+import VendorProfile from './pages/VendorProfile';
+import TourOperatorProfile from './pages/TourOperatorProfile';
+
+// Reviews for Providers
+import ProviderReviews from './pages/ProviderReviews';
+
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-
         {/* Pages using shared Navbar and Footer */}
         <Route element={<MainLayout />}>
 
@@ -70,6 +76,12 @@ function App() {
           <Route path="/my-bookings" element={<MyBookings />} />
           <Route path="/provider/bookings" element={<ProviderBookings />} />
 
+          {/* Provider Reviews */}
+          <Route
+          path="/provider/reviews"
+          element={<ProviderReviews />}
+          />
+
           {/* Itinerary and favourites */}
           <Route path="/my-itineraries" element={<MyItineraries />} />
           <Route path="/my-favourites" element={<MyFavourites />} />
@@ -80,9 +92,10 @@ function App() {
           <Route path="/my-reviews" element={<MyReviews />} />
 
           {/* Vendor pages */}
+          <Route path="/vendor/dashboard" element={<VendorDashboard />} />
           <Route
-            path="/vendor/dashboard"
-            element={<VendorDashboard />}
+            path="/vendor/profile"
+            element={<VendorProfile />}
           />
           <Route
             path="/vendor/create-experience"
@@ -97,6 +110,10 @@ function App() {
           <Route
             path="/operator/dashboard"
             element={<TourOperatorDashboard />}
+          />
+          <Route
+            path="/operator/profile"
+            element={<TourOperatorProfile />}
           />
           <Route
             path="/operator/create-tour"
@@ -118,9 +135,8 @@ function App() {
             path="/operator/tour-stops/:id/edit"
             element={<EditTourStop />}
           />
+
         </Route>
-
-
       </Routes>
     </BrowserRouter>
   );

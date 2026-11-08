@@ -514,6 +514,22 @@ function FoodTourDetails() {
                           ? new Date(review.created_at).toLocaleDateString()
                           : ''}
                       </small>
+                      {review.provider_response && (
+  <div className="public-review-provider-response">
+    <strong>Tour Operator's Response</strong>
+
+    <p>{review.provider_response}</p>
+
+    {review.provider_responded_at && (
+      <small>
+        Responded on{' '}
+        {new Date(
+          review.provider_responded_at
+        ).toLocaleDateString()}
+      </small>
+    )}
+  </div>
+)}
                     </article>
                   ))}
 

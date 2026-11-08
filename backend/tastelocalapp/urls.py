@@ -22,6 +22,8 @@ from .views import (
     ReviewListView,
     TouristReviewListView,
     TouristReviewDetailView,
+    ProviderReviewListView,
+    ProviderReviewResponseView,
     ItineraryListCreateView,
     ItineraryDetailView,
     ItineraryItemCreateView,
@@ -36,6 +38,9 @@ from .views import (
     TourOperatorFoodTourDetailView,
     TourOperatorTourStopListView,
     TourOperatorTourStopDetailView,
+    CurrentUserView,
+    VendorProfileView,
+    TourOperatorProfileView,
 )
 
 urlpatterns = [
@@ -54,6 +59,12 @@ urlpatterns = [
         'register/tour-operator/',
         TourOperatorRegistrationView.as_view(),
         name='tour-operator-register'
+    ),
+
+    path(
+        'me/',
+        CurrentUserView.as_view(),
+        name='current-user'
     ),
 
     #Tourist Profile
@@ -141,6 +152,16 @@ urlpatterns = [
         'reviews/', 
         ReviewListView.as_view(), 
         name='review-list'
+    ),
+    path(
+        'provider/reviews/',
+        ProviderReviewListView.as_view(),
+        name='provider-review-list'
+    ),
+    path(
+        'provider/reviews/<int:pk>/respond/',
+        ProviderReviewResponseView.as_view(),
+        name='provider-review-response'
     ),
 
     #Itineraries
@@ -236,5 +257,17 @@ urlpatterns = [
         'my-reviews/<int:pk>/',
         TouristReviewDetailView.as_view(),
         name='tourist-review-detail'
+    ),
+    #Vendor Profile
+    path(
+        'vendor/profile/',
+        VendorProfileView.as_view(),
+        name='vendor-profile'
+    ),
+    #Tour Operator Profile
+    path(
+        'operator/profile/',
+        TourOperatorProfileView.as_view(),
+        name='operator-profile'
     ),
 ]

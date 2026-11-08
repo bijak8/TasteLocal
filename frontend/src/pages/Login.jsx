@@ -27,17 +27,46 @@ function Login() {
     setLoading(true);
 
     try {
+      // Step 1: Authenticate user
       const response = await API.post('token/', formData);
 
       localStorage.setItem('accessToken', response.data.access);
       localStorage.setItem('refreshToken', response.data.refresh);
       localStorage.setItem('username', formData.username);
 
+      // Step 2: Retrieve user role and profile
+      const userResponse = await API.get('me/');
+
+      localStorage.setItem(
+        'userRole',
+        userResponse.data.role
+      );
+
+      localStorage.setItem(
+        'userProfile',
+        JSON.stringify(userResponse.data)
+      );
+
+      // Notify Navbar that authentication has changed
+      window.dispatchEvent(new Event('authChange'));
+
       alert('Login successful!');
       navigate('/');
+
     } catch (error) {
       console.error('Login error:', error);
-      setError('Invalid username or password. Please try again.');
+
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+      localStorage.removeItem('username');
+      localStorage.removeItem('userRole');
+      localStorage.removeItem('userProfile');
+
+      setError(
+        error.response?.data?.detail ||
+        'Login failed. Please try again.'
+      );
+
     } finally {
       setLoading(false);
     }
@@ -48,7 +77,9 @@ function Login() {
       <div className="login-container">
         <div className="login-card">
           <div className="login-heading">
-            <span className="login-eyebrow">WELCOME BACK TO TASTELOCAL</span>
+            <span className="login-eyebrow">
+              WELCOME BACK TO TASTELOCAL
+            </span>
 
             <h1>Welcome Back</h1>
 
@@ -67,6 +98,7 @@ function Login() {
           <form onSubmit={handleSubmit} className="login-form">
             <div className="login-field">
               <label htmlFor="login-username">Username</label>
+
               <input
                 id="login-username"
                 type="text"
@@ -81,6 +113,7 @@ function Login() {
 
             <div className="login-field">
               <label htmlFor="login-password">Password</label>
+
               <input
                 id="login-password"
                 type="password"

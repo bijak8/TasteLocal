@@ -17,7 +17,7 @@ from .models import (
     Review,
     Itinerary,
     ItineraryItem,
-    Favourite
+    Favourite,
 )
 
 from .serializers import (
@@ -35,6 +35,9 @@ from .serializers import (
     ItineraryItemSerializer,
     FavouriteSerializer,
     ReviewUpdateSerializer,
+    VendorProfileSerializer,
+    TourOperatorProfileSerializer,
+    ProviderReviewSerializer,
 )
 
 
@@ -72,6 +75,74 @@ class TouristProfileView(generics.RetrieveUpdateAPIView):
 
 
 # ==========================================
+# CURRENT LOGGED-IN USER
+# ==========================================
+
+class CurrentUserView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+
+        # Determine the user's role
+        if user.is_superuser or user.is_staff:
+            role = 'Admin'
+
+        elif user.groups.filter(name='Tourist').exists():
+            role = 'Tourist'
+
+        elif user.groups.filter(name='Vendor').exists():
+            role = 'Vendor'
+
+        elif user.groups.filter(name='Tour Operator').exists():
+            role = 'Tour Operator'
+
+        else:
+            role = 'User'
+
+        # Basic user information
+        data = {
+            'id': user.id,
+            'username': user.username,
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+            'email': user.email,
+            'role': role,
+            'profile_image': None,
+            'business_name': None,
+            'account_status': None,
+        }
+
+        # Tourist profile information
+        if role == 'Tourist':
+            profile = TouristProfile.objects.filter(
+                user=user
+            ).first()
+
+            if profile and profile.profile_image:
+                data['profile_image'] = request.build_absolute_uri(
+                    profile.profile_image.url
+                )
+
+        # Vendor information
+        elif role == 'Vendor':
+            vendor = user.vendors.first()
+
+            if vendor:
+                data['business_name'] = vendor.business_name
+                data['account_status'] = vendor.status
+
+        # Tour Operator information
+        elif role == 'Tour Operator':
+            operator = user.tour_operators.first()
+
+            if operator:
+                data['business_name'] = operator.business_name
+                data['account_status'] = operator.status
+
+        return Response(data)
+
+# ==========================================
 # VENDOR REGISTRATION
 # ==========================================
 
@@ -87,6 +158,55 @@ class VendorRegistrationView(generics.CreateAPIView):
 class TourOperatorRegistrationView(generics.CreateAPIView):
     serializer_class = TourOperatorRegistrationSerializer
     permission_classes = [AllowAny]
+
+# ==========================================
+# VENDOR PROFILE
+# ==========================================
+
+class VendorProfileView(generics.RetrieveUpdateAPIView):
+    serializer_class = VendorProfileSerializer
+    permission_classes = [IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
+
+    def get_object(self):
+        user = self.request.user
+
+        if not user.groups.filter(name='Vendor').exists():
+            raise PermissionDenied(
+                "Only registered vendors can access this profile."
+            )
+
+        vendor = user.vendors.first()
+
+        if not vendor:
+            raise NotFound("Vendor profile not found.")
+
+        return vendor
+
+
+# ==========================================
+# TOUR OPERATOR PROFILE
+# ==========================================
+
+class TourOperatorProfileView(generics.RetrieveUpdateAPIView):
+    serializer_class = TourOperatorProfileSerializer
+    permission_classes = [IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
+
+    def get_object(self):
+        user = self.request.user
+
+        if not user.groups.filter(name='Tour Operator').exists():
+            raise PermissionDenied(
+                "Only registered tour operators can access this profile."
+            )
+
+        operator = user.tour_operators.first()
+
+        if not operator:
+            raise NotFound("Tour Operator profile not found.")
+
+        return operator
 
 
 # ==========================================
@@ -520,6 +640,102 @@ class TouristReviewDetailView(
             'food_tour'
         )
 
+# ==========================================
+# PROVIDER REVIEW LIST
+# ==========================================
+
+class ProviderReviewListView(generics.ListAPIView):
+    serializer_class = ProviderReviewSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+
+        # Vendor: reviews for their own food experiences
+        if user.groups.filter(name='Vendor').exists():
+            vendor = user.vendors.first()
+
+            if not vendor:
+                raise PermissionDenied(
+                    "You do not have a Vendor profile."
+                )
+
+            return Review.objects.filter(
+                food_experience__vendor=vendor
+            ).select_related(
+                'tourist',
+                'food_experience',
+                'food_tour'
+            ).order_by('-created_at')
+
+        # Tour Operator: reviews for their own food tours
+        if user.groups.filter(name='Tour Operator').exists():
+            operator = user.tour_operators.first()
+
+            if not operator:
+                raise PermissionDenied(
+                    "You do not have a Tour Operator profile."
+                )
+
+            return Review.objects.filter(
+                food_tour__tour_operator=operator
+            ).select_related(
+                'tourist',
+                'food_experience',
+                'food_tour'
+            ).order_by('-created_at')
+
+        raise PermissionDenied(
+            "Only Vendors and Tour Operators can access provider reviews."
+        )
+
+
+# ==========================================
+# PROVIDER REVIEW RESPONSE
+# ==========================================
+
+class ProviderReviewResponseView(generics.UpdateAPIView):
+    serializer_class = ProviderReviewSerializer
+    permission_classes = [IsAuthenticated]
+    http_method_names = ['patch', 'options', 'head']
+
+    def get_queryset(self):
+        user = self.request.user
+
+        # Vendor: can respond only to reviews for their own experiences
+        if user.groups.filter(name='Vendor').exists():
+            vendor = user.vendors.first()
+
+            if not vendor:
+                raise PermissionDenied(
+                    "You do not have a Vendor profile."
+                )
+
+            return Review.objects.filter(
+                food_experience__vendor=vendor
+            )
+
+        # Tour Operator: can respond only to reviews for their own tours
+        if user.groups.filter(name='Tour Operator').exists():
+            operator = user.tour_operators.first()
+
+            if not operator:
+                raise PermissionDenied(
+                    "You do not have a Tour Operator profile."
+                )
+
+            return Review.objects.filter(
+                food_tour__tour_operator=operator
+            )
+
+        raise PermissionDenied(
+            "Only Vendors and Tour Operators can respond to reviews."
+        )
+
+    def perform_update(self, serializer):
+        serializer.save(
+            provider_responded_at=timezone.now()
+        )
 
 # ==========================================
 # ITINERARY LIST AND CREATE

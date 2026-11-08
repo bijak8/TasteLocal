@@ -384,6 +384,14 @@ class Review(models.Model):
     comment = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    provider_response = models.TextField(blank=True, default='')
+
+    provider_responded_at = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+
+
     def clean(self):
         from django.core.exceptions import ValidationError
 

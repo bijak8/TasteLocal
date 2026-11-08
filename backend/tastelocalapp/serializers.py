@@ -245,6 +245,68 @@ class TourOperatorRegistrationSerializer(serializers.ModelSerializer):
 
         return tour_operator
 
+# ==========================================
+# VENDOR PROFILE SERIALIZER
+# ==========================================
+
+class VendorProfileSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Vendor
+        fields = [
+            'id',
+            'business_name',
+            'owner_name',
+            'email',
+            'phone',
+            'logo',
+            'description',
+            'address',
+            'city',
+            'area',
+            'latitude',
+            'longitude',
+            'website',
+            'social_media',
+            'status',
+            'created_at',
+        ]
+
+        read_only_fields = [
+            'id',
+            'status',
+            'created_at',
+        ]
+
+
+# ==========================================
+# TOUR OPERATOR PROFILE SERIALIZER
+# ==========================================
+
+class TourOperatorProfileSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = TourOperator
+        fields = [
+            'id',
+            'business_name',
+            'owner_name',
+            'email',
+            'phone',
+            'logo',
+            'description',
+            'website',
+            'social_media',
+            'status',
+            'created_at',
+        ]
+
+        read_only_fields = [
+            'id',
+            'status',
+            'created_at',
+        ]
+
 
 class FoodExperienceSerializer(serializers.ModelSerializer):
 
@@ -435,12 +497,16 @@ class ReviewSerializer(serializers.ModelSerializer):
             'rating',
             'comment',
             'created_at',
+            'provider_response',
+            'provider_responded_at',
         ]
 
         read_only_fields = [
             'id',
             'tourist',
             'created_at',
+            'provider_response',
+            'provider_responded_at',
         ]
 
     def validate(self, data):
@@ -497,6 +563,58 @@ class ReviewSerializer(serializers.ModelSerializer):
         validated_data['tourist'] = self.context['request'].user
         return Review.objects.create(**validated_data)
 
+
+# ==========================================
+# PROVIDER REVIEW SERIALIZER
+# ==========================================
+
+class ProviderReviewSerializer(serializers.ModelSerializer):
+
+    tourist_username = serializers.CharField(
+        source='tourist.username',
+        read_only=True
+    )
+
+    food_experience_title = serializers.CharField(
+        source='food_experience.title',
+        read_only=True,
+        allow_null=True
+    )
+
+    food_tour_title = serializers.CharField(
+        source='food_tour.title',
+        read_only=True,
+        allow_null=True
+    )
+
+    class Meta:
+        model = Review
+        fields = [
+            'id',
+            'tourist_username',
+            'food_experience',
+            'food_experience_title',
+            'food_tour',
+            'food_tour_title',
+            'rating',
+            'comment',
+            'created_at',
+            'provider_response',
+            'provider_responded_at',
+        ]
+
+        read_only_fields = [
+            'id',
+            'tourist_username',
+            'food_experience',
+            'food_experience_title',
+            'food_tour',
+            'food_tour_title',
+            'rating',
+            'comment',
+            'created_at',
+            'provider_responded_at',
+        ]
 
 # ==========================================
 # TOURIST REVIEW UPDATE SERIALIZER

@@ -54,6 +54,11 @@
   color: var(--color-golden-yellow);
 }
 
+.taste-navbar .taste-nav-links a.taste-nav-active {
+  color: #F5C842 !important;
+  font-weight: 600;
+}
+
 .taste-nav-links .taste-signup-btn {
   background-color: var(--color-golden-yellow);
   color: var(--color-deep-purple);
@@ -8318,3 +8323,875 @@
   }
 }
 
+
+/* ==========================================
+   NAVBAR DASHBOARD DROPDOWN
+========================================== */
+
+.taste-nav-dropdown {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.taste-nav-dropdown-header {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.taste-dropdown-toggle {
+  border: none;
+  background: transparent;
+  color: #FFF9E8;
+  cursor: pointer;
+  padding: 8px 5px;
+  font-size: 16px;
+}
+
+.taste-dropdown-arrow {
+  display: inline-block;
+  transition: transform 0.2s ease;
+}
+
+.taste-dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  min-width: 190px;
+  background: #45246B;
+  border-radius: 8px;
+  padding: 8px 0;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+}
+
+.taste-dropdown-menu a {
+  display: block;
+  padding: 10px 16px;
+  color: #FFF9E8;
+  text-decoration: none;
+}
+
+.taste-dropdown-menu a:hover {
+  background: #7046A3;
+  color: #F5C842;
+}
+
+.taste-dropdown-toggle:focus-visible,
+.taste-nav-dropdown a:focus-visible {
+  outline: 2px solid #F5C842;
+  outline-offset: 3px;
+}
+
+.taste-logout-btn {
+  border: none;
+  cursor: pointer;
+  font: inherit;
+}
+
+/* ==========================================
+   PROFILE ICON AND DROPDOWN
+========================================== */
+
+.taste-profile-dropdown {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.taste-profile-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: transparent;
+  border: none;
+  color: #F5C842;
+  cursor: pointer;
+  font-size: 25px;
+  padding: 5px;
+  transition: color 0.25s ease;
+}
+
+.taste-profile-link:hover {
+  color: #FFF9E8;
+}
+
+.taste-profile-arrow {
+  font-size: 13px;
+}
+
+.taste-profile-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  min-width: 210px;
+  background: #45246B;
+  border-radius: 8px;
+  padding: 8px 0;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  z-index: 1001;
+  display: flex;
+  flex-direction: column;
+}
+
+.taste-profile-menu a,
+.taste-profile-menu a:visited,
+.taste-profile-menu .taste-profile-menu-button {
+  display: block;
+  width: 100%;
+  padding: 11px 16px;
+  color: #FFF9E8;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  text-decoration: none;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  appearance: none;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.taste-profile-menu a:hover,
+.taste-profile-menu .taste-profile-menu-button:hover {
+  background: #7046A3;
+  color: #F5C842;
+}
+
+.taste-profile-menu .taste-profile-menu-button:focus,
+.taste-profile-menu .taste-profile-menu-button:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+.taste-profile-divider {
+  border-top: 1px solid #BCA6D8;
+  margin: 6px 12px;
+}
+
+@media (max-width: 992px) {
+  .taste-profile-dropdown {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .taste-profile-link {
+    padding: 12px 0;
+  }
+
+  .taste-profile-menu {
+    position: static;
+    width: 100%;
+    min-width: 0;
+    margin: 0 0 10px;
+    box-shadow: none;
+    border: 1px solid rgba(188, 166, 216, 0.25);
+  }
+
+  .taste-profile-menu a,
+  .taste-profile-menu .taste-profile-menu-button {
+    padding: 12px 16px;
+  }
+}
+
+
+/* =========================================
+   BUSINESS PROFILE PAGE
+   Shared by Vendor and Tour Operator profiles
+========================================= */
+
+.business-profile-card {
+  padding: 32px;
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-medium);
+  box-shadow: var(--shadow-card);
+}
+
+.business-profile-card h5 {
+  color: var(--color-deep-purple);
+  font-family: var(--font-heading);
+  font-size: 21px;
+  font-weight: 700;
+  margin-bottom: 22px;
+}
+
+.business-profile-card .form-label {
+  display: block;
+  color: var(--color-deep-purple);
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.business-profile-card .form-control {
+  width: 100%;
+  min-height: 46px;
+  padding: 11px 14px;
+  background: #FFFFFF;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-small);
+  color: var(--color-deep-purple);
+  font-size: 14px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.business-profile-card textarea.form-control {
+  min-height: 120px;
+  resize: vertical;
+}
+
+.business-profile-card .form-control:focus {
+  border-color: var(--color-royal-purple);
+  box-shadow: 0 0 0 3px rgba(112, 70, 163, 0.12);
+  outline: none;
+}
+
+.business-profile-card input[type="file"] {
+  max-width: 450px;
+  background: var(--color-warm-ivory);
+}
+
+.business-profile-card img {
+  display: block;
+  width: 150px;
+  height: 150px;
+  object-fit: contain;
+  padding: 12px;
+  margin-bottom: 15px;
+  background: var(--color-warm-ivory);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-medium);
+}
+
+.business-profile-logo-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 150px;
+  height: 150px;
+  margin-bottom: 15px;
+  padding: 12px;
+  background: var(--color-warm-ivory);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-medium);
+  color: var(--color-royal-purple);
+  font-size: 13px;
+  text-align: center;
+}
+
+.business-profile-card small {
+  display: block;
+  margin-top: 7px;
+  color: var(--color-muted);
+  font-size: 12px;
+}
+
+.business-profile-card hr {
+  margin: 30px 0;
+  border-color: var(--color-border);
+  opacity: 1;
+}
+
+.business-profile-card button[type="submit"] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 43px;
+  padding: 11px 22px;
+  background: var(--color-golden-yellow);
+  color: var(--color-deep-purple);
+  border: 1px solid var(--color-golden-yellow);
+  border-radius: var(--radius-small);
+  font-size: 13px;
+  font-weight: 700;
+  transition: all 0.2s ease;
+}
+
+.business-profile-card button[type="submit"]:hover:not(:disabled) {
+  background: #EBC02F;
+  border-color: #EBC02F;
+  transform: translateY(-1px);
+}
+
+.business-profile-card button[type="submit"]:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.business-profile-card button.btn-outline-secondary {
+  min-height: 43px;
+  padding: 11px 22px;
+  background: transparent;
+  border: 1px solid var(--color-royal-purple);
+  border-radius: var(--radius-small);
+  color: var(--color-royal-purple);
+  font-size: 13px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.business-profile-card button.btn-outline-secondary:hover {
+  background: var(--color-royal-purple);
+  border-color: var(--color-royal-purple);
+  color: #FFFFFF;
+}
+
+.business-profile-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.business-profile-card .badge {
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 6px;
+}
+
+/* Business account status panel */
+
+.business-profile-status-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 35px;
+  padding: 28px 32px;
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-left: 5px solid var(--color-royal-purple);
+  border-radius: var(--radius-large);
+  box-shadow: var(--shadow-card);
+}
+
+.business-profile-status-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.business-profile-status-content h2 {
+  margin: 0 0 10px;
+  color: var(--color-deep-purple);
+  font-family: var(--font-heading);
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.business-profile-status-content p {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.business-profile-status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  min-width: 115px;
+  padding: 11px 18px;
+  border-radius: 30px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.business-profile-status-badge.status-approved {
+  background: #E5F5EB;
+  color: #27834A;
+}
+
+.business-profile-status-badge.status-pending {
+  background: #FFF3CD;
+  color: #856404;
+}
+
+.business-profile-status-badge.status-rejected {
+  background: #FCE8E8;
+  color: #C0392B;
+}
+
+/* Responsive business profile layout */
+
+@media (max-width: 768px) {
+  .business-profile-card {
+    padding: 24px 18px;
+  }
+
+  .business-profile-status-card {
+    padding: 24px;
+  }
+
+  .business-profile-status-content h2 {
+    font-size: 22px;
+  }
+}
+
+@media (max-width: 600px) {
+  .business-profile-card {
+    padding: 20px 15px;
+  }
+
+  .business-profile-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .business-profile-actions button {
+    width: 100%;
+  }
+
+  .business-profile-status-card {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 18px;
+    margin-bottom: 25px;
+    padding: 22px;
+  }
+
+  .business-profile-status-badge {
+    align-self: flex-start;
+  }
+}
+
+/* =========================================
+   PROVIDER REVIEWS
+========================================= */
+
+.provider-reviews-page {
+  min-height: 100vh;
+  padding: 55px 20px 80px;
+  background: var(--color-warm-ivory);
+}
+
+.provider-reviews-container {
+  max-width: 1050px;
+  margin: 0 auto;
+}
+
+.provider-reviews-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 25px;
+  margin-bottom: 35px;
+}
+
+.provider-reviews-eyebrow,
+.provider-review-section-label,
+.provider-review-item-label {
+  display: block;
+  color: var(--color-royal-purple);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.6px;
+  margin-bottom: 9px;
+}
+
+.provider-reviews-header h1 {
+  color: var(--color-deep-purple);
+  font-family: var(--font-heading);
+  font-size: 36px;
+  margin-bottom: 10px;
+}
+
+.provider-reviews-header p {
+  color: var(--color-muted);
+  margin: 0;
+  font-size: 14px;
+}
+
+.provider-reviews-total {
+  min-width: 90px;
+  min-height: 90px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-white);
+  border: 1px solid var(--color-lavender);
+  border-radius: 16px;
+}
+
+.provider-reviews-total span {
+  color: var(--color-deep-purple);
+  font-size: 30px;
+  font-weight: 700;
+}
+
+.provider-reviews-total small {
+  color: var(--color-muted);
+  font-size: 12px;
+}
+
+/* Review Cards */
+
+.provider-reviews-list {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.provider-review-card {
+  padding: 28px;
+  background: var(--color-white);
+  border: 1px solid #EAE2F1;
+  border-radius: var(--radius-medium);
+  box-shadow: 0 4px 18px rgba(69, 36, 107, 0.05);
+}
+
+.provider-review-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #EEE9F2;
+}
+
+.provider-review-item-label {
+  margin-bottom: 7px;
+}
+
+.provider-review-top h2 {
+  color: var(--color-deep-purple);
+  font-family: var(--font-heading);
+  font-size: 21px;
+  margin: 0;
+}
+
+.provider-review-rating {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.provider-review-stars {
+  color: #E5AD19;
+  font-size: 19px;
+  letter-spacing: 2px;
+}
+
+.provider-review-empty-stars {
+  color: #D9D2DF;
+}
+
+.provider-review-rating strong {
+  color: var(--color-deep-purple);
+  font-size: 13px;
+}
+
+/* Tourist Information */
+
+.provider-review-tourist {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 0;
+}
+
+.provider-review-avatar {
+  width: 43px;
+  height: 43px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: #F1EAF8;
+  color: var(--color-deep-purple);
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.provider-review-tourist div:last-child {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.provider-review-tourist strong {
+  color: var(--color-deep-purple);
+  font-size: 14px;
+}
+
+.provider-review-tourist span {
+  color: var(--color-muted);
+  font-size: 12px;
+}
+
+/* Tourist Comment */
+
+.provider-review-comment {
+  padding: 18px 20px;
+  margin-bottom: 22px;
+  background: #FBF9FD;
+  border-radius: 10px;
+}
+
+.provider-review-comment p {
+  color: var(--color-text);
+  font-size: 14px;
+  line-height: 1.7;
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* Provider Response */
+
+.provider-review-response {
+  padding-top: 20px;
+  border-top: 1px solid #EEE9F2;
+}
+
+.provider-review-existing-response {
+  padding: 14px 16px;
+  margin-bottom: 15px;
+  background: #F6F1FA;
+  border-left: 3px solid var(--color-royal-purple);
+  border-radius: 6px;
+}
+
+.provider-review-existing-response p {
+  color: var(--color-deep-purple);
+  font-size: 13px;
+  line-height: 1.7;
+  margin: 0 0 8px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.provider-review-existing-response small {
+  color: var(--color-muted);
+  font-size: 11px;
+}
+
+.provider-review-response textarea {
+  width: 100%;
+  min-height: 110px;
+  padding: 14px;
+  border: 1px solid #DED3E9;
+  border-radius: 8px;
+  background: #FFFFFF;
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: 13px;
+  line-height: 1.6;
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.provider-review-response textarea:focus {
+  border-color: var(--color-royal-purple);
+  box-shadow: 0 0 0 3px rgba(112, 70, 163, 0.1);
+}
+
+.provider-review-response-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+  margin-top: 12px;
+}
+
+.provider-review-response-footer span {
+  color: var(--color-muted);
+  font-size: 11px;
+}
+
+.provider-review-submit-btn,
+.provider-reviews-retry-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  padding: 10px 18px;
+  border: 1px solid var(--color-golden-yellow);
+  border-radius: var(--radius-small);
+  background: var(--color-golden-yellow);
+  color: var(--color-deep-purple);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.provider-review-submit-btn:hover,
+.provider-reviews-retry-btn:hover {
+  background: var(--color-deep-purple);
+  border-color: var(--color-deep-purple);
+  color: #FFFFFF;
+}
+
+.provider-review-submit-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.provider-review-success {
+  margin-top: 12px;
+  color: #287A4B;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* Empty State */
+
+.provider-reviews-empty {
+  padding: 65px 25px;
+  text-align: center;
+  background: var(--color-white);
+  border: 1px solid #EAE2F1;
+  border-radius: var(--radius-medium);
+}
+
+.provider-reviews-empty-icon {
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 18px;
+  border-radius: 50%;
+  background: #F1EAF8;
+  color: var(--color-royal-purple);
+  font-size: 30px;
+}
+
+.provider-reviews-empty h2 {
+  color: var(--color-deep-purple);
+  font-family: var(--font-heading);
+  font-size: 23px;
+}
+
+.provider-reviews-empty p {
+  max-width: 430px;
+  margin: 0 auto;
+  color: var(--color-muted);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+/* Loading and Error */
+
+.provider-reviews-loading {
+  min-height: 400px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  color: var(--color-muted);
+}
+
+.provider-reviews-spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid var(--color-lavender);
+  border-top-color: var(--color-deep-purple);
+  border-radius: 50%;
+  animation: providerReviewsSpin 0.8s linear infinite;
+}
+
+@keyframes providerReviewsSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.provider-reviews-error {
+  padding: 22px;
+  margin-bottom: 20px;
+  background: var(--color-white);
+  border: 1px solid #F0C4C4;
+  border-radius: var(--radius-medium);
+  color: #A52A2A;
+}
+
+.provider-reviews-error p {
+  margin-bottom: 12px;
+}
+
+/* Responsive */
+
+@media (max-width: 600px) {
+  .provider-reviews-page {
+    padding: 35px 14px 55px;
+  }
+
+  .provider-reviews-header {
+    align-items: flex-start;
+  }
+
+  .provider-reviews-header h1 {
+    font-size: 29px;
+  }
+
+  .provider-reviews-total {
+    min-width: 70px;
+    min-height: 70px;
+  }
+
+  .provider-reviews-total span {
+    font-size: 24px;
+  }
+
+  .provider-review-card {
+    padding: 20px 15px;
+  }
+
+  .provider-review-top {
+    flex-direction: column;
+  }
+
+  .provider-review-rating {
+    align-items: flex-start;
+  }
+
+  .provider-review-response-footer {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .provider-review-submit-btn {
+    width: 100%;
+  }
+}
+
+.public-review-provider-response {
+  margin-top: 16px;
+  padding: 16px;
+  background: #FFF9E8;
+  border-left: 4px solid #7046A3;
+  border-radius: 6px;
+}
+
+.public-review-provider-response strong {
+  display: block;
+  color: #45246B;
+  margin-bottom: 8px;
+}
+
+.public-review-provider-response p {
+  margin-bottom: 8px;
+  color: #333;
+}
+
+.public-review-provider-response small {
+  color: #777;
+}
