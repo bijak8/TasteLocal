@@ -1,0 +1,762 @@
+
+/* =========================================
+   TASTELOCAL ADMIN DASHBOARD
+========================================= */
+
+.admin-dashboard-page {
+  min-height: 100vh;
+  background: var(--color-warm-ivory);
+  padding: 55px 20px 80px;
+}
+
+.admin-dashboard-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+
+/* =========================================
+   DASHBOARD HEADER
+========================================= */
+
+.admin-dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 25px;
+  margin-bottom: 35px;
+}
+
+.admin-dashboard-eyebrow,
+.admin-dashboard-section-label {
+  display: block;
+  color: var(--color-royal-purple);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.8px;
+  margin-bottom: 9px;
+}
+
+.admin-dashboard-header h1 {
+  color: var(--color-deep-purple);
+  font-family: var(--font-heading);
+  font-size: 34px;
+  margin-bottom: 9px;
+}
+
+.admin-dashboard-header p {
+  color: var(--color-muted);
+  margin: 0;
+}
+
+.admin-dashboard-welcome {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 17px 22px;
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-medium);
+  box-shadow: var(--shadow-card);
+}
+
+.admin-dashboard-welcome span {
+  color: var(--color-royal-purple);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+}
+
+.admin-dashboard-welcome strong {
+  color: var(--color-deep-purple);
+  font-size: 14px;
+}
+
+
+/* =========================================
+   MAIN STATISTICS
+========================================= */
+
+.admin-dashboard-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+  margin-bottom: 55px;
+}
+
+.admin-dashboard-stat-card {
+  background: var(--color-white);
+  padding: 23px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-medium);
+  box-shadow: var(--shadow-card);
+  transition: transform 0.2s ease;
+}
+
+.admin-dashboard-stat-card:hover {
+  transform: translateY(-3px);
+}
+
+.admin-dashboard-stat-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  margin-bottom: 17px;
+  border-radius: 12px;
+  background: #F1EAF8;
+  color: var(--color-royal-purple);
+  font-size: 22px;
+}
+
+.admin-dashboard-stat-card p {
+  color: var(--color-muted);
+  font-size: 13px;
+  margin: 0 0 8px;
+}
+
+.admin-dashboard-stat-card h2 {
+  color: var(--color-deep-purple);
+  font-family: var(--font-heading);
+  font-size: 30px;
+  margin: 0 0 8px;
+}
+
+.admin-dashboard-stat-card > span {
+  color: var(--color-muted);
+  font-size: 11px;
+}
+
+
+/* =========================================
+   DASHBOARD SECTIONS
+========================================= */
+
+.admin-dashboard-section {
+  margin-bottom: 45px;
+}
+
+.admin-dashboard-section-heading {
+  margin-bottom: 22px;
+}
+
+.admin-dashboard-section-heading h2 {
+  color: var(--color-deep-purple);
+  font-family: var(--font-heading);
+  font-size: 25px;
+  margin: 0 0 8px;
+}
+
+.admin-dashboard-section-heading p {
+  color: var(--color-muted);
+  font-size: 13px;
+  margin: 0;
+}
+
+
+/* =========================================
+   PROVIDER APPROVAL OVERVIEW
+========================================= */
+
+.admin-dashboard-overview-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px;
+}
+
+.admin-dashboard-panel {
+  background: var(--color-white);
+  padding: 25px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-medium);
+  box-shadow: var(--shadow-card);
+}
+
+.admin-dashboard-panel-heading {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.admin-dashboard-panel-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: #F1EAF8;
+  color: var(--color-royal-purple);
+  font-size: 22px;
+}
+
+.admin-dashboard-panel-heading h3 {
+  color: var(--color-deep-purple);
+  font-size: 17px;
+  margin: 0 0 5px;
+}
+
+.admin-dashboard-panel-heading p {
+  color: var(--color-muted);
+  font-size: 12px;
+  margin: 0;
+}
+
+.admin-dashboard-status-list {
+  padding-top: 10px;
+}
+
+.admin-dashboard-status-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  padding: 13px 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.admin-dashboard-status-row:last-child {
+  border-bottom: none;
+}
+
+.admin-status-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--color-body);
+  font-size: 13px;
+}
+
+.admin-dashboard-status-row strong {
+  color: var(--color-deep-purple);
+  font-size: 17px;
+}
+
+.admin-status-dot,
+.admin-booking-dot {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  flex-shrink: 0;
+  border-radius: 50%;
+}
+
+.admin-status-dot.pending,
+.admin-booking-dot.pending {
+  background: #E5A323;
+}
+
+.admin-status-dot.approved,
+.admin-booking-dot.confirmed {
+  background: #39966B;
+}
+
+.admin-status-dot.rejected {
+  background: #C64C4C;
+}
+
+.admin-booking-dot.rejected {
+  background: #C64C4C;
+}
+
+.admin-booking-dot.cancelled {
+  background: #99919F;
+}
+
+
+/* =========================================
+   BOOKING OVERVIEW
+========================================= */
+
+.admin-dashboard-bookings {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+  background: var(--color-white);
+  padding: 25px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-medium);
+  box-shadow: var(--shadow-card);
+}
+
+.admin-dashboard-booking-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 15px;
+  background: #FFFEFC;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-small);
+}
+
+.admin-dashboard-booking-item p {
+  color: var(--color-muted);
+  font-size: 12px;
+  margin: 0;
+}
+
+.admin-dashboard-booking-item strong {
+  color: var(--color-deep-purple);
+  font-family: var(--font-heading);
+  font-size: 26px;
+}
+
+
+/* =========================================
+   LOADING STATE
+========================================= */
+
+.admin-dashboard-loading {
+  min-height: 400px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  color: var(--color-muted);
+}
+
+.admin-dashboard-spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid var(--color-lavender);
+  border-top-color: var(--color-deep-purple);
+  border-radius: 50%;
+  animation: adminDashboardSpin 0.8s linear infinite;
+}
+
+@keyframes adminDashboardSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
+/* =========================================
+   ERROR STATE
+========================================= */
+
+.admin-dashboard-error {
+  padding: 30px;
+  background: var(--color-white);
+  border: 1px solid #F0C4C4;
+  border-radius: var(--radius-medium);
+  color: #A52A2A;
+}
+
+.admin-dashboard-error h2 {
+  color: #A52A2A;
+  margin-bottom: 10px;
+}
+
+.admin-dashboard-error p {
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+
+/* =========================================
+   BUTTON
+========================================= */
+
+.admin-dashboard-primary-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 43px;
+  padding: 11px 20px;
+  border: 1px solid var(--color-golden-yellow);
+  border-radius: var(--radius-small);
+  background: var(--color-golden-yellow);
+  color: var(--color-deep-purple);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.admin-dashboard-primary-btn:hover {
+  background: var(--color-deep-purple);
+  border-color: var(--color-deep-purple);
+  color: var(--color-white);
+}
+
+
+/* =========================================
+   RESPONSIVE DESIGN
+========================================= */
+
+@media (max-width: 900px) {
+  .admin-dashboard-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .admin-dashboard-bookings {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .admin-dashboard-page {
+    padding: 35px 14px 55px;
+  }
+
+  .admin-dashboard-header {
+    align-items: flex-start;
+  }
+
+  .admin-dashboard-header h1 {
+    font-size: 28px;
+  }
+
+  .admin-dashboard-welcome {
+    width: 100%;
+  }
+
+  .admin-dashboard-stats {
+    gap: 12px;
+  }
+
+  .admin-dashboard-stat-card {
+    padding: 17px;
+  }
+
+  .admin-dashboard-stat-card h2 {
+    font-size: 25px;
+  }
+
+  .admin-dashboard-overview-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-dashboard-panel {
+    padding: 21px;
+  }
+
+  .admin-dashboard-bookings {
+    grid-template-columns: 1fr 1fr;
+    padding: 17px;
+    gap: 12px;
+  }
+
+  .admin-dashboard-booking-item {
+    padding: 13px;
+  }
+
+  .admin-dashboard-section-heading h2 {
+    font-size: 22px;
+  }
+}
+
+@media (max-width: 360px) {
+  .admin-dashboard-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-dashboard-bookings {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* =========================================
+   ADMIN VENDOR MANAGEMENT
+========================================= */
+
+.admin-vendor-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 25px;
+}
+
+.admin-vendor-search {
+  flex: 1;
+}
+
+.admin-vendor-search input,
+.admin-vendor-filter select {
+  width: 100%;
+  min-height: 46px;
+  padding: 12px 15px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-small);
+  background: var(--color-white);
+  color: var(--color-body);
+  font-family: inherit;
+  font-size: 13px;
+  outline: none;
+}
+
+.admin-vendor-search input:focus,
+.admin-vendor-filter select:focus {
+  border-color: var(--color-royal-purple);
+  box-shadow: 0 0 0 3px rgba(111, 66, 193, 0.1);
+}
+
+.admin-vendor-filter {
+  width: 190px;
+  flex-shrink: 0;
+}
+
+
+/* =========================================
+   VENDOR TABLE
+========================================= */
+
+.admin-vendor-table-wrapper {
+  overflow-x: auto;
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-medium);
+  box-shadow: var(--shadow-card);
+}
+
+.admin-vendor-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 12px;
+  min-width: 900px;
+}
+
+.admin-vendor-table th {
+  padding: 17px 15px;
+  background: #F8F5FB;
+  color: var(--color-deep-purple);
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.admin-vendor-table td {
+  padding: 17px 15px;
+  color: var(--color-body);
+  border-bottom: 1px solid var(--color-border);
+  vertical-align: middle;
+}
+
+.admin-vendor-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.admin-vendor-table tbody tr:hover {
+  background: #FFFEFC;
+}
+
+.admin-vendor-table td strong {
+  color: var(--color-deep-purple);
+  font-size: 12px;
+}
+
+.admin-vendor-table td small {
+  display: block;
+  margin-top: 5px;
+  color: var(--color-muted);
+}
+
+
+/* =========================================
+   VENDOR APPROVAL STATUS
+========================================= */
+
+.admin-vendor-status {
+  display: inline-block;
+  padding: 6px 11px;
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+.admin-vendor-status.pending {
+  background: #FFF3D9;
+  color: #9A6700;
+}
+
+.admin-vendor-status.approved {
+  background: #E1F3E9;
+  color: #26754C;
+}
+
+.admin-vendor-status.rejected {
+  background: #FBE5E5;
+  color: #B13D3D;
+}
+
+
+/* =========================================
+   VENDOR ACTION BUTTONS
+========================================= */
+
+.admin-vendor-actions {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.admin-vendor-actions button {
+  padding: 7px 10px;
+  border: none;
+  border-radius: 5px;
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.admin-vendor-approve {
+  background: #E1F3E9;
+  color: #26754C;
+}
+
+.admin-vendor-approve:hover {
+  background: #26754C;
+  color: white;
+}
+
+.admin-vendor-reject {
+  background: #FBE5E5;
+  color: #B13D3D;
+}
+
+.admin-vendor-reject:hover {
+  background: #B13D3D;
+  color: white;
+}
+
+.admin-vendor-actions button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+
+/* =========================================
+   VENDOR EMPTY STATE
+========================================= */
+
+.admin-vendor-empty {
+  padding: 65px 20px;
+  text-align: center;
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-medium);
+  box-shadow: var(--shadow-card);
+}
+
+.admin-vendor-empty h3 {
+  color: var(--color-deep-purple);
+  font-family: var(--font-heading);
+  font-size: 21px;
+  margin-bottom: 10px;
+}
+
+.admin-vendor-empty p {
+  color: var(--color-muted);
+  font-size: 13px;
+  margin: 0;
+}
+
+
+/* =========================================
+   VENDOR ERROR MESSAGE
+========================================= */
+
+.admin-vendor-error {
+  padding: 14px 18px;
+  margin-bottom: 20px;
+  background: #FBE5E5;
+  border: 1px solid #F0C4C4;
+  border-radius: var(--radius-small);
+  color: #A52A2A;
+  font-size: 13px;
+}
+
+
+/* =========================================
+   VENDOR RECORD COUNT
+========================================= */
+
+.admin-vendor-count {
+  padding: 15px;
+  color: var(--color-muted);
+  font-size: 11px;
+  border-top: 1px solid var(--color-border);
+}
+
+
+/* =========================================
+   VENDOR RESPONSIVE DESIGN
+========================================= */
+
+@media (max-width: 600px) {
+  .admin-vendor-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .admin-vendor-filter {
+    width: 100%;
+  }
+
+  .admin-vendor-table-wrapper {
+    border-radius: var(--radius-small);
+  }
+}
+
+/* ==========================================
+   ADMIN USER MANAGEMENT PAGINATION
+========================================== */
+
+.admin-user-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  padding: 20px 0;
+  border-top: 1px solid var(--color-border);
+}
+
+.admin-user-pagination button {
+  padding: 9px 18px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-small);
+  background: var(--color-white);
+  color: var(--color-deep-purple);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.admin-user-pagination button:hover:not(:disabled) {
+  background: var(--color-deep-purple);
+  color: var(--color-white);
+}
+
+.admin-user-pagination button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.admin-user-pagination span {
+  color: var(--color-body);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+@media (max-width: 600px) {
+  .admin-user-pagination {
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .admin-user-pagination button {
+    padding: 8px 12px;
+  }
+}

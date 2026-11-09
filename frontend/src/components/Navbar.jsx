@@ -151,9 +151,17 @@ function Navbar() {
           )}
 
           {/* Admin navigation */}
-          {isLoggedIn && userRole === 'Admin' && (
-            renderLink('/admin/dashboard', 'Admin Dashboard')
-          )}
+{isLoggedIn && userRole === 'Admin' && (
+  <>
+    {renderLink('/admin/dashboard', 'Admin Dashboard')}
+
+    {renderLink('/admin/vendors', 'Manage Vendors')}
+
+    {renderLink('/admin/tour-operators', 'Manage Tour Operators')}
+
+    {renderLink('/admin/users', 'Manage Users')}
+  </>
+)}
 
           {/* Profile icon and dropdown */}
           <div className="taste-profile-dropdown">

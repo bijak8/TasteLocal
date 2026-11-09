@@ -36,6 +36,10 @@ import MyFavourites from './pages/MyFavourites';
 import VendorDashboard from './pages/VendorDashboard';
 import TourOperatorDashboard from './pages/TourOperatorDashboard';
 import TouristDashboard from './pages/TouristDashboard';
+import AdminDashboard from './pages/AdminDashboard';
+import AdminVendorManagement from './pages/AdminVendorManagement';
+import AdminTourOperatorManagement from './pages/AdminTourOperatorManagement';
+import AdminUserManagement from './pages/AdminUserManagement';
 
 // Edit provider pages
 import EditFoodExperience from './pages/EditFoodExperience';
@@ -178,6 +182,23 @@ function App() {
           <Route
             path="/operator/tour-stops/:id/edit"
             element={<EditTourStop />}
+          />
+          {/* Admin pages */}
+          <Route
+            path="/admin/dashboard"
+            element={<AdminDashboard />}
+          />
+          <Route
+            path="/admin/vendors"
+            element={<AdminVendorManagement />}
+          />
+          <Route
+            path="/admin/tour-operators"
+            element={<AdminTourOperatorManagement />}
+          />
+          <Route
+            path="/admin/users"
+            element={<AdminUserManagement />}
           />
 
         </Route>
