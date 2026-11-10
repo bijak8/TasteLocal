@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import API from '../services/api';
@@ -12,12 +13,9 @@ function EditFoodTour() {
     city: '',
     area: '',
     price: '',
-    date: '',
-    start_time: '',
-    end_time: '',
-    capacity: '',
   });
 
+  const [sessions, setSessions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -25,11 +23,12 @@ function EditFoodTour() {
   useEffect(() => {
     const fetchTour = async () => {
       try {
-        const response = await API.get(
-          `operator/food-tours/${id}/`
-        );
+        const [tourResponse, sessionsResponse] = await Promise.all([
+          API.get(`operator/food-tours/${id}/`),
+          API.get('operator/availability-sessions/'),
+        ]);
 
-        const tour = response.data;
+        const tour = tourResponse.data;
 
         setFormData({
           title: tour.title || '',
@@ -37,11 +36,28 @@ function EditFoodTour() {
           city: tour.city || '',
           area: tour.area || '',
           price: tour.price ?? '',
-          date: tour.date || '',
-          start_time: tour.start_time?.slice(0, 5) || '',
-          end_time: tour.end_time?.slice(0, 5) || '',
-          capacity: tour.capacity ?? '',
         });
+
+        const allSessions = Array.isArray(sessionsResponse.data)
+          ? sessionsResponse.data
+          : sessionsResponse.data.results || [];
+
+        const tourSessions = allSessions
+          .filter(
+            (session) =>
+              Number(session.food_tour) === Number(id)
+          )
+          .map((session) => ({
+            ...session,
+            date: session.date || '',
+            start_time: session.start_time?.slice(0, 5) || '',
+            end_time: session.end_time?.slice(0, 5) || '',
+            capacity: session.capacity ?? '',
+            isNew: false,
+          }));
+
+        setSessions(tourSessions);
+
       } catch (error) {
         console.error('Error fetching food tour:', error);
 
@@ -49,6 +65,7 @@ function EditFoodTour() {
           error.response?.data?.detail ||
           'Unable to load food tour.'
         );
+
       } finally {
         setLoading(false);
       }
@@ -64,26 +81,130 @@ function EditFoodTour() {
     }));
   };
 
+  const handleSessionChange = (index, field, value) => {
+    setSessions((previousSessions) =>
+      previousSessions.map((session, sessionIndex) =>
+        sessionIndex === index
+          ? { ...session, [field]: value }
+          : session
+      )
+    );
+  };
+
+  const handleAddSession = () => {
+    setSessions((previousSessions) => [
+      ...previousSessions,
+      {
+        tempId: `new-${Date.now()}`,
+        date: '',
+        start_time: '',
+        end_time: '',
+        capacity: '',
+        remaining_seats: null,
+        is_active: true,
+        isNew: true,
+      },
+    ]);
+  };
+
+  const handleRemoveSession = (index) => {
+    setSessions((previousSessions) =>
+      previousSessions
+        .map((session, sessionIndex) => {
+          if (sessionIndex !== index) return session;
+
+          if (session.isNew) return null;
+
+          return {
+            ...session,
+            is_active: false,
+          };
+        })
+        .filter(Boolean)
+    );
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
-
     setError('');
+
+    const activeSessions = sessions.filter(
+      (session) => session.is_active
+    );
+
+    for (let index = 0; index < activeSessions.length; index++) {
+      const session = activeSessions[index];
+
+      if (
+        !session.date ||
+        !session.start_time ||
+        !session.end_time ||
+        !session.capacity
+      ) {
+        setError(
+          `Please complete all fields for session ${index + 1}.`
+        );
+        return;
+      }
+
+      if (session.end_time <= session.start_time) {
+        setError(
+          `End time must be later than start time for session ${index + 1}.`
+        );
+        return;
+      }
+
+      if (Number(session.capacity) < 1) {
+        setError(
+          `Capacity must be at least 1 for session ${index + 1}.`
+        );
+        return;
+      }
+    }
+
     setSaving(true);
 
     const tourData = {
       ...formData,
       price: Number(formData.price),
-      capacity: Number(formData.capacity),
     };
 
     try {
+      // Update the main food tour details.
       await API.patch(
         `operator/food-tours/${id}/`,
         tourData
       );
 
+      // Save all availability sessions.
+      for (const session of sessions) {
+        const sessionData = {
+          date: session.date,
+          start_time: session.start_time,
+          end_time: session.end_time,
+          capacity: Number(session.capacity),
+          is_active: session.is_active,
+        };
+
+        if (session.isNew) {
+          await API.post(
+            'operator/availability-sessions/',
+            {
+              ...sessionData,
+              food_tour: Number(id),
+            }
+          );
+        } else {
+          await API.patch(
+            `operator/availability-sessions/${session.id}/`,
+            sessionData
+          );
+        }
+      }
+
       alert('Food tour updated successfully!');
       navigate('/operator/dashboard');
+
     } catch (error) {
       console.error('Error updating food tour:', error);
 
@@ -92,6 +213,7 @@ function EditFoodTour() {
           ? JSON.stringify(error.response.data)
           : 'Unable to update food tour. Please try again.'
       );
+
     } finally {
       setSaving(false);
     }
@@ -110,6 +232,7 @@ function EditFoodTour() {
     <div className="edit-tour-page">
       <div className="edit-tour-container">
 
+        {/* Page Heading */}
         <div className="edit-tour-heading">
           <span className="edit-tour-eyebrow">
             TOUR OPERATOR
@@ -132,11 +255,14 @@ function EditFoodTour() {
               </div>
             )}
 
-            {/* Basic Information */}
+            {/* 01 - Basic Information */}
             <section className="edit-tour-section">
 
               <div className="edit-tour-section-heading">
-                <span className="edit-tour-section-number">01</span>
+                <span className="edit-tour-section-number">
+                  01
+                </span>
+
                 <div>
                   <h2>Basic Information</h2>
                   <p>Tell travellers about your food tour.</p>
@@ -145,6 +271,7 @@ function EditFoodTour() {
 
               <div className="edit-tour-field">
                 <label htmlFor="title">Tour Title</label>
+
                 <input
                   id="title"
                   type="text"
@@ -158,6 +285,7 @@ function EditFoodTour() {
 
               <div className="edit-tour-field">
                 <label htmlFor="description">Description</label>
+
                 <textarea
                   id="description"
                   name="description"
@@ -170,9 +298,13 @@ function EditFoodTour() {
               </div>
 
               <div className="edit-tour-field">
-                <label htmlFor="price">Price per Person (SGD)</label>
+                <label htmlFor="price">
+                  Price per Person (SGD)
+                </label>
+
                 <div className="edit-tour-price-input">
                   <span>SGD</span>
+
                   <input
                     id="price"
                     type="number"
@@ -191,81 +323,174 @@ function EditFoodTour() {
 
             <div className="edit-tour-divider"></div>
 
-            {/* Schedule and Capacity */}
+            {/* 02 - Availability Sessions */}
             <section className="edit-tour-section">
 
               <div className="edit-tour-section-heading">
-                <span className="edit-tour-section-number">02</span>
+                <span className="edit-tour-section-number">
+                  02
+                </span>
+
                 <div>
-                  <h2>Schedule and Capacity</h2>
-                  <p>Set the date, duration and group size.</p>
+                  <h2>Availability Sessions</h2>
+                  <p>
+                    Manage all available dates and booking time slots.
+                  </p>
                 </div>
               </div>
 
-              <div className="edit-tour-field">
-                <label htmlFor="date">Tour Date</label>
-                <input
-                  id="date"
-                  type="date"
-                  name="date"
-                  value={formData.date}
-                  onChange={handleChange}
-                  required
-                />
+              <div className="d-flex justify-content-between align-items-center mb-4">
+                <p className="text-secondary mb-0">
+                  {sessions.length} session(s)
+                </p>
+
+                <button
+                  type="button"
+                  className="edit-tour-cancel-btn"
+                  onClick={handleAddSession}
+                >
+                  + Add Session
+                </button>
               </div>
 
-              <div className="edit-tour-field-row">
-
-                <div className="edit-tour-field">
-                  <label htmlFor="start_time">Start Time</label>
-                  <input
-                    id="start_time"
-                    type="time"
-                    name="start_time"
-                    value={formData.start_time}
-                    onChange={handleChange}
-                    required
-                  />
+              {sessions.length === 0 && (
+                <div className="edit-tour-empty">
+                  No availability sessions found. Add a session to get started.
                 </div>
+              )}
 
-                <div className="edit-tour-field">
-                  <label htmlFor="end_time">End Time</label>
-                  <input
-                    id="end_time"
-                    type="time"
-                    name="end_time"
-                    value={formData.end_time}
-                    onChange={handleChange}
-                    required
-                  />
+              {sessions.map((session, index) => (
+                <div
+                  key={session.id || session.tempId}
+                  className="edit-session-card"
+                >
+
+                  <div className="edit-session-heading">
+                    <div>
+                      <h3>Session {index + 1}</h3>
+
+                      {session.isNew && (
+                        <span className="edit-session-status new">
+                          New
+                        </span>
+                      )}
+
+                      {!session.is_active && (
+                        <span className="edit-session-status inactive">
+                          Inactive
+                        </span>
+                      )}
+                    </div>
+
+                    {session.is_active && (
+                      <button
+                        type="button"
+                        className="edit-session-deactivate"
+                        onClick={() => handleRemoveSession(index)}
+                      >
+                        {session.isNew ? 'Remove' : 'Deactivate'}
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="edit-tour-field">
+                    <label>Session Date</label>
+
+                    <input
+                      type="date"
+                      value={session.date}
+                      onChange={(event) =>
+                        handleSessionChange(
+                          index,
+                          'date',
+                          event.target.value
+                        )
+                      }
+                      disabled={!session.is_active}
+                      required={session.is_active}
+                    />
+                  </div>
+
+                  <div className="edit-tour-field-row">
+
+                    <div className="edit-tour-field">
+                      <label>Start Time</label>
+
+                      <input
+                        type="time"
+                        value={session.start_time}
+                        onChange={(event) =>
+                          handleSessionChange(
+                            index,
+                            'start_time',
+                            event.target.value
+                          )
+                        }
+                        disabled={!session.is_active}
+                        required={session.is_active}
+                      />
+                    </div>
+
+                    <div className="edit-tour-field">
+                      <label>End Time</label>
+
+                      <input
+                        type="time"
+                        value={session.end_time}
+                        onChange={(event) =>
+                          handleSessionChange(
+                            index,
+                            'end_time',
+                            event.target.value
+                          )
+                        }
+                        disabled={!session.is_active}
+                        required={session.is_active}
+                      />
+                    </div>
+
+                  </div>
+
+                  <div className="edit-tour-field">
+                    <label>Maximum Participants</label>
+
+                    <input
+                      type="number"
+                      min="1"
+                      value={session.capacity}
+                      onChange={(event) =>
+                        handleSessionChange(
+                          index,
+                          'capacity',
+                          event.target.value
+                        )
+                      }
+                      disabled={!session.is_active}
+                      required={session.is_active}
+                    />
+                  </div>
+
+                  {!session.isNew && (
+                    <p className="edit-session-remaining">
+                      Remaining seats: {session.remaining_seats}
+                    </p>
+                  )}
+
                 </div>
-
-              </div>
-
-              <div className="edit-tour-field">
-                <label htmlFor="capacity">Maximum Participants</label>
-                <input
-                  id="capacity"
-                  type="number"
-                  name="capacity"
-                  min="1"
-                  step="1"
-                  value={formData.capacity}
-                  onChange={handleChange}
-                  placeholder="Enter maximum participants"
-                  required
-                />
-              </div>
+              ))}
 
             </section>
 
             <div className="edit-tour-divider"></div>
 
-            {/* Location */}
+            {/* 03 - Location */}
             <section className="edit-tour-section">
 
               <div className="edit-tour-section-heading">
-                <span className="edit-tour-section-number">03</span>
+                <span className="edit-tour-section-number">
+                  03
+                </span>
+
                 <div>
                   <h2>Location</h2>
                   <p>Where will your food tour take place?</p>
@@ -276,6 +501,7 @@ function EditFoodTour() {
 
                 <div className="edit-tour-field">
                   <label htmlFor="city">City</label>
+
                   <input
                     id="city"
                     type="text"
@@ -288,6 +514,7 @@ function EditFoodTour() {
 
                 <div className="edit-tour-field">
                   <label htmlFor="area">Area</label>
+
                   <input
                     id="area"
                     type="text"
@@ -309,6 +536,7 @@ function EditFoodTour() {
                 type="button"
                 className="edit-tour-cancel-btn"
                 onClick={() => navigate('/operator/dashboard')}
+                disabled={saving}
               >
                 Cancel
               </button>

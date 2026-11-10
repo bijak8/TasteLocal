@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import API from '../services/api';
 
@@ -7,48 +7,174 @@ function Booking() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
- const experienceId = searchParams.get('food_experience');
-const tourId = searchParams.get('food_tour');
-const genericId = searchParams.get('id');
+  const experienceId = searchParams.get('food_experience');
+  const tourId = searchParams.get('food_tour');
+  const genericId = searchParams.get('id');
+  const requestedSessionId = searchParams.get('availability_session');
 
-const initialType =
-  searchParams.get('type') ||
-  (tourId ? 'tour' : 'experience');
+  const initialType =
+    searchParams.get('type') ||
+    (tourId ? 'tour' : 'experience');
 
-const initialId =
-  genericId ||
-  (initialType === 'tour' ? tourId : experienceId) ||
-  '';
+  const initialId =
+    genericId ||
+    (initialType === 'tour' ? tourId : experienceId) ||
+    '';
 
-const [bookingType, setBookingType] = useState(initialType);
+  const [bookingType, setBookingType] = useState(initialType);
 
-const [formData, setFormData] = useState({
-  food_experience: initialType === 'experience' ? initialId : '',
-  food_tour: initialType === 'tour' ? initialId : '',
-  number_of_participants: 1,
-  special_request: '',
-});
+  const [formData, setFormData] = useState({
+    food_experience: initialType === 'experience' ? initialId : '',
+    food_tour: initialType === 'tour' ? initialId : '',
+    number_of_participants: 1,
+    special_request: '',
+  });
+
+  const [sessions, setSessions] = useState([]);
+  const [selectedSession, setSelectedSession] = useState(
+    requestedSessionId || ''
+  );
+  const [price, setPrice] = useState(null);
+  const [sessionsLoading, setSessionsLoading] = useState(false);
+  const [sessionError, setSessionError] = useState('');
 
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  const itemId =
+    bookingType === 'experience'
+      ? formData.food_experience
+      : formData.food_tour;
+
+  // Retrieve listing price and available sessions
+  useEffect(() => {
+    if (!itemId || Number(itemId) < 1) {
+      setSessions([]);
+      setSelectedSession('');
+      setPrice(null);
+      setSessionError('');
+      return;
+    }
+
+    let cancelled = false;
+
+    const fetchBookingDetails = async () => {
+      setSessionsLoading(true);
+      setSessionError('');
+      setSessions([]);
+      setPrice(null);
+
+      try {
+        const endpoint =
+          bookingType === 'experience'
+            ? 'food-experiences/'
+            : 'food-tours/';
+
+        const [sessionResponse, listingResponse] = await Promise.all([
+          API.get(`${endpoint}${itemId}/availability/`),
+          API.get(`${endpoint}${itemId}/`),
+        ]);
+
+        if (cancelled) return;
+
+        const sessionData = Array.isArray(sessionResponse.data)
+          ? sessionResponse.data
+          : sessionResponse.data.results || [];
+
+        setSessions(sessionData);
+        setPrice(Number(listingResponse.data.price));
+
+        const matchingSession = sessionData.find(
+          (session) => String(session.id) === String(requestedSessionId)
+        );
+
+        if (matchingSession) {
+          setSelectedSession(String(matchingSession.id));
+        } else {
+          setSelectedSession('');
+        }
+
+      } catch (err) {
+        if (cancelled) return;
+
+        console.error('Unable to retrieve booking details:', err);
+        setSessionError(
+          'Unable to load availability sessions or listing price. Please check the listing ID.'
+        );
+        setSelectedSession('');
+      } finally {
+        if (!cancelled) {
+          setSessionsLoading(false);
+        }
+      }
+    };
+
+    fetchBookingDetails();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [bookingType, itemId, requestedSessionId]);
+
+  const selectedSessionDetails = sessions.find(
+    (session) => String(session.id) === String(selectedSession)
+  );
+
+  const participants = Number(formData.number_of_participants) || 0;
+
+  const totalPrice =
+    price !== null && participants > 0
+      ? price * participants
+      : null;
+
+  const formatDate = (date) => {
+    if (!date) return '';
+
+    const [year, month, day] = date.split('-');
+    return new Date(
+      Number(year),
+      Number(month) - 1,
+      Number(day)
+    ).toLocaleDateString('en-GB', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    });
+  };
+
+  const formatTime = (time) => {
+    if (!time) return '';
+
+    const [hours, minutes] = time.split(':');
+    const date = new Date();
+    date.setHours(Number(hours), Number(minutes), 0, 0);
+
+    return date.toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true,
+    });
+  };
 
   const handleTypeChange = (event) => {
     const type = event.target.value;
 
     setBookingType(type);
 
-    setFormData({
-      ...formData,
+    setFormData((previous) => ({
+      ...previous,
       food_experience: '',
       food_tour: '',
-    });
+    }));
+
+    setSelectedSession('');
   };
 
   const handleChange = (event) => {
-    setFormData({
-      ...formData,
+    setFormData((previous) => ({
+      ...previous,
       [event.target.name]: event.target.value,
-    });
+    }));
   };
 
   const handleSubmit = async (event) => {
@@ -60,23 +186,21 @@ const [formData, setFormData] = useState({
       return;
     }
 
-    if (
-      bookingType === 'experience' &&
-      !formData.food_experience
-    ) {
-      setError('Please enter a food experience ID.');
+    if (!itemId) {
+      setError(
+        bookingType === 'experience'
+          ? 'Please enter a food experience ID.'
+          : 'Please enter a food tour ID.'
+      );
       return;
     }
 
-    if (
-      bookingType === 'tour' &&
-      !formData.food_tour
-    ) {
-      setError('Please enter a food tour ID.');
+    if (!selectedSession) {
+      setError('Please select an availability session.');
       return;
     }
 
-    if (Number(formData.number_of_participants) < 1) {
+    if (participants < 1) {
       setError('Number of participants must be at least 1.');
       return;
     }
@@ -84,17 +208,15 @@ const [formData, setFormData] = useState({
     setLoading(true);
 
     const bookingData = {
-      food_experience: bookingType === 'experience'
-        ? Number(formData.food_experience)
-        : null,
+      food_experience:
+        bookingType === 'experience' ? Number(itemId) : null,
 
-      food_tour: bookingType === 'tour'
-        ? Number(formData.food_tour)
-        : null,
+      food_tour:
+        bookingType === 'tour' ? Number(itemId) : null,
 
-      number_of_participants: Number(
-        formData.number_of_participants
-      ),
+      availability_session: Number(selectedSession),
+
+      number_of_participants: participants,
 
       special_request: formData.special_request,
     };
@@ -113,7 +235,9 @@ const [formData, setFormData] = useState({
       console.error('Booking error:', error);
 
       if (error.response?.status === 401) {
-        setError('Your login session has expired. Please log in again.');
+        setError(
+          'Your login session has expired. Please log in again.'
+        );
       } else if (error.response?.data) {
         setError(JSON.stringify(error.response.data));
       } else {
@@ -130,7 +254,9 @@ const [formData, setFormData] = useState({
       <div className="booking-container">
         <div className="booking-card">
           <div className="booking-heading">
-            <span className="booking-eyebrow">PLAN YOUR EXPERIENCE</span>
+            <span className="booking-eyebrow">
+              PLAN YOUR EXPERIENCE
+            </span>
 
             <h1>Make a Booking</h1>
 
@@ -185,11 +311,7 @@ const [formData, setFormData] = useState({
                     ? 'food_experience'
                     : 'food_tour'
                 }
-                value={
-                  bookingType === 'experience'
-                    ? formData.food_experience
-                    : formData.food_tour
-                }
+                value={itemId}
                 onChange={handleChange}
                 min="1"
                 placeholder="Enter the ID"
@@ -199,6 +321,69 @@ const [formData, setFormData] = useState({
               <span className="booking-field-hint">
                 Find the ID in the food experience or tour URL.
               </span>
+            </div>
+
+            <div className="booking-field">
+              <label htmlFor="booking-session">
+                Select Availability Session
+              </label>
+
+              <select
+                id="booking-session"
+                value={selectedSession}
+                onChange={(event) =>
+                  setSelectedSession(event.target.value)
+                }
+                disabled={sessionsLoading || sessions.length === 0}
+                required
+              >
+                <option value="">
+                  {sessionsLoading
+                    ? 'Loading sessions...'
+                    : sessions.length === 0
+                      ? 'No available sessions'
+                      : 'Choose a date and time'}
+                </option>
+
+                {sessions.map((session) => (
+                  <option
+                    key={session.id}
+                    value={session.id}
+                    disabled={
+                      Number(session.remaining_seats) <= 0
+                    }
+                  >
+                    {formatDate(session.date)} —{' '}
+                    {formatTime(session.start_time)} till{' '}
+                    {formatTime(session.end_time)} —{' '}
+                    {session.remaining_seats} seat(s) remaining
+                  </option>
+                ))}
+              </select>
+
+              {sessionError && (
+                <span className="booking-field-hint">
+                  {sessionError}
+                </span>
+              )}
+
+              {selectedSessionDetails && (
+                <div className="booking-session-summary">
+                  <strong>Selected Session</strong>
+                  <p>
+                    {formatDate(selectedSessionDetails.date)}
+                  </p>
+                  <p>
+                    {formatTime(selectedSessionDetails.start_time)}
+                    {' till '}
+                    {formatTime(selectedSessionDetails.end_time)}
+                  </p>
+                  <p>
+                    {selectedSessionDetails.remaining_seats} seat(s)
+                    remaining
+                  </p>
+                </div>
+              )}
             </div>
 
             <div className="booking-field">
@@ -215,6 +400,31 @@ const [formData, setFormData] = useState({
                 min="1"
                 required
               />
+            </div>
+
+            <div className="booking-price-summary">
+              <div className="booking-price-row">
+                <span>Price per participant</span>
+                <strong>
+                  {price !== null
+                    ? `SGD ${price.toFixed(2)}`
+                    : '—'}
+                </strong>
+              </div>
+
+              <div className="booking-price-row">
+                <span>Number of participants</span>
+                <strong>{participants}</strong>
+              </div>
+
+              <div className="booking-price-total">
+                <span>Total Amount</span>
+                <strong>
+                  {totalPrice !== null
+                    ? `SGD ${totalPrice.toFixed(2)}`
+                    : '—'}
+                </strong>
+              </div>
             </div>
 
             <div className="booking-field">
@@ -235,9 +445,16 @@ const [formData, setFormData] = useState({
             <button
               type="submit"
               className="booking-submit-btn"
-              disabled={loading}
+              disabled={
+                loading ||
+                sessionsLoading ||
+                !selectedSession ||
+                price === null
+              }
             >
-              {loading ? 'Submitting...' : 'Submit Booking Request'}
+              {loading
+                ? 'Submitting...'
+                : 'Submit Booking Request'}
             </button>
           </form>
 

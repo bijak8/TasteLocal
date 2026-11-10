@@ -20,6 +20,12 @@ function FoodTourDetails() {
   const [reviewMessage, setReviewMessage] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
+  // Availability session states
+  const [sessions, setSessions] = useState([]);
+  const [selectedSession, setSelectedSession] = useState('');
+  const [sessionsLoading, setSessionsLoading] = useState(true);
+  const [sessionsError, setSessionsError] = useState('');
+
   // Itinerary states
   const [itineraries, setItineraries] = useState([]);
   const [selectedItinerary, setSelectedItinerary] = useState('');
@@ -51,6 +57,80 @@ function FoodTourDetails() {
 
     fetchReviews();
   }, [id]);
+
+  // Fetch availability sessions
+  useEffect(() => {
+    let cancelled = false;
+
+    const fetchSessions = async () => {
+      setSessionsLoading(true);
+      setSessionsError('');
+
+      try {
+        const response = await API.get(
+          `food-tours/${id}/availability/`
+        );
+
+        if (cancelled) return;
+
+        const sessionData = Array.isArray(response.data)
+          ? response.data
+          : response.data.results || [];
+
+        setSessions(sessionData);
+      } catch (error) {
+        if (cancelled) return;
+
+        console.error('Error fetching food tour sessions:', error);
+        setSessionsError(
+          'Unable to load available tour sessions. Please try again later.'
+        );
+      } finally {
+        if (!cancelled) {
+          setSessionsLoading(false);
+        }
+      }
+    };
+
+    fetchSessions();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [id]);
+
+  // Format session date
+  const formatSessionDate = (date) => {
+    if (!date) return '';
+
+    const [year, month, day] = date.split('-');
+
+    return new Date(
+      Number(year),
+      Number(month) - 1,
+      Number(day)
+    ).toLocaleDateString('en-GB', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric'
+    });
+  };
+
+  // Format session time
+  const formatSessionTime = (time) => {
+    if (!time) return '';
+
+    const [hours, minutes] = time.split(':');
+    const date = new Date();
+
+    date.setHours(Number(hours), Number(minutes), 0, 0);
+
+    return date.toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    });
+  };
 
   // Fetch reviews
   const fetchReviews = () => {
@@ -208,6 +288,17 @@ function FoodTourDetails() {
     }
   };
 
+  // Navigate to booking with selected session
+  const handleBookTour = () => {
+    if (!selectedSession) {
+      return;
+    }
+
+    navigate(
+      `/booking?food_tour=${tour.id}&availability_session=${selectedSession}`
+    );
+  };
+
   // Submit review
   const handleSubmitReview = async (e) => {
     e.preventDefault();
@@ -363,25 +454,6 @@ function FoodTourDetails() {
                 </div>
 
                 <div className="detail-information-item">
-                  <span>Date</span>
-                  <strong>{tour.date || 'Not specified'}</strong>
-                </div>
-
-                <div className="detail-information-item">
-                  <span>Time</span>
-                  <strong>
-                    {tour.start_time} – {tour.end_time}
-                  </strong>
-                </div>
-
-                <div className="detail-information-item">
-                  <span>Capacity</span>
-                  <strong>
-                    {tour.capacity} participants
-                  </strong>
-                </div>
-
-                <div className="detail-information-item">
                   <span>Tour Price</span>
                   <strong>SGD {tour.price}</strong>
                 </div>
@@ -514,22 +586,23 @@ function FoodTourDetails() {
                           ? new Date(review.created_at).toLocaleDateString()
                           : ''}
                       </small>
+
                       {review.provider_response && (
-  <div className="public-review-provider-response">
-    <strong>Tour Operator's Response</strong>
+                        <div className="public-review-provider-response">
+                          <strong>Tour Operator's Response</strong>
 
-    <p>{review.provider_response}</p>
+                          <p>{review.provider_response}</p>
 
-    {review.provider_responded_at && (
-      <small>
-        Responded on{' '}
-        {new Date(
-          review.provider_responded_at
-        ).toLocaleDateString()}
-      </small>
-    )}
-  </div>
-)}
+                          {review.provider_responded_at && (
+                            <small>
+                              Responded on{' '}
+                              {new Date(
+                                review.provider_responded_at
+                              ).toLocaleDateString()}
+                            </small>
+                          )}
+                        </div>
+                      )}
                     </article>
                   ))}
 
@@ -610,12 +683,94 @@ function FoodTourDetails() {
 
               <p>Per participant</p>
 
-              <Link
-                to={`/booking?food_tour=${tour.id}`}
+              {/* Availability Sessions */}
+              <div className="experience-availability">
+                <h3>Select Your Tour Session</h3>
+
+                {sessionsLoading ? (
+                  <p className="detail-muted-text">
+                    Loading available sessions...
+                  </p>
+                ) : sessionsError ? (
+                  <p className="detail-muted-text">
+                    {sessionsError}
+                  </p>
+                ) : sessions.length === 0 ? (
+                  <p className="detail-muted-text">
+                    No available sessions at the moment.
+                  </p>
+                ) : (
+                  <div className="experience-session-grid">
+
+                    {sessions.map((session) => {
+                      const fullyBooked =
+                        Number(session.remaining_seats) <= 0;
+
+                      return (
+                        <button
+                          key={session.id}
+                          type="button"
+                          className={`experience-session-card ${
+                            selectedSession === String(session.id)
+                              ? 'selected'
+                              : ''
+                          } ${
+                            fullyBooked ? 'fully-booked' : ''
+                          }`}
+                          onClick={() =>
+                            setSelectedSession(String(session.id))
+                          }
+                          disabled={fullyBooked}
+                        >
+                          <strong>
+                            {formatSessionDate(session.date)}
+                          </strong>
+
+                          <span className="experience-session-time">
+                            {formatSessionTime(session.start_time)} till{' '}
+                            {formatSessionTime(session.end_time)}
+                          </span>
+
+                          <span className="experience-session-seats">
+                            {fullyBooked
+                              ? 'Fully booked'
+                              : `${session.remaining_seats} seat(s) left`}
+                          </span>
+                        </button>
+                      );
+                    })}
+
+                  </div>
+                )}
+
+                {selectedSession && (
+                  <div className="experience-session-selection">
+                    <span>Selected session:</span>{' '}
+                    {(() => {
+                      const session = sessions.find(
+                        (item) => String(item.id) === selectedSession
+                      );
+
+                      return session
+                        ? `${formatSessionDate(session.date)}, ${formatSessionTime(session.start_time)} till ${formatSessionTime(session.end_time)}`
+                        : '';
+                    })()}
+                  </div>
+                )}
+              </div>
+
+              <button
+                type="button"
                 className="experience-book-btn"
+                onClick={handleBookTour}
+                disabled={
+                  !selectedSession ||
+                  sessionsLoading ||
+                  !!sessionsError
+                }
               >
                 Book This Tour
-              </Link>
+              </button>
 
               {/* Favourite Button */}
               <button

@@ -13,6 +13,12 @@ function FoodExperienceDetails() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
+  // Availability session states
+  const [sessions, setSessions] = useState([]);
+  const [selectedSession, setSelectedSession] = useState('');
+  const [sessionsLoading, setSessionsLoading] = useState(true);
+  const [sessionsError, setSessionsError] = useState('');
+
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState('');
   const [reviewMessage, setReviewMessage] = useState('');
@@ -29,6 +35,7 @@ function FoodExperienceDetails() {
   const [favouriteLoading, setFavouriteLoading] = useState(false);
   const [favouriteMessage, setFavouriteMessage] = useState('');
 
+  // Fetch food experience details
   useEffect(() => {
     API.get(`food-experiences/${id}/`)
       .then((response) => {
@@ -44,6 +51,72 @@ function FoodExperienceDetails() {
 
     fetchReviews();
   }, [id]);
+
+  // Fetch availability sessions
+  useEffect(() => {
+    let cancelled = false;
+
+    setSessionsLoading(true);
+    setSessionsError('');
+    setSelectedSession('');
+
+    API.get(`food-experiences/${id}/availability/`)
+      .then((response) => {
+        if (cancelled) return;
+
+        const data = Array.isArray(response.data)
+          ? response.data
+          : response.data.results || [];
+
+        setSessions(data);
+      })
+      .catch((error) => {
+        if (cancelled) return;
+
+        console.error('Error fetching availability sessions:', error);
+        setSessionsError('Unable to load available sessions.');
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setSessionsLoading(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [id]);
+
+  // Format session date
+  const formatSessionDate = (date) => {
+    if (!date) return 'Date unavailable';
+
+    const [year, month, day] = date.split('-').map(Number);
+
+    const sessionDate = new Date(year, month - 1, day);
+
+    return sessionDate.toLocaleDateString('en-SG', {
+      weekday: 'short',
+      day: '2-digit',
+      month: 'short',
+    });
+  };
+
+  // Format session time
+  const formatSessionTime = (time) => {
+    if (!time) return '';
+
+    const [hours, minutes] = time.split(':');
+
+    const date = new Date();
+    date.setHours(Number(hours), Number(minutes), 0, 0);
+
+    return date.toLocaleTimeString('en-SG', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true,
+    });
+  };
 
   // Fetch reviews
   const fetchReviews = () => {
@@ -255,7 +328,24 @@ function FoodExperienceDetails() {
     }
   };
 
-  
+  // Navigate to booking with selected availability session
+  const handleBookExperience = () => {
+    if (!selectedSession) {
+      return;
+    }
+
+    const token = localStorage.getItem('accessToken');
+
+    if (!token) {
+      navigate('/login');
+      return;
+    }
+
+    navigate(
+      `/booking?food_experience=${experience.id}&availability_session=${selectedSession}`
+    );
+  };
+
   if (loading) {
     return (
       <div className="experience-details-message">
@@ -331,23 +421,6 @@ function FoodExperienceDetails() {
                 <div className="detail-information-item">
                   <span>City</span>
                   <strong>{experience.city || 'Not specified'}</strong>
-                </div>
-
-                <div className="detail-information-item">
-                  <span>Date</span>
-                  <strong>{experience.date || 'Not specified'}</strong>
-                </div>
-
-                <div className="detail-information-item">
-                  <span>Time</span>
-                  <strong>
-                    {experience.start_time} – {experience.end_time}
-                  </strong>
-                </div>
-
-                <div className="detail-information-item">
-                  <span>Available Capacity</span>
-                  <strong>{experience.capacity} participants</strong>
                 </div>
 
               </div>
@@ -461,12 +534,102 @@ function FoodExperienceDetails() {
 
               <p>Per participant</p>
 
-              <Link
-                to={`/booking?food_experience=${experience.id}`}
+              {/* Availability Sessions */}
+              <div className="experience-availability">
+
+                <h3>Choose Date and Time</h3>
+
+                {sessionsLoading ? (
+                  <p className="detail-muted-text">
+                    Loading available sessions...
+                  </p>
+                ) : sessionsError ? (
+                  <p className="detail-feedback-message">
+                    {sessionsError}
+                  </p>
+                ) : sessions.length === 0 ? (
+                  <p className="detail-muted-text">
+                    No upcoming sessions are currently available.
+                  </p>
+                ) : (
+                  <div className="experience-session-grid">
+
+                    {sessions.map((session) => {
+                      const remainingSeats = Number(
+                        session.remaining_seats ?? 0
+                      );
+
+                      const isFullyBooked = remainingSeats <= 0;
+
+                      const isSelected =
+                        String(selectedSession) === String(session.id);
+
+                      return (
+                        <button
+                          key={session.id}
+                          type="button"
+                          className={`experience-session-card ${
+                            isSelected ? 'selected' : ''
+                          } ${
+                            isFullyBooked ? 'fully-booked' : ''
+                          }`}
+                          disabled={isFullyBooked}
+                          onClick={() => setSelectedSession(String(session.id))}
+                          aria-pressed={isSelected}
+                        >
+
+                          <strong>
+                            {formatSessionDate(session.date)}
+                          </strong>
+
+<span className="experience-session-time">
+  {formatSessionTime(session.start_time)} till{' '}
+  {formatSessionTime(session.end_time)}
+</span>
+
+                          <span className="experience-session-seats">
+                            {isFullyBooked
+                              ? 'Fully booked'
+                              : `${remainingSeats} left`}
+                          </span>
+
+                        </button>
+                      );
+                    })}
+
+                  </div>
+                )}
+
+                {selectedSession && (
+                  <p className="experience-session-selection">
+                    <span>Selected session:</span>{' '}
+                    {(() => {
+                      const selected = sessions.find(
+                        (session) =>
+                          String(session.id) === String(selectedSession)
+                      );
+
+                      return selected
+                        ? `${formatSessionDate(selected.date)}, ${formatSessionTime(selected.start_time)} – ${formatSessionTime(selected.end_time)}`
+                        : '';
+                    })()}
+                  </p>
+                )}
+
+              </div>
+
+              <button
+                type="button"
                 className="experience-book-btn"
+                onClick={handleBookExperience}
+                disabled={
+                  !selectedSession ||
+                  sessionsLoading ||
+                  sessions.length === 0
+                }
               >
                 Book This Experience
-              </Link>
+              </button>
 
               <button
                 type="button"
@@ -527,22 +690,23 @@ function FoodExperienceDetails() {
                         ? new Date(review.created_at).toLocaleDateString()
                         : ''}
                     </small>
+
                     {review.provider_response && (
-  <div className="public-review-provider-response">
-    <strong>Vendor's Response</strong>
+                      <div className="public-review-provider-response">
+                        <strong>Vendor's Response</strong>
 
-    <p>{review.provider_response}</p>
+                        <p>{review.provider_response}</p>
 
-    {review.provider_responded_at && (
-      <small>
-        Responded on{' '}
-        {new Date(
-          review.provider_responded_at
-        ).toLocaleDateString()}
-      </small>
-    )}
-  </div>
-)}
+                        {review.provider_responded_at && (
+                          <small>
+                            Responded on{' '}
+                            {new Date(
+                              review.provider_responded_at
+                            ).toLocaleDateString()}
+                          </small>
+                        )}
+                      </div>
+                    )}
 
                   </div>
                 ))}
