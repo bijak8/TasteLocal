@@ -1,7 +1,7 @@
-
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.contrib.auth.models import User
+
 
 class TouristProfile(models.Model):
     user = models.OneToOneField(
@@ -25,6 +25,7 @@ class TouristProfile(models.Model):
 
     def __str__(self):
         return f"{self.user.username}'s Profile"
+
 
 class Vendor(models.Model):
     STATUS_CHOICES = [
@@ -251,6 +252,75 @@ class FoodTour(models.Model):
         return self.title
 
 
+class AvailabilitySession(models.Model):
+
+    food_experience = models.ForeignKey(
+        FoodExperience,
+        on_delete=models.CASCADE,
+        related_name='availability_sessions',
+        null=True,
+        blank=True
+    )
+
+    food_tour = models.ForeignKey(
+        FoodTour,
+        on_delete=models.CASCADE,
+        related_name='availability_sessions',
+        null=True,
+        blank=True
+    )
+
+    date = models.DateField()
+
+    start_time = models.TimeField()
+
+    end_time = models.TimeField()
+
+    capacity = models.PositiveIntegerField(
+        validators=[MinValueValidator(1)]
+    )
+
+    is_active = models.BooleanField(default=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['date', 'start_time']
+        constraints = [
+            models.CheckConstraint(
+                condition=(
+                    models.Q(
+                        food_experience__isnull=False,
+                        food_tour__isnull=True
+                    )
+                    |
+                    models.Q(
+                        food_experience__isnull=True,
+                        food_tour__isnull=False
+                    )
+                ),
+                name='availability_session_one_listing'
+            )
+        ]
+
+    def clean(self):
+        from django.core.exceptions import ValidationError
+
+        if bool(self.food_experience) == bool(self.food_tour):
+            raise ValidationError(
+                'A session must belong to either a food experience or a food tour.'
+            )
+
+        if self.end_time <= self.start_time:
+            raise ValidationError(
+                'End time must be later than start time.'
+            )
+
+    def __str__(self):
+        listing = self.food_experience or self.food_tour
+        return f'{listing.title} - {self.date} {self.start_time}'
+
+
 class TourStop(models.Model):
     food_tour = models.ForeignKey(
         FoodTour,
@@ -318,6 +388,28 @@ class Booking(models.Model):
         blank=True
     )
 
+    availability_session = models.ForeignKey(
+        AvailabilitySession,
+        on_delete=models.PROTECT,
+        related_name='bookings',
+        null=True,
+        blank=True
+    )
+
+    price_per_participant = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        null=True,
+        blank=True
+    )
+
+    total_price = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        null=True,
+        blank=True
+    )
+
     number_of_participants = models.PositiveIntegerField()
 
     status = models.CharField(
@@ -343,6 +435,27 @@ class Booking(models.Model):
             raise ValidationError(
                 'A booking must be for a food experience or a food tour.'
             )
+
+        # Ensure the availability session belongs to the selected listing.
+        if self.availability_session:
+
+            if self.food_experience:
+                if (
+                    self.availability_session.food_experience_id
+                    != self.food_experience_id
+                ):
+                    raise ValidationError(
+                        'The availability session does not belong to this food experience.'
+                    )
+
+            if self.food_tour:
+                if (
+                    self.availability_session.food_tour_id
+                    != self.food_tour_id
+                ):
+                    raise ValidationError(
+                        'The availability session does not belong to this food tour.'
+                    )
 
     def __str__(self):
         if self.food_experience:
@@ -391,7 +504,6 @@ class Review(models.Model):
         blank=True
     )
 
-
     def clean(self):
         from django.core.exceptions import ValidationError
 
@@ -418,6 +530,7 @@ class Itinerary(models.Model):
         on_delete=models.CASCADE,
         related_name='itineraries'
     )
+
     title = models.CharField(max_length=200)
     description = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -432,6 +545,7 @@ class ItineraryItem(models.Model):
         on_delete=models.CASCADE,
         related_name='items'
     )
+
     food_experience = models.ForeignKey(
         FoodExperience,
         on_delete=models.CASCADE,
@@ -439,6 +553,7 @@ class ItineraryItem(models.Model):
         blank=True,
         related_name='itinerary_items'
     )
+
     food_tour = models.ForeignKey(
         FoodTour,
         on_delete=models.CASCADE,
@@ -446,6 +561,7 @@ class ItineraryItem(models.Model):
         blank=True,
         related_name='itinerary_items'
     )
+
     position = models.PositiveIntegerField(default=1)
     notes = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -516,4 +632,3 @@ class Favourite(models.Model):
             return f'{self.tourist.username} - {self.food_experience.title}'
 
         return f'{self.tourist.username} - {self.food_tour.title}'
-

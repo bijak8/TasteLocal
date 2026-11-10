@@ -30,6 +30,14 @@ from .views import (
     BookingListView,
     BookingUpdateView,
     TouristBookingListView,
+    TouristBookingCancelView,
+
+    VendorAvailabilitySessionListCreateView,
+    VendorAvailabilitySessionDetailView,
+    OperatorAvailabilitySessionListCreateView,
+    OperatorAvailabilitySessionDetailView,
+    FoodExperienceAvailabilityView,
+    FoodTourAvailabilityView,
 
     ReviewCreateView,
     ReviewListView,
@@ -55,6 +63,10 @@ from .views import (
     TourOperatorFoodTourDetailView,
 
     AdminDashboardView,
+    GlobalSearchView,
+    FoodDiscoveryAssistantView,
+    IntelligentSearchView,
+    
 )
 
 
@@ -171,6 +183,23 @@ urlpatterns = [
     # 4. FOOD EXPERIENCE MANAGEMENT
     # ==========================================
 
+    # Global website search
+    path(
+        'global-search/',
+        GlobalSearchView.as_view(),
+        name='global-search'
+    ),
+    # AI Food Discovery Assistant
+    path(
+        'food-discovery-assistant/',
+        FoodDiscoveryAssistantView.as_view(),
+        name='food-discovery-assistant'
+    ),
+    path(
+        'intelligent-search/',
+        IntelligentSearchView.as_view(),
+        name='intelligent-search'
+    ),
     # Create food experience
     path(
         'food-experiences/create/',
@@ -291,6 +320,46 @@ urlpatterns = [
         name='booking-create'
     ),
 
+    # ==========================================
+    # AVAILABILITY SESSIONS
+    # ==========================================
+
+    # Vendor availability sessions
+    path(
+        'vendor/availability-sessions/',
+        VendorAvailabilitySessionListCreateView.as_view(),
+        name='vendor-availability-sessions'
+    ),
+    path(
+        'vendor/availability-sessions/<int:pk>/',
+        VendorAvailabilitySessionDetailView.as_view(),
+        name='vendor-availability-session-detail'
+    ),
+
+    # Tour Operator availability sessions
+    path(
+        'operator/availability-sessions/',
+        OperatorAvailabilitySessionListCreateView.as_view(),
+        name='operator-availability-sessions'
+    ),
+    path(
+        'operator/availability-sessions/<int:pk>/',
+        OperatorAvailabilitySessionDetailView.as_view(),
+        name='operator-availability-session-detail'
+    ),
+
+    # Public availability sessions for tourists
+    path(
+        'food-experiences/<int:experience_id>/availability/',
+        FoodExperienceAvailabilityView.as_view(),
+        name='food-experience-availability'
+    ),
+    path(
+        'food-tours/<int:tour_id>/availability/',
+        FoodTourAvailabilityView.as_view(),
+        name='food-tour-availability'
+    ),
+
     # Provider booking list
     path(
         'bookings/',
@@ -311,6 +380,12 @@ urlpatterns = [
         TouristBookingListView.as_view(),
         name='tourist-booking-list'
     ),
+
+    path(
+    'my-bookings/<int:pk>/cancel/',
+    TouristBookingCancelView.as_view(),
+    name='tourist-booking-cancel'
+    ),  
 
 
     # ==========================================

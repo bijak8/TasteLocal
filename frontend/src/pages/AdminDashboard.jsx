@@ -67,6 +67,7 @@ function AdminDashboard() {
 
   }, [navigate, retryCount]);
 
+  
   // Main dashboard statistics
   const statistics = dashboard
     ? [
@@ -75,6 +76,18 @@ function AdminDashboard() {
           value: dashboard.total_users,
           icon: '♙',
           description: 'Registered platform users',
+        },
+        {
+          label: 'Active Users',
+          value: dashboard.active_users,
+          icon: '✓',
+          description: 'Currently active accounts',
+        },
+        {
+          label: 'Inactive Users',
+          value: dashboard.inactive_users,
+          icon: '⊘',
+          description: 'Deactivated accounts',
         },
         {
           label: 'Total Tourists',
@@ -143,7 +156,9 @@ function AdminDashboard() {
             <button
               type="button"
               className="admin-dashboard-primary-btn"
-              onClick={() => setRetryCount((previous) => previous + 1)}
+              onClick={() =>
+                setRetryCount((previous) => previous + 1)
+              }
             >
               Try Again
             </button>
@@ -174,6 +189,18 @@ function AdminDashboard() {
               Monitor platform activity, manage providers and
               oversee bookings.
             </p>
+
+<button
+  type="button"
+  className="admin-dashboard-primary-btn"
+  onClick={() =>
+    setRetryCount((previous) => previous + 1)
+  }
+  disabled={loading}
+>
+  Refresh Dashboard
+</button>
+
           </div>
 
           <div className="admin-dashboard-welcome">
@@ -182,6 +209,55 @@ function AdminDashboard() {
           </div>
         </header>
 
+        {/* Admin Quick Navigation */}
+        <section className="admin-dashboard-quick-nav">
+
+          <div className="admin-dashboard-section-heading">
+            <span className="admin-dashboard-section-label">
+              QUICK ACCESS
+            </span>
+
+            <h2>Management Shortcuts</h2>
+
+            <p>
+              Quickly access platform management sections.
+            </p>
+          </div>
+
+          <div className="admin-dashboard-quick-nav-grid">
+
+            <button
+              type="button"
+              onClick={() => navigate('/admin/users')}
+            >
+              <span>♙</span>
+              <strong>Manage Users</strong>
+              <small>View and manage user accounts</small>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => navigate('/admin/vendors')}
+            >
+              <span>▣</span>
+              <strong>Manage Vendors</strong>
+              <small>Review vendor registrations</small>
+            </button>
+
+            <button
+              type="button"
+              onClick={() =>
+                navigate('/admin/tour-operators')
+              }
+            >
+              <span>⌂</span>
+              <strong>Manage Tour Operators</strong>
+              <small>Review tour operator registrations</small>
+            </button>
+
+          </div>
+
+        </section>
 
         {/* Main Statistics */}
         <section className="admin-dashboard-stats">
@@ -198,7 +274,9 @@ function AdminDashboard() {
               <p>{statistic.label}</p>
 
               <h2>
-                {Number(statistic.value ?? 0).toLocaleString()}
+                {Number(
+                  statistic.value ?? 0
+                ).toLocaleString()}
               </h2>
 
               <span>{statistic.description}</span>
@@ -206,7 +284,6 @@ function AdminDashboard() {
           ))}
 
         </section>
-
 
         {/* Provider Approval Overview */}
         <section className="admin-dashboard-section">
@@ -275,9 +352,7 @@ function AdminDashboard() {
                 </div>
 
               </div>
-
             </div>
-
 
             {/* Tour Operator Status */}
             <div className="admin-dashboard-panel">
@@ -329,13 +404,10 @@ function AdminDashboard() {
                 </div>
 
               </div>
-
             </div>
 
           </div>
-
         </section>
-
 
         {/* Booking Overview */}
         <section className="admin-dashboard-section">
@@ -395,7 +467,6 @@ function AdminDashboard() {
             </div>
 
           </div>
-
         </section>
 
       </div>

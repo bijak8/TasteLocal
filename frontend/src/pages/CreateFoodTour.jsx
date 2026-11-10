@@ -12,11 +12,16 @@ function CreateFoodTour() {
     city: '',
     area: '',
     price: '',
-    date: '',
-    start_time: '',
-    end_time: '',
-    capacity: '',
   });
+
+  const [sessions, setSessions] = useState([
+    {
+      date: '',
+      start_time: '',
+      end_time: '',
+      capacity: '',
+    },
+  ]);
 
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -30,32 +35,111 @@ function CreateFoodTour() {
     }));
   };
 
+  const handleSessionChange = (index, event) => {
+    const { name, value } = event.target;
+
+    setSessions((previousSessions) =>
+      previousSessions.map((session, sessionIndex) =>
+        sessionIndex === index
+          ? { ...session, [name]: value }
+          : session
+      )
+    );
+  };
+
+  const addSession = () => {
+    setSessions((previousSessions) => [
+      ...previousSessions,
+      {
+        date: '',
+        start_time: '',
+        end_time: '',
+        capacity: '',
+      },
+    ]);
+  };
+
+  const removeSession = (index) => {
+    if (sessions.length === 1) {
+      return;
+    }
+
+    setSessions((previousSessions) =>
+      previousSessions.filter((_, sessionIndex) => sessionIndex !== index)
+    );
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     setError('');
+
+    for (let index = 0; index < sessions.length; index++) {
+      const session = sessions[index];
+
+      if (
+        !session.date ||
+        !session.start_time ||
+        !session.end_time ||
+        !session.capacity
+      ) {
+        setError(`Please complete all fields in Session ${index + 1}.`);
+        return;
+      }
+
+      if (session.end_time <= session.start_time) {
+        setError(`Session ${index + 1}: End time must be later than start time.`);
+        return;
+      }
+
+      if (Number(session.capacity) < 1) {
+        setError(`Session ${index + 1}: Capacity must be at least 1.`);
+        return;
+      }
+    }
+
     setLoading(true);
 
-    const tourData = {
-      ...formData,
-      price: Number(formData.price),
-      capacity: Number(formData.capacity),
-    };
-
     try {
+      const firstSession = sessions[0];
+
+      // Keep the existing listing fields compatible with the serializer.
+      const tourData = {
+        ...formData,
+        price: Number(formData.price),
+        date: firstSession.date,
+        start_time: firstSession.start_time,
+        end_time: firstSession.end_time,
+        capacity: Number(firstSession.capacity),
+      };
+
+      // First create the food tour.
       const response = await API.post('food-tours/create/', tourData);
+
+      const foodTourId = response.data.id;
+
+      // Then create each availability session for this tour.
+      for (const session of sessions) {
+        await API.post('operator/availability-sessions/', {
+          food_tour: foodTourId,
+          date: session.date,
+          start_time: session.start_time,
+          end_time: session.end_time,
+          capacity: Number(session.capacity),
+        });
+      }
 
       console.log('Food tour created:', response.data);
 
-      alert('Food tour created successfully!');
+      alert('Food tour and availability sessions created successfully!');
       navigate('/food-tours');
 
     } catch (error) {
-      console.error('Error creating food tour:', error);
+      console.error('Error creating food tour or sessions:', error);
 
       setError(
         error.response?.data
           ? JSON.stringify(error.response.data)
-          : 'Unable to create food tour. Please try again.'
+          : 'Unable to complete the food tour creation. Please try again.'
       );
 
     } finally {
@@ -207,74 +291,146 @@ function CreateFoodTour() {
 
                 <div>
                   <h3>Schedule & Capacity</h3>
-                  <p>Set the date, duration and number of participants.</p>
+                  <p>
+                    Add multiple dates and time slots for your food tour.
+                  </p>
                 </div>
               </div>
 
-              <div className="create-tour-field">
-                <label htmlFor="tour-date">Tour Date</label>
+              {sessions.map((session, index) => (
+                <div
+                  className="create-tour-session-card"
+                  key={index}
+                  style={{
+                    border: '1px solid #e7dcef',
+                    borderRadius: '12px',
+                    padding: '20px',
+                    marginBottom: '20px',
+                  }}
+                >
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      marginBottom: '20px',
+                    }}
+                  >
+                    <h4>Session {index + 1}</h4>
 
-                <input
-                  id="tour-date"
-                  type="date"
-                  name="date"
-                  value={formData.date}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
+                    {sessions.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => removeSession(index)}
+                        style={{
+                          border: 'none',
+                          background: 'none',
+                          color: '#a33',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        Remove
+                      </button>
+                    )}
+                  </div>
 
-              <div className="create-tour-field-row">
+                  <div className="create-tour-field">
+                    <label htmlFor={`tour-date-${index}`}>
+                      Tour Date
+                    </label>
 
-                <div className="create-tour-field">
-                  <label htmlFor="tour-start-time">Start Time</label>
+                    <input
+                      id={`tour-date-${index}`}
+                      type="date"
+                      name="date"
+                      value={session.date}
+                      onChange={(event) =>
+                        handleSessionChange(index, event)
+                      }
+                      required
+                    />
+                  </div>
 
-                  <input
-                    id="tour-start-time"
-                    type="time"
-                    name="start_time"
-                    value={formData.start_time}
-                    onChange={handleChange}
-                    required
-                  />
+                  <div className="create-tour-field-row">
+
+                    <div className="create-tour-field">
+                      <label htmlFor={`tour-start-time-${index}`}>
+                        Start Time
+                      </label>
+
+                      <input
+                        id={`tour-start-time-${index}`}
+                        type="time"
+                        name="start_time"
+                        value={session.start_time}
+                        onChange={(event) =>
+                          handleSessionChange(index, event)
+                        }
+                        required
+                      />
+                    </div>
+
+                    <div className="create-tour-field">
+                      <label htmlFor={`tour-end-time-${index}`}>
+                        End Time
+                      </label>
+
+                      <input
+                        id={`tour-end-time-${index}`}
+                        type="time"
+                        name="end_time"
+                        value={session.end_time}
+                        onChange={(event) =>
+                          handleSessionChange(index, event)
+                        }
+                        required
+                      />
+                    </div>
+
+                  </div>
+
+                  <div className="create-tour-field">
+                    <label htmlFor={`tour-capacity-${index}`}>
+                      Maximum Participants
+                    </label>
+
+                    <input
+                      id={`tour-capacity-${index}`}
+                      type="number"
+                      name="capacity"
+                      min="1"
+                      step="1"
+                      placeholder="e.g. 12"
+                      value={session.capacity}
+                      onChange={(event) =>
+                        handleSessionChange(index, event)
+                      }
+                      required
+                    />
+
+                    <small>
+                      Maximum number of guests for this session.
+                    </small>
+                  </div>
+
                 </div>
+              ))}
 
-                <div className="create-tour-field">
-                  <label htmlFor="tour-end-time">End Time</label>
-
-                  <input
-                    id="tour-end-time"
-                    type="time"
-                    name="end_time"
-                    value={formData.end_time}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-
-              </div>
-
-              <div className="create-tour-field">
-                <label htmlFor="tour-capacity">
-                  Maximum Participants
-                </label>
-
-                <input
-                  id="tour-capacity"
-                  type="number"
-                  name="capacity"
-                  min="1"
-                  step="1"
-                  placeholder="e.g. 12"
-                  value={formData.capacity}
-                  onChange={handleChange}
-                  required
-                />
-
-                <small>
-                  Enter the maximum number of guests for this tour.
-                </small>
-              </div>
+              <button
+                type="button"
+                onClick={addSession}
+                style={{
+                  padding: '12px 20px',
+                  border: '1px dashed #7650a5',
+                  borderRadius: '8px',
+                  background: 'transparent',
+                  color: '#7650a5',
+                  cursor: 'pointer',
+                  fontWeight: '600',
+                }}
+              >
+                + Add Another Session
+              </button>
 
             </div>
 
@@ -290,7 +446,7 @@ function CreateFoodTour() {
               </button>
 
               <p>
-                Please review your tour details before publishing.
+                Please review your tour details and sessions before publishing.
               </p>
 
             </div>

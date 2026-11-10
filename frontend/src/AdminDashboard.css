@@ -760,3 +760,58 @@
     padding: 8px 12px;
   }
 }
+
+/* ==========================================
+   ADMIN DASHBOARD QUICK NAVIGATION
+========================================== */
+
+.admin-dashboard-quick-nav {
+  margin-bottom: 35px;
+}
+
+.admin-dashboard-quick-nav-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.admin-dashboard-quick-nav-grid button {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 24px;
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-medium);
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.admin-dashboard-quick-nav-grid button:hover {
+  border-color: var(--color-royal-purple);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-card);
+}
+
+.admin-dashboard-quick-nav-grid button span {
+  font-size: 26px;
+  color: var(--color-royal-purple);
+}
+
+.admin-dashboard-quick-nav-grid button strong {
+  color: var(--color-deep-purple);
+  font-size: 16px;
+}
+
+.admin-dashboard-quick-nav-grid button small {
+  color: var(--color-muted);
+  font-size: 13px;
+}
+
+@media (max-width: 768px) {
+  .admin-dashboard-quick-nav-grid {
+    grid-template-columns: 1fr;
+  }
+}

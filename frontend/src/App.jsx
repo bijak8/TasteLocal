@@ -3,9 +3,11 @@ import './App.css';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
 import MainLayout from './components/MainLayout';
+import FoodDiscoveryChatbot from './components/FoodDiscoveryChatbot';
 
 // Public pages
 import Home from './pages/Home';
+import GlobalSearchResults from './pages/GlobalSearchResults';
 import FoodExperiences from './pages/FoodExperiences';
 import FoodExperienceDetails from './pages/FoodExperienceDetails';
 import FoodTours from './pages/FoodTours';
@@ -69,15 +71,27 @@ function App() {
 
           {/* Public pages */}
           <Route path="/" element={<Home />} />
+
+          <Route
+            path="/search"
+            element={<GlobalSearchResults />}
+          />
+
           <Route
             path="/food-experiences"
             element={<FoodExperiences />}
           />
+
           <Route
             path="/food-experiences/:id"
             element={<FoodExperienceDetails />}
           />
-          <Route path="/food-tours" element={<FoodTours />} />
+
+          <Route
+            path="/food-tours"
+            element={<FoodTours />}
+          />
+
           <Route
             path="/food-tours/:id"
             element={<FoodTourDetails />}
@@ -92,10 +106,12 @@ function App() {
             path="/forgot-password"
             element={<ForgotPassword />}
           />
+
           <Route
             path="/reset-password/:uidb64/:token"
             element={<ResetPassword />}
           />
+
           <Route
             path="/change-password"
             element={<ChangePassword />}
@@ -104,6 +120,7 @@ function App() {
           {/* Booking pages */}
           <Route path="/booking" element={<Booking />} />
           <Route path="/my-bookings" element={<MyBookings />} />
+
           <Route
             path="/provider/bookings"
             element={<ProviderBookings />}
@@ -120,6 +137,7 @@ function App() {
             path="/my-itineraries"
             element={<MyItineraries />}
           />
+
           <Route
             path="/my-favourites"
             element={<MyFavourites />}
@@ -130,25 +148,33 @@ function App() {
             path="/tourist/dashboard"
             element={<TouristDashboard />}
           />
+
           <Route
             path="/tourist/profile"
             element={<TouristProfile />}
           />
-          <Route path="/my-reviews" element={<MyReviews />} />
+
+          <Route
+            path="/my-reviews"
+            element={<MyReviews />}
+          />
 
           {/* Vendor pages */}
           <Route
             path="/vendor/dashboard"
             element={<VendorDashboard />}
           />
+
           <Route
             path="/vendor/profile"
             element={<VendorProfile />}
           />
+
           <Route
             path="/vendor/create-experience"
             element={<CreateFoodExperience />}
           />
+
           <Route
             path="/vendor/food-experiences/:id/edit"
             element={<EditFoodExperience />}
@@ -159,43 +185,53 @@ function App() {
             path="/operator/dashboard"
             element={<TourOperatorDashboard />}
           />
+
           <Route
             path="/operator/profile"
             element={<TourOperatorProfile />}
           />
+
           <Route
             path="/operator/create-tour"
             element={<CreateFoodTour />}
           />
+
           <Route
             path="/operator/food-tours/:id/edit"
             element={<EditFoodTour />}
           />
+
           <Route
             path="/operator/add-tour-stop"
             element={<AddTourStop />}
           />
+
           <Route
             path="/operator/tour-stops"
             element={<TourOperatorTourStops />}
           />
+
           <Route
             path="/operator/tour-stops/:id/edit"
             element={<EditTourStop />}
           />
+
           {/* Admin pages */}
           <Route
             path="/admin/dashboard"
             element={<AdminDashboard />}
           />
+
           <Route
             path="/admin/vendors"
             element={<AdminVendorManagement />}
           />
+
           <Route
             path="/admin/tour-operators"
             element={<AdminTourOperatorManagement />}
           />
+
           <Route
             path="/admin/users"
             element={<AdminUserManagement />}
@@ -203,6 +239,10 @@ function App() {
 
         </Route>
       </Routes>
+
+      {/* Floating AI Food Discovery Chatbot - Available on all pages */}
+      <FoodDiscoveryChatbot />
+
     </BrowserRouter>
   );
 }

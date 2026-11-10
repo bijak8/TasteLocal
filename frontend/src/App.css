@@ -9297,3 +9297,967 @@
   outline-offset: 3px;
   border-radius: 3px;
 }
+.taste-brand-logo {
+  height: 55px;
+  width: auto;
+  object-fit: contain;
+  display: block;
+}
+
+/* =================================
+   TASTELOCAL NAVBAR SEARCH
+================================= */
+
+.taste-navbar-search {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px;
+  background: rgba(255, 255, 255, 0.10);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 8px;
+}
+
+.taste-navbar-search input {
+  width: 165px;
+  min-width: 100px;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: var(--color-white);
+  padding: 8px 10px;
+  font-size: 13px;
+}
+
+.taste-navbar-search input::placeholder {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.taste-navbar-search select {
+  max-width: 120px;
+  border: 0;
+  border-left: 1px solid rgba(255, 255, 255, 0.2);
+  background: transparent;
+  color: var(--color-white);
+  padding: 8px 5px;
+  font-size: 12px;
+}
+
+.taste-navbar-search select option {
+  color: #222;
+}
+
+.taste-navbar-search button {
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 6px;
+  background: var(--color-golden-yellow);
+  color: var(--color-deep-purple);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.taste-navbar-search button:hover {
+  background: var(--color-white);
+}
+
+@media (max-width: 1200px) {
+  .taste-navbar-search input {
+    width: 125px;
+  }
+}
+
+@media (max-width: 992px) {
+  .taste-navbar-search {
+    width: 100%;
+    margin: 12px 0;
+  }
+
+  .taste-navbar-search input {
+    flex: 1;
+    width: auto;
+    min-width: 0;
+  }
+
+  .taste-navbar-search select {
+    max-width: 130px;
+  }
+
+  .taste-navbar-search button {
+    flex: 0 0 38px;
+  }
+}
+
+/* ==========================================
+   GLOBAL SEARCH RESULTS PAGE
+========================================== */
+
+.global-search-page {
+  background-color: #fff9e9;
+  min-height: 100vh;
+  padding: 55px 30px 80px;
+}
+
+.global-search-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.global-search-container h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: 42px;
+  font-weight: 700;
+  color: #352047;
+  margin-bottom: 12px;
+}
+
+.global-search-container > p {
+  font-size: 17px;
+  color: #62576b;
+  margin-bottom: 35px;
+}
+
+.global-search-section {
+  margin-top: 35px;
+}
+
+.global-search-section h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 28px;
+  color: #4b246f;
+  margin-bottom: 18px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #e8d9b9;
+}
+
+.global-search-result {
+  background-color: #ffffff;
+  border: 1px solid #eee5d5;
+  border-radius: 12px;
+  padding: 22px 25px;
+  margin-bottom: 16px;
+  box-shadow: 0 3px 12px rgba(53, 32, 71, 0.06);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.global-search-result:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 18px rgba(53, 32, 71, 0.12);
+}
+
+.global-search-result a {
+  display: inline-block;
+  font-size: 19px;
+  font-weight: 600;
+  color: #7541a5;
+  text-decoration: none;
+  margin-bottom: 8px;
+}
+
+.global-search-result a:hover {
+  color: #4b246f;
+  text-decoration: underline;
+}
+
+.global-search-result p {
+  font-size: 15px;
+  line-height: 1.7;
+  color: #62576b;
+  margin: 0;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .global-search-page {
+    padding: 35px 18px 55px;
+  }
+
+  .global-search-container h1 {
+    font-size: 32px;
+  }
+
+  .global-search-section h2 {
+    font-size: 24px;
+  }
+
+  .global-search-result {
+    padding: 18px;
+  }
+
+  .global-search-result a {
+    font-size: 17px;
+  }
+}
+
+/* =========================================
+   TASTELOCAL AI FOOD DISCOVERY CHATBOT
+========================================= */
+
+.food-chat-launcher {
+  position: fixed;
+  bottom: 25px;
+  right: 25px;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 15px 22px;
+  border: none;
+  border-radius: 50px;
+  background: #35105f;
+  color: #ffffff;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 5px 20px rgba(53, 16, 95, 0.25);
+  transition: all 0.3s ease;
+}
+
+.food-chat-launcher:hover {
+  background: #54218a;
+  transform: translateY(-3px);
+}
+
+.food-chat-launcher-icon {
+  color: #f4c95d;
+  font-size: 22px;
+}
+
+.food-chat-window {
+  position: fixed;
+  bottom: 25px;
+  right: 25px;
+  z-index: 9999;
+  width: 380px;
+  height: 560px;
+  max-height: calc(100vh - 50px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: #fffdf8;
+  border-radius: 18px;
+  box-shadow: 0 8px 35px rgba(35, 15, 60, 0.25);
+  border: 1px solid #e8e0ef;
+}
+
+.food-chat-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px;
+  background: #35105f;
+  color: white;
+}
+
+.food-chat-header-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.food-chat-avatar {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #54218a;
+  color: #f4c95d;
+  font-size: 22px;
+}
+
+.food-chat-header h3 {
+  margin: 0 0 4px;
+  font-family: 'Playfair Display', serif;
+  font-size: 17px;
+}
+
+.food-chat-header span {
+  font-size: 11px;
+  color: #e3d8f0;
+}
+
+.food-chat-close {
+  border: none;
+  background: transparent;
+  color: white;
+  font-size: 28px;
+  cursor: pointer;
+}
+
+.food-chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+}
+
+.food-chat-message {
+  display: flex;
+  margin-bottom: 14px;
+}
+
+.food-chat-message.user {
+  justify-content: flex-end;
+}
+
+.food-chat-bubble {
+  max-width: 88%;
+  padding: 12px 14px;
+  border-radius: 13px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 12px;
+  line-height: 1.7;
+  white-space: pre-wrap;
+}
+
+.food-chat-message.assistant .food-chat-bubble {
+  background: #f0eaf7;
+  color: #35105f;
+  border-bottom-left-radius: 3px;
+}
+
+.food-chat-message.user .food-chat-bubble {
+  background: #35105f;
+  color: white;
+  border-bottom-right-radius: 3px;
+}
+
+.food-chat-recommendation {
+  display: block;
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 10px;
+  background: white;
+  border: 1px solid #e7dced;
+  color: #35105f;
+  text-decoration: none;
+  white-space: normal;
+  transition: box-shadow 0.2s ease;
+}
+
+.food-chat-recommendation:hover {
+  box-shadow: 0 3px 12px rgba(53, 16, 95, 0.12);
+}
+
+.food-chat-recommendation-type {
+  color: #8055a9;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.food-chat-recommendation h4 {
+  margin: 6px 0;
+  font-family: 'Playfair Display', serif;
+  font-size: 14px;
+}
+
+.food-chat-recommendation p {
+  margin: 4px 0;
+  color: #777;
+  font-size: 11px;
+}
+
+.food-chat-price {
+  margin-top: 8px;
+  color: #35105f;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.food-chat-view-link {
+  display: block;
+  margin-top: 8px;
+  color: #8a6415;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.food-chat-typing {
+  color: #806b91;
+  font-style: italic;
+}
+
+.food-chat-suggestions {
+  padding: 10px 16px;
+  border-top: 1px solid #eee6f3;
+}
+
+.food-chat-suggestions p {
+  margin: 0 0 8px;
+  color: #777;
+  font-size: 11px;
+}
+
+.food-chat-suggestions button {
+  display: block;
+  width: 100%;
+  margin-bottom: 6px;
+  padding: 9px 11px;
+  border: 1px solid #d9c8e9;
+  border-radius: 20px;
+  background: white;
+  color: #54218a;
+  text-align: left;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.food-chat-suggestions button:hover {
+  background: #f0eaf7;
+}
+
+.food-chat-input-area {
+  display: flex;
+  gap: 8px;
+  padding: 12px 14px;
+  border-top: 1px solid #eee6f3;
+}
+
+.food-chat-input-area input {
+  flex: 1;
+  min-width: 0;
+  padding: 11px 13px;
+  border: 1px solid #ddd2e8;
+  border-radius: 25px;
+  outline: none;
+  font-size: 12px;
+}
+
+.food-chat-input-area input:focus {
+  border-color: #8055a9;
+}
+
+.food-chat-input-area button {
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  border: none;
+  border-radius: 50%;
+  background: #35105f;
+  color: #f4c95d;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.food-chat-input-area button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.food-chat-footer {
+  padding: 7px;
+  background: #f8f4fb;
+  color: #988ba5;
+  text-align: center;
+  font-size: 9px;
+}
+
+/* Mobile responsive layout */
+@media (max-width: 480px) {
+  .food-chat-window {
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    max-height: 100%;
+    border-radius: 0;
+  }
+
+  .food-chat-launcher {
+    right: 16px;
+    bottom: 16px;
+    padding: 13px 18px;
+  }
+}
+
+/* =========================================
+   TASTELOCAL ROBOT MASCOT
+========================================= */
+
+/* Floating Robot Launcher */
+
+.food-chat-launcher {
+  width: 82px;
+  height: 82px;
+  padding: 5px;
+  overflow: visible;
+}
+
+.food-chat-launcher-robot {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transition: transform 0.3s ease;
+}
+
+.food-chat-launcher:hover .food-chat-launcher-robot {
+  transform: scale(1.08);
+}
+
+/* Header Robot */
+
+.food-chat-header-robot {
+  width: 65px;
+  height: 65px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.food-chat-brand h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 27px;
+  margin: 0 0 5px;
+  color: white;
+}
+
+.food-chat-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.food-chat-status span:last-child {
+  color: #f2e8f8;
+  font-size: 11px;
+}
+
+.food-chat-online-dot {
+  width: 10px;
+  height: 10px;
+  display: inline-block;
+  border-radius: 50%;
+  background: #70df54;
+}
+
+/* Header Controls */
+
+.food-chat-header-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.food-chat-minimize {
+  width: 35px;
+  height: 35px;
+  border: none;
+  background: transparent;
+  color: white;
+  font-size: 30px;
+  cursor: pointer;
+}
+
+.food-chat-minimize:hover,
+.food-chat-close:hover {
+  opacity: 0.75;
+}
+
+/* Robot beside assistant messages */
+
+.food-chat-message.assistant {
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.food-chat-message-robot {
+  width: 43px;
+  height: 43px;
+  object-fit: contain;
+  flex-shrink: 0;
+  align-self: flex-start;
+}
+
+/* =========================================
+   TASTELOCAL AI FOOD DISCOVERY CHATBOT
+========================================= */
+
+.food-chat-launcher {
+  position: fixed;
+  bottom: 25px;
+  right: 25px;
+  z-index: 9999;
+
+  width: 82px;
+  height: 82px;
+  padding: 4px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: none;
+  border-radius: 50%;
+
+  background: linear-gradient(145deg, #54218a, #35105f);
+
+  cursor: pointer;
+  box-shadow: 0 8px 28px rgba(53, 16, 95, 0.3);
+  transition: all 0.3s ease;
+}
+
+.food-chat-launcher:hover {
+  transform: translateY(-5px) scale(1.04);
+  box-shadow: 0 12px 32px rgba(53, 16, 95, 0.4);
+}
+
+.food-chat-launcher-robot {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.food-chat-window {
+  position: fixed;
+  bottom: 25px;
+  right: 25px;
+  z-index: 9999;
+
+  width: 410px;
+  height: 610px;
+  max-height: calc(100vh - 50px);
+
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  background: #fffdf8;
+  border-radius: 22px;
+  border: 1px solid rgba(112, 65, 160, 0.18);
+
+  box-shadow: 0 8px 35px rgba(35, 15, 60, 0.25);
+}
+
+/* HEADER */
+
+.food-chat-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px;
+
+  background: linear-gradient(120deg, #35105f, #54218a);
+  color: white;
+}
+
+.food-chat-header-info {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+}
+
+.food-chat-avatar {
+  width: 48px;
+  height: 48px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 15px;
+  background: #f4c95d;
+  color: #35105f;
+
+  font-size: 26px;
+}
+
+.food-chat-header h3 {
+  margin: 0 0 5px;
+  font-family: 'Playfair Display', serif;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.food-chat-header span {
+  font-size: 10px;
+  color: #e7d9f2;
+}
+
+.food-chat-close {
+  width: 36px;
+  height: 36px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: white;
+
+  font-size: 28px;
+  cursor: pointer;
+}
+
+/* MESSAGE AREA */
+
+.food-chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 22px 18px;
+
+  background: #fffdf8;
+}
+
+.food-chat-message {
+  display: flex;
+  margin-bottom: 18px;
+}
+
+.food-chat-message.user {
+  justify-content: flex-end;
+}
+
+.food-chat-bubble {
+  max-width: 88%;
+  padding: 14px 16px;
+
+  border-radius: 16px;
+
+  font-family: 'Montserrat', sans-serif;
+  font-size: 12px;
+  line-height: 1.8;
+
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.food-chat-message.assistant .food-chat-bubble {
+  background: #f0eaf7;
+  color: #30213d;
+  border-bottom-left-radius: 4px;
+}
+
+.food-chat-message.user .food-chat-bubble {
+  background: #35105f;
+  color: white;
+  border-bottom-right-radius: 4px;
+}
+
+/* RECOMMENDATION CARDS */
+
+.food-chat-recommendation {
+  display: block;
+  margin-top: 12px;
+  padding: 12px;
+
+  border-radius: 10px;
+  background: white;
+  border: 1px solid #e7dced;
+
+  color: #35105f;
+  text-decoration: none;
+  white-space: normal;
+
+  transition: box-shadow 0.2s ease;
+}
+
+.food-chat-recommendation:hover {
+  box-shadow: 0 3px 12px rgba(53, 16, 95, 0.12);
+}
+
+.food-chat-recommendation-type {
+  color: #8055a9;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.food-chat-recommendation h4 {
+  margin: 6px 0;
+  font-family: 'Playfair Display', serif;
+  font-size: 14px;
+}
+
+.food-chat-recommendation p {
+  margin: 4px 0;
+  color: #777;
+  font-size: 11px;
+}
+
+.food-chat-price {
+  margin-top: 8px;
+  color: #35105f;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.food-chat-view-link {
+  display: block;
+  margin-top: 8px;
+  color: #8a6415;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* LOADING */
+
+.food-chat-typing {
+  color: #806b91;
+  font-style: italic;
+}
+
+/* SUGGESTED QUESTIONS */
+
+.food-chat-suggestions {
+  padding: 10px 16px;
+  border-top: 1px solid #eee6f3;
+}
+
+.food-chat-suggestions p {
+  margin: 0 0 8px;
+  color: #777;
+  font-size: 11px;
+}
+
+.food-chat-suggestions button {
+  display: block;
+  width: 100%;
+  margin-bottom: 6px;
+  padding: 9px 11px;
+
+  border: 1px solid #d9c8e9;
+  border-radius: 20px;
+
+  background: white;
+  color: #54218a;
+
+  text-align: left;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.food-chat-suggestions button:hover {
+  background: #f0eaf7;
+}
+
+/* INPUT AREA */
+
+.food-chat-input-area {
+  display: flex;
+  gap: 8px;
+  padding: 12px 14px;
+
+  border-top: 1px solid #eee6f3;
+}
+
+.food-chat-input-area input {
+  flex: 1;
+  min-width: 0;
+
+  padding: 11px 13px;
+
+  border: 1px solid #ddd2e8;
+  border-radius: 25px;
+
+  outline: none;
+  font-size: 12px;
+}
+
+.food-chat-input-area input:focus {
+  border-color: #8055a9;
+}
+
+.food-chat-input-area button {
+  width: 43px;
+  height: 43px;
+
+  flex-shrink: 0;
+
+  border: none;
+  border-radius: 50%;
+
+  background: #f4c95d;
+  color: #35105f;
+
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.food-chat-input-area button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* FOOTER */
+
+.food-chat-footer {
+  padding: 9px;
+
+  background: #f8f4fb;
+  color: #988ba5;
+
+  text-align: center;
+  font-size: 9px;
+}
+
+/* MOBILE */
+
+@media (max-width: 480px) {
+  .food-chat-window {
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    max-height: 100%;
+    border-radius: 0;
+  }
+
+  .food-chat-launcher {
+    width: 68px;
+    height: 68px;
+    right: 16px;
+    bottom: 16px;
+  }
+}
+
+/* =========================================
+   TASTELOCAL AI ROBOT ICON - FINAL OVERRIDE
+========================================= */
+
+/* Robot icon inside the chat header */
+.food-chat-avatar {
+  width: 65px;
+  height: 65px;
+  object-fit: contain;
+  display: block;
+  flex-shrink: 0;
+
+  background: transparent;
+  border-radius: 0;
+  padding: 0;
+}
+
+/* Robot floating launcher */
+.food-chat-launcher {
+  width: 82px;
+  height: 82px;
+  padding: 5px;
+  border-radius: 50%;
+  overflow: visible;
+}
+
+.food-chat-launcher-robot {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+/* Mobile robot launcher */
+@media (max-width: 480px) {
+  .food-chat-launcher {
+    width: 68px;
+    height: 68px;
+    right: 16px;
+    bottom: 16px;
+  }
+}
+
+
+

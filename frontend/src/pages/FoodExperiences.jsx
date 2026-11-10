@@ -1,6 +1,6 @@
 
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import API from '../services/api';
 
 function FoodExperiences() {
@@ -10,6 +10,11 @@ function FoodExperiences() {
 
   // Search and filter states
   const [search, setSearch] = useState('');
+  const [searchParams] = useSearchParams();
+
+useEffect(() => {
+  setSearch(searchParams.get('q') || '');
+}, [searchParams]);
   const [selectedCity, setSelectedCity] = useState('');
   const [selectedArea, setSelectedArea] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');

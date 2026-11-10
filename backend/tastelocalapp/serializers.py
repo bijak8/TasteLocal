@@ -15,6 +15,7 @@ from .models import (
     Itinerary,
     ItineraryItem,
     Favourite,
+    AvailabilitySession,
 )
 
 
@@ -471,6 +472,145 @@ class FoodTourSerializer(serializers.ModelSerializer):
         )
 
 
+class AvailabilitySessionSerializer(serializers.ModelSerializer):
+
+    remaining_seats = serializers.SerializerMethodField()
+
+    class Meta:
+        model = AvailabilitySession
+        fields = [
+            'id',
+            'food_experience',
+            'food_tour',
+            'date',
+            'start_time',
+            'end_time',
+            'capacity',
+            'remaining_seats',
+            'is_active',
+            'created_at',
+        ]
+
+        read_only_fields = [
+            'id',
+            'remaining_seats',
+            'created_at',
+        ]
+
+    def get_remaining_seats(self, obj):
+        reserved_seats = sum(
+            obj.bookings.filter(
+                status__in=['pending', 'confirmed']
+            ).values_list(
+                'number_of_participants',
+                flat=True
+            )
+        )
+
+        return max(0, obj.capacity - reserved_seats)
+
+    def validate(self, attrs):
+        instance = self.instance
+
+        food_experience = attrs.get(
+            'food_experience',
+            instance.food_experience if instance else None
+        )
+
+        food_tour = attrs.get(
+            'food_tour',
+            instance.food_tour if instance else None
+        )
+
+        if bool(food_experience) == bool(food_tour):
+            raise serializers.ValidationError(
+                'A session must belong to either a food experience or a food tour, not both.'
+            )
+
+        start_time = attrs.get(
+            'start_time',
+            instance.start_time if instance else None
+        )
+
+        end_time = attrs.get(
+            'end_time',
+            instance.end_time if instance else None
+        )
+
+        if start_time and end_time and end_time <= start_time:
+            raise serializers.ValidationError({
+                'end_time': 'End time must be later than start time.'
+            })
+
+        capacity = attrs.get(
+            'capacity',
+            instance.capacity if instance else None
+        )
+
+        if instance and capacity is not None:
+            reserved_seats = sum(
+                instance.bookings.filter(
+                    status__in=['pending', 'confirmed']
+                ).values_list(
+                    'number_of_participants',
+                    flat=True
+                )
+            )
+
+            if capacity < reserved_seats:
+                raise serializers.ValidationError({
+                    'capacity': (
+                        f'Capacity cannot be lower than {reserved_seats} '
+                        'already reserved seats.'
+                    )
+                })
+
+        request = self.context.get('request')
+
+        if not request:
+            return attrs
+
+        user = request.user
+
+        if food_experience:
+            vendor = user.vendors.first()
+
+            if not vendor:
+                raise serializers.ValidationError(
+                    'Only vendors can manage food experience availability.'
+                )
+
+            if vendor.status != 'approved':
+                raise serializers.ValidationError(
+                    'Your vendor profile must be approved.'
+                )
+
+            if food_experience.vendor_id != vendor.id:
+                raise serializers.ValidationError(
+                    'You can only manage availability for your own experiences.'
+                )
+
+        if food_tour:
+            operator = user.tour_operators.first()
+
+            if not operator:
+                raise serializers.ValidationError(
+                    'Only tour operators can manage food tour availability.'
+                )
+
+            if operator.status != 'approved':
+                raise serializers.ValidationError(
+                    'Your Tour Operator profile must be approved.'
+                )
+
+            if food_tour.tour_operator_id != operator.id:
+                raise serializers.ValidationError(
+                    'You can only manage availability for your own tours.'
+                )
+
+        return attrs
+
+
 class TourStopSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -497,6 +637,11 @@ class TourStopSerializer(serializers.ModelSerializer):
 
 class BookingSerializer(serializers.ModelSerializer):
 
+    availability_session = serializers.PrimaryKeyRelatedField(
+        queryset=AvailabilitySession.objects.all(),
+        required=True
+    )
+
     class Meta:
         model = Booking
         fields = [
@@ -504,7 +649,10 @@ class BookingSerializer(serializers.ModelSerializer):
             'tourist',
             'food_experience',
             'food_tour',
+            'availability_session',
             'number_of_participants',
+            'price_per_participant',
+            'total_price',
             'status',
             'special_request',
             'created_at',
@@ -514,6 +662,8 @@ class BookingSerializer(serializers.ModelSerializer):
         read_only_fields = [
             'id',
             'tourist',
+            'price_per_participant',
+            'total_price',
             'status',
             'created_at',
             'updated_at',
@@ -522,6 +672,7 @@ class BookingSerializer(serializers.ModelSerializer):
     def validate(self, data):
         food_experience = data.get('food_experience')
         food_tour = data.get('food_tour')
+        availability_session = data.get('availability_session')
 
         if food_experience and food_tour:
             raise serializers.ValidationError(
@@ -533,9 +684,32 @@ class BookingSerializer(serializers.ModelSerializer):
                 "Please select either a food experience or a food tour."
             )
 
+        if not availability_session:
+            raise serializers.ValidationError(
+                "Please select an availability session."
+            )
+
         if data.get('number_of_participants', 0) < 1:
             raise serializers.ValidationError(
                 "At least one participant is required."
+            )
+
+        # Ensure the selected session belongs to the selected listing.
+        if food_experience:
+            if availability_session.food_experience_id != food_experience.id:
+                raise serializers.ValidationError(
+                    "The selected session does not belong to this food experience."
+                )
+
+        if food_tour:
+            if availability_session.food_tour_id != food_tour.id:
+                raise serializers.ValidationError(
+                    "The selected session does not belong to this food tour."
+                )
+
+        if not availability_session.is_active:
+            raise serializers.ValidationError(
+                "This availability session is no longer active."
             )
 
         return data
@@ -543,7 +717,6 @@ class BookingSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         validated_data['tourist'] = self.context['request'].user
         return Booking.objects.create(**validated_data)
-
 
 class BookingUpdateSerializer(serializers.ModelSerializer):
 

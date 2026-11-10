@@ -6,11 +6,13 @@ import {
   useLocation,
   useNavigate,
 } from 'react-router-dom';
-import { FaUser, FaChevronDown } from 'react-icons/fa';
+import { FaUser, FaChevronDown, FaSearch } from 'react-icons/fa';
 
 function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const [searchKeyword, setSearchKeyword] = useState('');
+  const [searchCategory, setSearchCategory] = useState('everything');
 
   const [userRole, setUserRole] = useState(
     localStorage.getItem('userRole')
@@ -46,6 +48,21 @@ function Navbar() {
   const isLoggedIn = Boolean(
     localStorage.getItem('accessToken')
   );
+
+  // Submit navbar search
+  const handleSearch = (e) => {
+    e.preventDefault();
+
+    const keyword = searchKeyword.trim();
+
+    if (!keyword) return;
+
+    navigate(
+      `/search?q=${encodeURIComponent(keyword)}&category=${searchCategory}`
+    );
+
+    closeMenu();
+  };
 
   // Reusable active navigation link
   const renderLink = (to, label) => (
@@ -111,7 +128,11 @@ function Navbar() {
           className="taste-brand"
           onClick={closeMenu}
         >
-          TasteLocal
+          <img
+            src="/images/logos/logo-tastelocal-transparent.png"
+            alt="TasteLocal"
+            className="taste-brand-logo"
+          />
         </Link>
 
         {/* Mobile hamburger button */}
@@ -150,18 +171,41 @@ function Navbar() {
             renderLink('/provider/bookings', 'Manage Bookings')
           )}
 
-          {/* Admin navigation */}
-{isLoggedIn && userRole === 'Admin' && (
-  <>
-    {renderLink('/admin/dashboard', 'Admin Dashboard')}
+          {/* Admin standalone navigation */}
+          {isLoggedIn && userRole === 'Admin' && (
+            renderLink('/admin/dashboard', 'Admin Dashboard')
+          )}
 
-    {renderLink('/admin/vendors', 'Manage Vendors')}
+          {/* Navbar Search */}
+          <form
+            className="taste-navbar-search"
+            onSubmit={handleSearch}
+          >
+            <input
+              type="search"
+              value={searchKeyword}
+              onChange={(e) => setSearchKeyword(e.target.value)}
+              placeholder="Search TasteLocal..."
+              aria-label="Search TasteLocal"
+            />
 
-    {renderLink('/admin/tour-operators', 'Manage Tour Operators')}
+            <select
+              value={searchCategory}
+              onChange={(e) => setSearchCategory(e.target.value)}
+              aria-label="Search category"
+            >
+              <option value="everything">Everything</option>
+              <option value="experiences">Experiences</option>
+              <option value="tours">Food Tours</option>
+            </select>
 
-    {renderLink('/admin/users', 'Manage Users')}
-  </>
-)}
+            <button
+              type="submit"
+              aria-label="Submit search"
+            >
+              <FaSearch />
+            </button>
+          </form>
 
           {/* Profile icon and dropdown */}
           <div className="taste-profile-dropdown">
@@ -186,179 +230,131 @@ function Navbar() {
                 {/* Vendor dropdown */}
                 {isLoggedIn && userRole === 'Vendor' && (
                   <>
-                    <Link
-                      to="/vendor/profile"
-                      onClick={closeMenu}
-                    >
+                    <Link to="/vendor/profile" onClick={closeMenu}>
                       My Account
                     </Link>
 
-                    <Link
-                      to="/vendor/dashboard"
-                      onClick={closeMenu}
-                    >
+                    <Link to="/vendor/dashboard" onClick={closeMenu}>
                       My Dashboard
                     </Link>
 
-                    <Link
-                      to="/provider/bookings"
-                      onClick={closeMenu}
-                    >
+                    <Link to="/provider/bookings" onClick={closeMenu}>
                       Manage Bookings
                     </Link>
 
-                    <Link
-                      to="/vendor/create-experience"
-                      onClick={closeMenu}
-                    >
+                    <Link to="/vendor/create-experience" onClick={closeMenu}>
                       Create Experiences
                     </Link>
 
-                    <Link
-                      to="/provider/reviews"
-                      onClick={closeMenu}
-                    >
+                    <Link to="/provider/reviews" onClick={closeMenu}>
                       Manage Reviews
                     </Link>
-<div className="taste-profile-divider"></div>
 
-{renderLogout()}
+                    <div className="taste-profile-divider"></div>
 
-{renderChangePassword()}
+                    {renderLogout()}
+                    {renderChangePassword()}
                   </>
                 )}
 
                 {/* Tour Operator dropdown */}
                 {isLoggedIn && userRole === 'Tour Operator' && (
                   <>
-                    <Link
-                      to="/operator/profile"
-                      onClick={closeMenu}
-                    >
+                    <Link to="/operator/profile" onClick={closeMenu}>
                       My Account
                     </Link>
 
-                    <Link
-                      to="/operator/dashboard"
-                      onClick={closeMenu}
-                    >
+                    <Link to="/operator/dashboard" onClick={closeMenu}>
                       My Dashboard
                     </Link>
 
-                    <Link
-                      to="/provider/bookings"
-                      onClick={closeMenu}
-                    >
+                    <Link to="/provider/bookings" onClick={closeMenu}>
                       Manage Bookings
                     </Link>
 
-                    <Link
-                      to="/operator/create-tour"
-                      onClick={closeMenu}
-                    >
+                    <Link to="/operator/create-tour" onClick={closeMenu}>
                       Create Tours
                     </Link>
 
-                    <Link
-                      to="/provider/reviews"
-                      onClick={closeMenu}
-                    >
+                    <Link to="/provider/reviews" onClick={closeMenu}>
                       Manage Reviews
                     </Link>
 
-<div className="taste-profile-divider"></div>
+                    <div className="taste-profile-divider"></div>
 
-{renderLogout()}
-
-{renderChangePassword()}
+                    {renderLogout()}
+                    {renderChangePassword()}
                   </>
                 )}
 
                 {/* Tourist dropdown */}
                 {isLoggedIn && userRole === 'Tourist' && (
                   <>
-                    <Link
-                      to="/tourist/profile"
-                      onClick={closeMenu}
-                    >
+                    <Link to="/tourist/profile" onClick={closeMenu}>
                       My Account
                     </Link>
 
-                    <Link
-                      to="/tourist/dashboard"
-                      onClick={closeMenu}
-                    >
+                    <Link to="/tourist/dashboard" onClick={closeMenu}>
                       My Dashboard
                     </Link>
 
-                    <Link
-                      to="/my-bookings"
-                      onClick={closeMenu}
-                    >
+                    <Link to="/my-bookings" onClick={closeMenu}>
                       My Bookings
                     </Link>
 
-                    <Link
-                      to="/my-itineraries"
-                      onClick={closeMenu}
-                    >
+                    <Link to="/my-itineraries" onClick={closeMenu}>
                       My Itineraries
                     </Link>
 
-                    <Link
-                      to="/my-favourites"
-                      onClick={closeMenu}
-                    >
+                    <Link to="/my-favourites" onClick={closeMenu}>
                       My Favourites
                     </Link>
 
-                    <Link
-                      to="/my-reviews"
-                      onClick={closeMenu}
-                    >
+                    <Link to="/my-reviews" onClick={closeMenu}>
                       My Reviews
                     </Link>
 
-<div className="taste-profile-divider"></div>
+                    <div className="taste-profile-divider"></div>
 
-{renderLogout()}
-
-{renderChangePassword()}
+                    {renderLogout()}
+                    {renderChangePassword()}
                   </>
                 )}
 
                 {/* Admin dropdown */}
                 {isLoggedIn && userRole === 'Admin' && (
                   <>
-                    <Link
-                      to="/admin/dashboard"
-                      onClick={closeMenu}
-                    >
+                    <Link to="/admin/dashboard" onClick={closeMenu}>
                       Admin Dashboard
                     </Link>
 
-<div className="taste-profile-divider"></div>
+                    <Link to="/admin/users" onClick={closeMenu}>
+                      Manage Users
+                    </Link>
 
-{renderLogout()}
+                    <Link to="/admin/vendors" onClick={closeMenu}>
+                      Manage Vendors
+                    </Link>
 
-{renderChangePassword()}
+                    <Link to="/admin/tour-operators" onClick={closeMenu}>
+                      Manage Tour Operators
+                    </Link>
+
+                    <div className="taste-profile-divider"></div>
+
+                    {renderLogout()}
+                    {renderChangePassword()}
                   </>
                 )}
 
                 {/* Guest dropdown */}
                 {!isLoggedIn && (
                   <>
-                    <Link
-                      to="/login"
-                      onClick={closeMenu}
-                    >
+                    <Link to="/login" onClick={closeMenu}>
                       Login
                     </Link>
 
-                    <Link
-                      to="/register"
-                      onClick={closeMenu}
-                    >
+                    <Link to="/register" onClick={closeMenu}>
                       Sign Up
                     </Link>
 

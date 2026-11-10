@@ -20,8 +20,6 @@ function Footer() {
           <h4>Explore</h4>
           <Link to="/food-experiences">Food Experiences</Link>
           <Link to="/food-tours">Food Tours</Link>
-          <Link to="/my-itineraries">My Itineraries</Link>
-          <Link to="/my-favourites">My Favourites</Link>
         </div>
 
         <div className="taste-footer-links">
