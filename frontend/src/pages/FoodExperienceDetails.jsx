@@ -423,6 +423,13 @@ function FoodExperienceDetails() {
                   <strong>{experience.city || 'Not specified'}</strong>
                 </div>
 
+                <div className="detail-information-item">
+                  <span>Vendor</span>
+<strong>
+  {experience.vendor_business_name || 'Not specified'}
+</strong>
+                </div>
+
               </div>
 
             </section>

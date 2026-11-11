@@ -458,6 +458,13 @@ function FoodTourDetails() {
                   <strong>SGD {tour.price}</strong>
                 </div>
 
+                <div className="detail-information-item">
+                  <span>Tour Operator</span>
+<strong>
+  {tour.tour_operator_business_name || 'Not specified'}
+</strong>
+                </div>
+
               </div>
             </section>
 

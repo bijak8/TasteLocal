@@ -8,7 +8,11 @@ function Footer() {
 
         <div className="taste-footer-brand">
           <Link to="/" className="taste-footer-logo">
-            TasteLocal
+              <img
+            src="/images/logos/logo-tastelocal-transparent.png"
+            alt="TasteLocal"
+            className="taste-brand-logo"
+          />
           </Link>
           <p>
             Discover local food, culture and experiences.

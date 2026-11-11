@@ -9,7 +9,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated, BasePermission
 from rest_framework.exceptions import NotFound, PermissionDenied
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from django.db import transaction
-from django.db.models import Q
+from django.db.models import Q, Avg, Count
 from django.utils import timezone
 from rest_framework.exceptions import ValidationError
 
@@ -1658,6 +1658,7 @@ class IsTasteLocalAdmin(BasePermission):
 
 
 
+
 # ==========================================
 # ADMIN DASHBOARD
 # ==========================================
@@ -1666,6 +1667,89 @@ class AdminDashboardView(APIView):
     permission_classes = [IsTasteLocalAdmin]
 
     def get(self, request):
+
+        # ----------------------------------
+        # Reviews and Ratings
+        # ----------------------------------
+
+        review_summary = Review.objects.aggregate(
+            average_rating=Avg('rating')
+        )
+
+        average_rating = review_summary['average_rating'] or 0
+
+        rating_counts = Review.objects.values(
+            'rating'
+        ).annotate(
+            count=Count('id')
+        ).order_by('rating')
+
+        rating_distribution = {
+            item['rating']: item['count']
+            for item in rating_counts
+        }
+
+        reviews_by_rating = [
+            {
+                'rating': rating,
+                'count': rating_distribution.get(rating, 0)
+            }
+            for rating in range(1, 6)
+        ]
+
+        # ----------------------------------
+        # Most Popular Booked Listings
+        # ----------------------------------
+
+        popular_experiences = FoodExperience.objects.annotate(
+            booking_count=Count(
+                'bookings',
+                filter=Q(
+                    bookings__status__in=['pending', 'confirmed']
+                )
+            )
+        ).filter(
+            booking_count__gt=0
+        ).order_by('-booking_count')[:5]
+
+        popular_tours = FoodTour.objects.annotate(
+            booking_count=Count(
+                'bookings',
+                filter=Q(
+                    bookings__status__in=['pending', 'confirmed']
+                )
+            )
+        ).filter(
+            booking_count__gt=0
+        ).order_by('-booking_count')[:5]
+
+        popular_listings = []
+
+        for experience in popular_experiences:
+            popular_listings.append({
+                'id': experience.id,
+                'title': experience.title,
+                'type': 'Food Experience',
+                'booking_count': experience.booking_count
+            })
+
+        for tour in popular_tours:
+            popular_listings.append({
+                'id': tour.id,
+                'title': tour.title,
+                'type': 'Food Tour',
+                'booking_count': tour.booking_count
+            })
+
+        popular_listings = sorted(
+            popular_listings,
+            key=lambda item: item['booking_count'],
+            reverse=True
+        )[:5]
+
+        # ----------------------------------
+        # Existing Dashboard Statistics
+        # ----------------------------------
 
         return Response({
 
@@ -1742,5 +1826,12 @@ class AdminDashboardView(APIView):
             # Review statistics
             'total_reviews': Review.objects.count(),
 
-        })
+            # New: Reviews and Ratings Chart
+            'average_rating': round(float(average_rating), 2),
 
+            'reviews_by_rating': reviews_by_rating,
+
+            # New: Most Popular Booked Listings Chart
+            'popular_listings': popular_listings,
+
+        })

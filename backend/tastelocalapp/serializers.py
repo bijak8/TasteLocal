@@ -338,6 +338,7 @@ class VendorProfileSerializer(serializers.ModelSerializer):
             'social_media',
             'status',
             'created_at',
+            'vendor_business_name',
         ]
 
         read_only_fields = [
@@ -378,6 +379,10 @@ class TourOperatorProfileSerializer(serializers.ModelSerializer):
 
 class FoodExperienceSerializer(serializers.ModelSerializer):
 
+    vendor_business_name = serializers.CharField(
+    source='vendor.business_name',
+    read_only=True
+)
     class Meta:
         model = FoodExperience
         fields = [
@@ -398,6 +403,7 @@ class FoodExperienceSerializer(serializers.ModelSerializer):
             'image',
             'status',
             'created_at',
+            'vendor_business_name',
         ]
 
         read_only_fields = [
@@ -428,6 +434,10 @@ class FoodExperienceSerializer(serializers.ModelSerializer):
 
 class FoodTourSerializer(serializers.ModelSerializer):
 
+    tour_operator_business_name = serializers.CharField(
+    source='tour_operator.business_name',
+    read_only=True
+)
     class Meta:
         model = FoodTour
         fields = [
@@ -444,6 +454,7 @@ class FoodTourSerializer(serializers.ModelSerializer):
             'image',
             'status',
             'created_at',
+            'tour_operator_business_name',
         ]
 
         read_only_fields = [

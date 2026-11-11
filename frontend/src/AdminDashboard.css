@@ -815,3 +815,134 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ==========================================
+   ADMIN DASHBOARD CHARTS
+========================================== */
+
+.admin-dashboard-charts-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px;
+}
+
+.admin-dashboard-chart-card {
+  min-width: 0;
+  padding: 25px;
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-medium);
+  box-shadow: var(--shadow-card);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.admin-dashboard-chart-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-card);
+}
+
+.admin-dashboard-chart-heading {
+  margin-bottom: 12px;
+}
+
+.admin-dashboard-chart-heading h3 {
+  color: var(--color-deep-purple);
+  font-family: var(--font-heading);
+  font-size: 17px;
+  margin: 0 0 7px;
+}
+
+.admin-dashboard-chart-heading p {
+  color: var(--color-muted);
+  font-size: 12px;
+  margin: 0;
+}
+
+.admin-dashboard-chart-card .recharts-wrapper {
+  max-width: 100%;
+}
+
+.admin-dashboard-chart-card .recharts-legend-item-text {
+  color: var(--color-body) !important;
+  font-family: inherit;
+  font-size: 11px;
+}
+
+.admin-dashboard-chart-card .recharts-cartesian-axis-tick-value {
+  fill: var(--color-muted);
+  font-size: 11px;
+}
+
+.admin-dashboard-chart-card .recharts-cartesian-grid-horizontal line {
+  stroke: var(--color-border);
+}
+
+.admin-dashboard-chart-card .recharts-tooltip-wrapper {
+  outline: none;
+}
+
+.admin-dashboard-chart-empty {
+  min-height: 280px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  color: var(--color-muted);
+  font-size: 13px;
+  text-align: center;
+  background: #FFFEFC;
+  border-radius: var(--radius-small);
+}
+
+/* ==========================================
+   CHART RESPONSIVE DESIGN
+========================================== */
+
+@media (max-width: 900px) {
+  .admin-dashboard-charts-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .admin-dashboard-chart-card {
+    padding: 17px 12px;
+  }
+
+  .admin-dashboard-chart-heading {
+    padding: 0 5px;
+  }
+
+  .admin-dashboard-chart-heading h3 {
+    font-size: 16px;
+  }
+}
+
+
+/* ==========================================
+   CLICKABLE PROVIDER HEADINGS
+========================================== */
+
+.admin-dashboard-panel-heading h3[role="button"] {
+  display: inline-block;
+  cursor: pointer;
+  transition: color 0.2s ease, text-decoration-color 0.2s ease,
+    transform 0.2s ease;
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 5px;
+}
+
+.admin-dashboard-panel-heading h3[role="button"]:hover {
+  color: var(--color-royal-purple);
+  text-decoration-color: var(--color-golden-yellow);
+  transform: translateX(3px);
+}
+
+.admin-dashboard-panel-heading h3[role="button"]:focus-visible {
+  color: var(--color-royal-purple);
+  outline: 2px solid var(--color-royal-purple);
+  outline-offset: 5px;
+  border-radius: 3px;
+}
