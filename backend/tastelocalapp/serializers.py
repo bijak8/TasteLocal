@@ -338,7 +338,6 @@ class VendorProfileSerializer(serializers.ModelSerializer):
             'social_media',
             'status',
             'created_at',
-            'vendor_business_name',
         ]
 
         read_only_fields = [

@@ -35,6 +35,201 @@ function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [retryCount, setRetryCount] = useState(0);
+    // Vendor Bulk Import States
+  const [vendorImportFile, setVendorImportFile] = useState(null);
+  const [vendorImporting, setVendorImporting] = useState(false);
+  const [vendorImportResult, setVendorImportResult] = useState(null);
+  const [vendorImportError, setVendorImportError] = useState('');
+
+  const [tourOperatorImportFile, setTourOperatorImportFile] = useState(null);
+  const [tourOperatorImporting, setTourOperatorImporting] = useState(false);
+  const [tourOperatorImportResult, setTourOperatorImportResult] = useState(null);
+  const [tourOperatorImportError, setTourOperatorImportError] = useState('');
+
+  // Handle Vendor CSV Bulk Import
+  const handleVendorBulkImport = async (event) => {
+    event.preventDefault();
+
+    if (!vendorImportFile) {
+      setVendorImportError('Please select a CSV file.');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('file', vendorImportFile);
+
+    try {
+      setVendorImporting(true);
+      setVendorImportError('');
+      setVendorImportResult(null);
+
+      const response = await API.post(
+        'admin/vendors/bulk-import/',
+        formData
+      );
+
+      setVendorImportResult(response.data);
+      setVendorImportFile(null);
+
+      // Refresh dashboard statistics
+      setRetryCount((previous) => previous + 1);
+
+    } catch (err) {
+      console.error('Vendor bulk import error:', err);
+
+      setVendorImportError(
+        err.response?.data?.error ||
+        err.response?.data?.detail ||
+        'Unable to import vendors. Please try again.'
+      );
+
+    } finally {
+      setVendorImporting(false);
+    }
+  };
+
+  // Download Vendor CSV Template
+  const handleDownloadVendorTemplate = () => {
+    const headers = [
+      'business_name',
+      'owner_name',
+      'email',
+      'phone',
+      'description',
+      'website',
+      'social_media',
+      'address',
+      'city',
+      'area',
+      'latitude',
+      'longitude',
+      'logo',
+    ];
+
+    const sampleRow = [
+      'Example Food Business',
+      'John Tan',
+      'john@example.com',
+      '0123456789',
+      'Traditional local food business',
+      'https://example.com',
+      'https://instagram.com/example',
+      '123 Example Street',
+      'Singapore',
+      'Little India',
+      '1.3067',
+      '103.8490',
+      '',
+    ];
+
+    const escapeCsvValue = (value) =>
+      `"${String(value).replace(/"/g, '""')}"`;
+
+    const csvContent = [
+      headers.join(','),
+      sampleRow.map(escapeCsvValue).join(','),
+    ].join('\n');
+
+    const blob = new Blob([csvContent], {
+      type: 'text/csv;charset=utf-8;',
+    });
+
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+
+    link.href = url;
+    link.download = 'tastelocal_vendor_template.csv';
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    URL.revokeObjectURL(url);
+  };
+
+
+  // Handle Tour Operator CSV Bulk Import
+  const handleTourOperatorBulkImport = async (event) => {
+    event.preventDefault();
+
+    if (!tourOperatorImportFile) {
+      setTourOperatorImportError('Please select a CSV file.');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('file', tourOperatorImportFile);
+
+    try {
+      setTourOperatorImporting(true);
+      setTourOperatorImportError('');
+      setTourOperatorImportResult(null);
+
+      const response = await API.post(
+        'admin/tour-operators/bulk-import/',
+        formData
+      );
+
+      setTourOperatorImportResult(response.data);
+      setTourOperatorImportFile(null);
+      setRetryCount((previous) => previous + 1);
+    } catch (err) {
+      console.error('Tour Operator bulk import error:', err);
+      setTourOperatorImportError(
+        err.response?.data?.error ||
+        err.response?.data?.detail ||
+        'Unable to import tour operators. Please try again.'
+      );
+    } finally {
+      setTourOperatorImporting(false);
+    }
+  };
+
+  // Download Tour Operator CSV Template
+  const handleDownloadTourOperatorTemplate = () => {
+    const headers = [
+      'business_name',
+      'owner_name',
+      'email',
+      'phone',
+      'description',
+      'website',
+      'social_media',
+      'logo',
+    ];
+
+    const sampleRow = [
+      'Example Tour Company',
+      'Jane Tan',
+      'jane@example.com',
+      '0123456789',
+      'Local food and cultural tour operator',
+      'https://example.com',
+      'https://instagram.com/example',
+      '',
+    ];
+
+    const escapeCsvValue = (value) =>
+      '"' + String(value).replace(/"/g, '""') + '"';
+
+    const csvContent = [
+      headers.join(','),
+      sampleRow.map(escapeCsvValue).join(','),
+    ].join('\n');
+
+    const blob = new Blob([csvContent], {
+      type: 'text/csv;charset=utf-8;',
+    });
+
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'tastelocal_tour_operator_template.csv';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
 
   // Fetch Admin Dashboard Statistics
   useEffect(() => {
@@ -1272,6 +1467,372 @@ function AdminDashboard() {
               </strong>
             </div>
 
+          </div>
+        </section>
+
+
+        {/* Bulk Import Providers */}
+        <section className="admin-dashboard-section admin-provider-import-section">
+          <div className="admin-dashboard-section-heading">
+            <span className="admin-dashboard-section-label">DATA MANAGEMENT</span>
+            <h2>Bulk Import Providers</h2>
+            <p>Import multiple vendors and tour operators using CSV files.</p>
+          </div>
+
+          <div className="admin-provider-import-grid">
+          <div className="admin-dashboard-chart-card admin-provider-import-card">
+
+            <div className="admin-dashboard-chart-heading">
+              <h3>Import Vendors</h3>
+              <p>
+                Upload a CSV file containing vendor business information.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              className="admin-dashboard-primary-btn"
+              onClick={handleDownloadVendorTemplate}
+              style={{ marginBottom: '20px' }}
+            >
+              Download Vendor CSV Template
+            </button>
+
+            <form onSubmit={handleVendorBulkImport}>
+
+              <div style={{ marginBottom: '20px' }}>
+                <label htmlFor="vendor-csv-file" className="admin-provider-import-label">
+                  Select Vendor CSV File
+                </label>
+
+                <input
+                  id="vendor-csv-file"
+                  type="file"
+                  accept=".csv,text/csv"
+                  onChange={(event) => {
+                    setVendorImportFile(
+                      event.target.files[0] || null
+                    );
+                    setVendorImportError('');
+                    setVendorImportResult(null);
+                  }}
+                />
+              </div>
+
+              {vendorImportFile && (
+                <p style={{ color: '#77717F', fontSize: '13px' }}>
+                  Selected file: {vendorImportFile.name}
+                </p>
+              )}
+
+
+              <button
+                type="submit"
+                className="admin-dashboard-primary-btn"
+                disabled={vendorImporting || !vendorImportFile}
+              >
+                {vendorImporting
+                  ? 'Importing Vendors...'
+                  : 'Upload and Import Vendors'}
+              </button>
+
+            </form>
+
+            {vendorImportError && (
+              <div
+                style={{
+                  marginTop: '20px',
+                  padding: '14px',
+                  backgroundColor: '#FCECEC',
+                  color: '#B54747',
+                  borderRadius: '8px',
+                }}
+              >
+                {vendorImportError}
+              </div>
+            )}
+
+            {vendorImportResult && (
+              <div style={{ marginTop: '25px' }}>
+
+                <h3>Import Results</h3>
+
+                <div
+                  style={{
+                    display: 'flex',
+                    gap: '20px',
+                    flexWrap: 'wrap',
+                    margin: '15px 0',
+                  }}
+                >
+                  <div>
+                    <strong style={{ color: '#398568' }}>
+                      {vendorImportResult.imported_count}
+                    </strong>
+                    <p>Successfully Imported</p>
+                  </div>
+
+                  <div>
+                    <strong style={{ color: '#C66B6B' }}>
+                      {vendorImportResult.skipped_count}
+                    </strong>
+                    <p>Skipped Records</p>
+                  </div>
+                </div>
+
+                {vendorImportResult.imported?.length > 0 && (
+                  <>
+                    <h3>Generated Account Credentials</h3>
+
+                    <p style={{ fontSize: '13px', color: '#77717F' }}>
+                      Save these credentials securely. Initial passwords
+                      are displayed only in this import response.
+                    </p>
+
+                    <div style={{ overflowX: 'auto' }}>
+                      <table style={{
+                        width: '100%',
+                        borderCollapse: 'collapse',
+                        marginTop: '15px',
+                      }}>
+                        <thead>
+                          <tr>
+                            <th>Business Name</th>
+                            <th>Username</th>
+                            <th>Email</th>
+                            <th>Initial Password</th>
+                          </tr>
+                        </thead>
+
+                        <tbody>
+                          {vendorImportResult.imported.map((vendor) => (
+                            <tr key={vendor.vendor_id}>
+                              <td>{vendor.business_name}</td>
+                              <td>{vendor.username}</td>
+                              <td>{vendor.email}</td>
+                              <td>
+                                <code>{vendor.initial_password}</code>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </>
+                )}
+
+                {vendorImportResult.skipped?.length > 0 && (
+                  <>
+                    <h3 style={{ marginTop: '25px' }}>
+                      Skipped Records
+                    </h3>
+
+                    <div style={{ overflowX: 'auto' }}>
+                      <table style={{
+                        width: '100%',
+                        borderCollapse: 'collapse',
+                      }}>
+                        <thead>
+                          <tr>
+                            <th>CSV Row</th>
+                            <th>Reason</th>
+                          </tr>
+                        </thead>
+
+                        <tbody>
+                          {vendorImportResult.skipped.map((item, index) => (
+                            <tr key={`${item.row}-${index}`}>
+                              <td>{item.row}</td>
+                              <td>{item.reason}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </>
+                )}
+
+              </div>
+            )}
+
+          </div>
+
+          <div className="admin-dashboard-chart-card admin-provider-import-card">
+
+            <div className="admin-dashboard-chart-heading">
+              <h3>Import Tour Operators</h3>
+              <p>
+                Upload a CSV file containing tour operator business information.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              className="admin-dashboard-primary-btn"
+              onClick={handleDownloadTourOperatorTemplate}
+              style={{ marginBottom: '20px' }}
+            >
+              Download Tour Operator CSV Template
+            </button>
+
+            <form onSubmit={handleTourOperatorBulkImport}>
+
+              <div style={{ marginBottom: '20px' }}>
+                <label htmlFor="tour-operator-csv-file" className="admin-provider-import-label">
+                  Select Tour Operator CSV File
+                </label>
+
+                <input
+                  id="tour-operator-csv-file"
+                  type="file"
+                  accept=".csv,text/csv"
+                  onChange={(event) => {
+                    setTourOperatorImportFile(
+                      event.target.files[0] || null
+                    );
+                    setTourOperatorImportError('');
+                    setTourOperatorImportResult(null);
+                  }}
+                />
+              </div>
+
+              {tourOperatorImportFile && (
+                <p style={{ color: '#77717F', fontSize: '13px' }}>
+                  Selected file: {tourOperatorImportFile.name}
+                </p>
+              )}
+
+
+              <button
+                type="submit"
+                className="admin-dashboard-primary-btn"
+                disabled={tourOperatorImporting || !tourOperatorImportFile}
+              >
+                {tourOperatorImporting
+                  ? 'Importing Tour Operators...'
+                  : 'Upload and Import Tour Operators'}
+              </button>
+
+            </form>
+
+            {tourOperatorImportError && (
+              <div
+                style={{
+                  marginTop: '20px',
+                  padding: '14px',
+                  backgroundColor: '#FCECEC',
+                  color: '#B54747',
+                  borderRadius: '8px',
+                }}
+              >
+                {tourOperatorImportError}
+              </div>
+            )}
+
+            {tourOperatorImportResult && (
+              <div style={{ marginTop: '25px' }}>
+
+                <h3>Import Results</h3>
+
+                <div
+                  style={{
+                    display: 'flex',
+                    gap: '20px',
+                    flexWrap: 'wrap',
+                    margin: '15px 0',
+                  }}
+                >
+                  <div>
+                    <strong style={{ color: '#398568' }}>
+                      {tourOperatorImportResult.imported_count}
+                    </strong>
+                    <p>Successfully Imported</p>
+                  </div>
+
+                  <div>
+                    <strong style={{ color: '#C66B6B' }}>
+                      {tourOperatorImportResult.skipped_count}
+                    </strong>
+                    <p>Skipped Records</p>
+                  </div>
+                </div>
+
+                {tourOperatorImportResult.imported?.length > 0 && (
+                  <>
+                    <h3>Generated Account Credentials</h3>
+
+                    <p style={{ fontSize: '13px', color: '#77717F' }}>
+                      Save these credentials securely. Initial passwords
+                      are displayed only in this import response.
+                    </p>
+
+                    <div style={{ overflowX: 'auto' }}>
+                      <table style={{
+                        width: '100%',
+                        borderCollapse: 'collapse',
+                        marginTop: '15px',
+                      }}>
+                        <thead>
+                          <tr>
+                            <th>Business Name</th>
+                            <th>Username</th>
+                            <th>Email</th>
+                            <th>Initial Password</th>
+                          </tr>
+                        </thead>
+
+                        <tbody>
+                          {tourOperatorImportResult.imported.map((operator) => (
+                            <tr key={operator.tour_operator_id}>
+                              <td>{operator.business_name}</td>
+                              <td>{operator.username}</td>
+                              <td>{operator.email}</td>
+                              <td>
+                                <code>{operator.initial_password}</code>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </>
+                )}
+
+                {tourOperatorImportResult.skipped?.length > 0 && (
+                  <>
+                    <h3 style={{ marginTop: '25px' }}>
+                      Skipped Records
+                    </h3>
+
+                    <div style={{ overflowX: 'auto' }}>
+                      <table style={{
+                        width: '100%',
+                        borderCollapse: 'collapse',
+                      }}>
+                        <thead>
+                          <tr>
+                            <th>CSV Row</th>
+                            <th>Reason</th>
+                          </tr>
+                        </thead>
+
+                        <tbody>
+                          {tourOperatorImportResult.skipped.map((item, index) => (
+                            <tr key={`${item.row}-${index}`}>
+                              <td>{item.row}</td>
+                              <td>{item.reason}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </>
+                )}
+
+              </div>
+            )}
+
+          </div>
           </div>
         </section>
 

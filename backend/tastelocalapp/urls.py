@@ -66,7 +66,6 @@ from .views import (
     GlobalSearchView,
     FoodDiscoveryAssistantView,
     IntelligentSearchView,
-    
 )
 
 
@@ -96,6 +95,21 @@ from .admin_views import (
     AdminUserListView,
     AdminUserStatusView,
 )
+
+
+# ==========================================
+# BULK IMPORT VIEWS
+# ==========================================
+
+from .vendor_bulk_import import (
+    AdminVendorBulkImportView,
+)
+
+from .tour_operator_bulk_import import (
+    AdminTourOperatorBulkImportView,
+)
+
+
 
 
 # ==========================================
@@ -189,17 +203,20 @@ urlpatterns = [
         GlobalSearchView.as_view(),
         name='global-search'
     ),
+
     # AI Food Discovery Assistant
     path(
         'food-discovery-assistant/',
         FoodDiscoveryAssistantView.as_view(),
         name='food-discovery-assistant'
     ),
+
     path(
         'intelligent-search/',
         IntelligentSearchView.as_view(),
         name='intelligent-search'
     ),
+
     # Create food experience
     path(
         'food-experiences/create/',
@@ -320,6 +337,7 @@ urlpatterns = [
         name='booking-create'
     ),
 
+
     # ==========================================
     # AVAILABILITY SESSIONS
     # ==========================================
@@ -330,6 +348,7 @@ urlpatterns = [
         VendorAvailabilitySessionListCreateView.as_view(),
         name='vendor-availability-sessions'
     ),
+
     path(
         'vendor/availability-sessions/<int:pk>/',
         VendorAvailabilitySessionDetailView.as_view(),
@@ -342,6 +361,7 @@ urlpatterns = [
         OperatorAvailabilitySessionListCreateView.as_view(),
         name='operator-availability-sessions'
     ),
+
     path(
         'operator/availability-sessions/<int:pk>/',
         OperatorAvailabilitySessionDetailView.as_view(),
@@ -354,6 +374,7 @@ urlpatterns = [
         FoodExperienceAvailabilityView.as_view(),
         name='food-experience-availability'
     ),
+
     path(
         'food-tours/<int:tour_id>/availability/',
         FoodTourAvailabilityView.as_view(),
@@ -382,10 +403,10 @@ urlpatterns = [
     ),
 
     path(
-    'my-bookings/<int:pk>/cancel/',
-    TouristBookingCancelView.as_view(),
-    name='tourist-booking-cancel'
-    ),  
+        'my-bookings/<int:pk>/cancel/',
+        TouristBookingCancelView.as_view(),
+        name='tourist-booking-cancel'
+    ),
 
 
     # ==========================================
@@ -538,6 +559,13 @@ urlpatterns = [
         name='admin-vendor-status'
     ),
 
+    # Bulk import vendors
+    path(
+        'admin/vendors/bulk-import/',
+        AdminVendorBulkImportView.as_view(),
+        name='admin-vendor-bulk-import'
+    ),
+
 
     # ==========================================
     # 15. ADMIN TOUR OPERATOR MANAGEMENT
@@ -555,6 +583,13 @@ urlpatterns = [
         'admin/tour-operators/<int:pk>/status/',
         AdminTourOperatorStatusView.as_view(),
         name='admin-tour-operator-status'
+    ),
+
+    # Bulk import tour operators
+    path(
+        'admin/tour-operators/bulk-import/',
+        AdminTourOperatorBulkImportView.as_view(),
+        name='admin-tour-operator-bulk-import'
     ),
 
 
