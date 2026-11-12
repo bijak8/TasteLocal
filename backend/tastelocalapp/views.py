@@ -26,6 +26,9 @@ from .models import (
     Itinerary,
     ItineraryItem,
     Favourite,
+    CuisineCategory,
+    ExperienceCategory,
+    FoodTourCategory,
 )
 
 from .serializers import (
@@ -47,6 +50,9 @@ from .serializers import (
     VendorProfileSerializer,
     TourOperatorProfileSerializer,
     ProviderReviewSerializer,
+    CuisineCategorySerializer,
+    ExperienceCategorySerializer,
+    FoodTourCategorySerializer,
 )
 
 
@@ -1835,3 +1841,38 @@ class AdminDashboardView(APIView):
             'popular_listings': popular_listings,
 
         })
+
+# ==========================================
+# PUBLIC CATEGORY LISTING
+# ==========================================
+
+class PublicCategoryListView(generics.ListAPIView):
+
+    permission_classes = [AllowAny]
+
+    category_model = None
+    serializer_class = None
+
+    def get_queryset(self):
+
+        return self.category_model.objects.filter(
+            is_active=True
+        ).order_by('name')
+
+
+class PublicCuisineCategoryListView(PublicCategoryListView):
+
+    category_model = CuisineCategory
+    serializer_class = CuisineCategorySerializer
+
+
+class PublicExperienceCategoryListView(PublicCategoryListView):
+
+    category_model = ExperienceCategory
+    serializer_class = ExperienceCategorySerializer
+
+
+class PublicFoodTourCategoryListView(PublicCategoryListView):
+
+    category_model = FoodTourCategory
+    serializer_class = FoodTourCategorySerializer

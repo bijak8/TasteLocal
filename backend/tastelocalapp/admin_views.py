@@ -12,11 +12,17 @@ from .views import IsTasteLocalAdmin
 from .models import (
     Vendor,
     TourOperator,
+    CuisineCategory,
+    ExperienceCategory,
+    FoodTourCategory,
 )
 
 from .serializers import (
     VendorProfileSerializer,
     TourOperatorProfileSerializer,
+    CuisineCategorySerializer,
+    ExperienceCategorySerializer,
+    FoodTourCategorySerializer,
 )
 
 
@@ -385,6 +391,154 @@ class AdminUserListView(APIView):
             'results': results,
         })
 
+# ==========================================
+# ADMIN CATEGORY MANAGEMENT
+# ==========================================
+
+class AdminCategoryListCreateView(APIView):
+
+    permission_classes = [IsTasteLocalAdmin]
+
+    category_model = None
+    serializer_class = None
+
+    # List all categories
+    def get(self, request):
+
+        categories = self.category_model.objects.all().order_by(
+            'name'
+        )
+
+        serializer = self.serializer_class(
+            categories,
+            many=True
+        )
+
+        return Response(serializer.data)
+
+    # Create a new category
+    def post(self, request):
+
+        serializer = self.serializer_class(
+            data=request.data
+        )
+
+        if serializer.is_valid():
+            serializer.save()
+
+            return Response(
+                serializer.data,
+                status=status.HTTP_201_CREATED
+            )
+
+        return Response(
+            serializer.errors,
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+
+class AdminCategoryDetailView(APIView):
+
+    permission_classes = [IsTasteLocalAdmin]
+
+    category_model = None
+    serializer_class = None
+
+    # Retrieve one category
+    def get(self, request, pk):
+
+        category = get_object_or_404(
+            self.category_model,
+            pk=pk
+        )
+
+        serializer = self.serializer_class(category)
+
+        return Response(serializer.data)
+
+    # Edit category name or active status
+    def patch(self, request, pk):
+
+        category = get_object_or_404(
+            self.category_model,
+            pk=pk
+        )
+
+        serializer = self.serializer_class(
+            category,
+            data=request.data,
+            partial=True
+        )
+
+        if serializer.is_valid():
+            serializer.save()
+
+            return Response(serializer.data)
+
+        return Response(
+            serializer.errors,
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+
+# ==========================================
+# CUISINE CATEGORY MANAGEMENT
+# ==========================================
+
+class AdminCuisineCategoryListCreateView(
+    AdminCategoryListCreateView
+):
+
+    category_model = CuisineCategory
+    serializer_class = CuisineCategorySerializer
+
+
+class AdminCuisineCategoryDetailView(
+    AdminCategoryDetailView
+):
+
+    category_model = CuisineCategory
+    serializer_class = CuisineCategorySerializer
+
+
+# ==========================================
+# EXPERIENCE CATEGORY MANAGEMENT
+# ==========================================
+
+class AdminExperienceCategoryListCreateView(
+    AdminCategoryListCreateView
+):
+
+    category_model = ExperienceCategory
+    serializer_class = ExperienceCategorySerializer
+
+
+class AdminExperienceCategoryDetailView(
+    AdminCategoryDetailView
+):
+
+    category_model = ExperienceCategory
+    serializer_class = ExperienceCategorySerializer
+
+
+# ==========================================
+# FOOD TOUR CATEGORY MANAGEMENT
+# ==========================================
+
+class AdminFoodTourCategoryListCreateView(
+    AdminCategoryListCreateView
+):
+
+    category_model = FoodTourCategory
+    serializer_class = FoodTourCategorySerializer
+
+
+class AdminFoodTourCategoryDetailView(
+    AdminCategoryDetailView
+):
+
+    category_model = FoodTourCategory
+    serializer_class = FoodTourCategorySerializer
 
 # ==========================================
 # ADMIN ACTIVATE / DEACTIVATE USER

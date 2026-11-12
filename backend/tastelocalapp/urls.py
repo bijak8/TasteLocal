@@ -66,6 +66,10 @@ from .views import (
     GlobalSearchView,
     FoodDiscoveryAssistantView,
     IntelligentSearchView,
+
+    PublicCuisineCategoryListView,
+    PublicExperienceCategoryListView,
+    PublicFoodTourCategoryListView,
 )
 
 
@@ -94,6 +98,13 @@ from .admin_views import (
     AdminTourOperatorStatusView,
     AdminUserListView,
     AdminUserStatusView,
+
+    AdminCuisineCategoryListCreateView,
+    AdminCuisineCategoryDetailView,
+    AdminExperienceCategoryListCreateView,
+    AdminExperienceCategoryDetailView,
+    AdminFoodTourCategoryListCreateView,
+    AdminFoodTourCategoryDetailView,
 )
 
 
@@ -108,8 +119,6 @@ from .vendor_bulk_import import (
 from .tour_operator_bulk_import import (
     AdminTourOperatorBulkImportView,
 )
-
-
 
 
 # ==========================================
@@ -609,6 +618,73 @@ urlpatterns = [
         'admin/users/<int:pk>/status/',
         AdminUserStatusView.as_view(),
         name='admin-user-status'
+    ),
+
+
+    # ==========================================
+    # 17. PUBLIC CATEGORY LISTING
+    # ==========================================
+
+    path(
+        'categories/cuisine/',
+        PublicCuisineCategoryListView.as_view(),
+        name='public-cuisine-category-list'
+    ),
+
+    path(
+        'categories/experience/',
+        PublicExperienceCategoryListView.as_view(),
+        name='public-experience-category-list'
+    ),
+
+    path(
+        'categories/food-tour/',
+        PublicFoodTourCategoryListView.as_view(),
+        name='public-food-tour-category-list'
+    ),
+
+
+    # ==========================================
+    # 18. ADMIN CATEGORY MANAGEMENT
+    # ==========================================
+
+    # Cuisine categories
+    path(
+        'admin/categories/cuisine/',
+        AdminCuisineCategoryListCreateView.as_view(),
+        name='admin-cuisine-category-list-create'
+    ),
+
+    path(
+        'admin/categories/cuisine/<int:pk>/',
+        AdminCuisineCategoryDetailView.as_view(),
+        name='admin-cuisine-category-detail'
+    ),
+
+    # Experience categories
+    path(
+        'admin/categories/experience/',
+        AdminExperienceCategoryListCreateView.as_view(),
+        name='admin-experience-category-list-create'
+    ),
+
+    path(
+        'admin/categories/experience/<int:pk>/',
+        AdminExperienceCategoryDetailView.as_view(),
+        name='admin-experience-category-detail'
+    ),
+
+    # Food tour categories
+    path(
+        'admin/categories/food-tour/',
+        AdminFoodTourCategoryListCreateView.as_view(),
+        name='admin-food-tour-category-list-create'
+    ),
+
+    path(
+        'admin/categories/food-tour/<int:pk>/',
+        AdminFoodTourCategoryDetailView.as_view(),
+        name='admin-food-tour-category-detail'
     ),
 
 ]

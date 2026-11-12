@@ -42,6 +42,7 @@ import AdminDashboard from './pages/AdminDashboard';
 import AdminVendorManagement from './pages/AdminVendorManagement';
 import AdminTourOperatorManagement from './pages/AdminTourOperatorManagement';
 import AdminUserManagement from './pages/AdminUserManagement';
+import AdminCategoryManagement from './pages/AdminCategoryManagement';
 
 // Edit provider pages
 import EditFoodExperience from './pages/EditFoodExperience';
@@ -235,6 +236,11 @@ function App() {
           <Route
             path="/admin/users"
             element={<AdminUserManagement />}
+          />
+
+          <Route
+            path="/admin/categories"
+            element={<AdminCategoryManagement />}
           />
 
         </Route>

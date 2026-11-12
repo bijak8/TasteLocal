@@ -27,6 +27,45 @@ class TouristProfile(models.Model):
         return f"{self.user.username}'s Profile"
 
 
+class CuisineCategory(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['name']
+        verbose_name_plural = 'Cuisine Categories'
+
+    def __str__(self):
+        return self.name
+
+
+class ExperienceCategory(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['name']
+        verbose_name_plural = 'Experience Categories'
+
+    def __str__(self):
+        return self.name
+
+
+class FoodTourCategory(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['name']
+        verbose_name_plural = 'Food Tour Categories'
+
+    def __str__(self):
+        return self.name
+
+
 class Vendor(models.Model):
     STATUS_CHOICES = [
         ('pending', 'Pending'),
@@ -37,6 +76,12 @@ class Vendor(models.Model):
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
+        related_name='vendors'
+    )
+
+    cuisine_categories = models.ManyToManyField(
+        CuisineCategory,
+        blank=True,
         related_name='vendors'
     )
 
@@ -149,6 +194,15 @@ class FoodExperience(models.Model):
     description = models.TextField()
     category = models.CharField(max_length=100)
 
+    # Temporary nullable relationship for safe migration from the old text category field.
+    experience_category = models.ForeignKey(
+        ExperienceCategory,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name='food_experiences'
+    )
+
     price = models.DecimalField(
         max_digits=10,
         decimal_places=2
@@ -210,6 +264,15 @@ class FoodTour(models.Model):
 
     title = models.CharField(max_length=200)
     description = models.TextField()
+
+    # Nullable initially so existing food tours remain valid during migration.
+    tour_category = models.ForeignKey(
+        FoodTourCategory,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name='food_tours'
+    )
 
     city = models.CharField(
         max_length=100,

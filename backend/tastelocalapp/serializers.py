@@ -7,6 +7,9 @@ from .models import (
     TouristProfile,
     Vendor,
     TourOperator,
+    CuisineCategory,
+    ExperienceCategory,
+    FoodTourCategory,
     FoodExperience,
     FoodTour,
     TourStop,
@@ -313,11 +316,53 @@ class TourOperatorRegistrationSerializer(serializers.ModelSerializer):
 
         return tour_operator
 
+
+# ==========================================
+# CATEGORY SERIALIZERS
+# ==========================================
+
+class CuisineCategorySerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = CuisineCategory
+        fields = ['id', 'name', 'is_active', 'created_at']
+        read_only_fields = ['id', 'created_at']
+
+
+class ExperienceCategorySerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = ExperienceCategory
+        fields = ['id', 'name', 'is_active', 'created_at']
+        read_only_fields = ['id', 'created_at']
+
+
+class FoodTourCategorySerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = FoodTourCategory
+        fields = ['id', 'name', 'is_active', 'created_at']
+        read_only_fields = ['id', 'created_at']
+
+
 # ==========================================
 # VENDOR PROFILE SERIALIZER
 # ==========================================
 
+
 class VendorProfileSerializer(serializers.ModelSerializer):
+
+    cuisine_categories = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=CuisineCategory.objects.filter(is_active=True),
+        required=False
+    )
+
+    cuisine_category_details = CuisineCategorySerializer(
+        source='cuisine_categories',
+        many=True,
+        read_only=True
+    )
 
     class Meta:
         model = Vendor
@@ -336,6 +381,8 @@ class VendorProfileSerializer(serializers.ModelSerializer):
             'longitude',
             'website',
             'social_media',
+            'cuisine_categories',
+            'cuisine_category_details',
             'status',
             'created_at',
         ]
@@ -345,6 +392,14 @@ class VendorProfileSerializer(serializers.ModelSerializer):
             'status',
             'created_at',
         ]
+
+    def validate_cuisine_categories(self, value):
+        if self.instance and self.instance.status != 'approved':
+            raise serializers.ValidationError(
+                "Cuisine categories can only be selected after vendor approval."
+            )
+
+        return value
 
 
 # ==========================================
@@ -376,12 +431,26 @@ class TourOperatorProfileSerializer(serializers.ModelSerializer):
         ]
 
 
+
 class FoodExperienceSerializer(serializers.ModelSerializer):
 
     vendor_business_name = serializers.CharField(
-    source='vendor.business_name',
-    read_only=True
-)
+        source='vendor.business_name',
+        read_only=True
+    )
+
+    experience_category = serializers.PrimaryKeyRelatedField(
+        queryset=ExperienceCategory.objects.filter(is_active=True),
+        required=False,
+        allow_null=True
+    )
+
+    experience_category_name = serializers.CharField(
+        source='experience_category.name',
+        read_only=True,
+        allow_null=True
+    )
+
     class Meta:
         model = FoodExperience
         fields = [
@@ -389,6 +458,8 @@ class FoodExperienceSerializer(serializers.ModelSerializer):
             'title',
             'description',
             'category',
+            'experience_category',
+            'experience_category_name',
             'price',
             'date',
             'start_time',
@@ -411,6 +482,13 @@ class FoodExperienceSerializer(serializers.ModelSerializer):
             'created_at',
         ]
 
+        extra_kwargs = {
+            'category': {
+                'required': False,
+                'allow_blank': True,
+            }
+        }
+
     def create(self, validated_data):
         vendor = self.context['request'].user.vendors.first()
 
@@ -424,6 +502,18 @@ class FoodExperienceSerializer(serializers.ModelSerializer):
                 "Your vendor profile must be approved before creating food experiences."
             )
 
+        experience_category = validated_data.get('experience_category')
+
+        if not experience_category:
+            experience_category = ExperienceCategory.objects.get(
+                name="Food Discovery"
+            )
+
+            validated_data['experience_category'] = experience_category
+
+        if not validated_data.get('category'):
+            validated_data['category'] = experience_category.name
+
         return FoodExperience.objects.create(
             vendor=vendor,
             status='approved',
@@ -431,18 +521,34 @@ class FoodExperienceSerializer(serializers.ModelSerializer):
         )
 
 
+
 class FoodTourSerializer(serializers.ModelSerializer):
 
     tour_operator_business_name = serializers.CharField(
-    source='tour_operator.business_name',
-    read_only=True
-)
+        source='tour_operator.business_name',
+        read_only=True
+    )
+
+    tour_category = serializers.PrimaryKeyRelatedField(
+        queryset=FoodTourCategory.objects.filter(is_active=True),
+        required=False,
+        allow_null=True
+    )
+
+    tour_category_name = serializers.CharField(
+        source='tour_category.name',
+        read_only=True,
+        allow_null=True
+    )
+
     class Meta:
         model = FoodTour
         fields = [
             'id',
             'title',
             'description',
+            'tour_category',
+            'tour_category_name',
             'city',
             'area',
             'price',
@@ -473,6 +579,11 @@ class FoodTourSerializer(serializers.ModelSerializer):
         if operator.status != 'approved':
             raise serializers.ValidationError(
                 "Your Tour Operator profile must be approved before creating food tours."
+            )
+
+        if not validated_data.get('tour_category'):
+            validated_data['tour_category'] = (
+                FoodTourCategory.objects.get(name="Guided Food Tour")
             )
 
         return FoodTour.objects.create(

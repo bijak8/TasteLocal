@@ -544,6 +544,17 @@ function AdminDashboard() {
               <small>Review tour operator registrations</small>
             </button>
 
+
+<button
+  type="button"
+  onClick={() => navigate('/admin/categories')}
+>
+  <span>▤</span>
+  <strong>Manage Categories</strong>
+  <small>Manage cuisine, experience and food tour categories</small>
+</button>
+
+
           </div>
         </section>
 
