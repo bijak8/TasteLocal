@@ -2010,8 +2010,12 @@ margin-bottom: 25px;
 
 .food-tour-detail-main .detail-section h2,
 .food-tour-itinerary-panel h2 {
-font-size: 25px;
-margin-bottom: 20px;
+  font-family: var(--font-heading);
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--color-deep-purple);
+  margin: 0 0 20px;
+  line-height: 1.3;
 }
 
 .food-tour-detail-main .detail-section-description {
@@ -11857,4 +11861,12 @@ opacity: 0.5;
     padding: 18px 20px;
   }
 }
-
+.page-loading {
+  min-height: 60vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-deep-purple);
+  font-size: 16px;
+  font-weight: 600;
+}
