@@ -67,7 +67,7 @@ function FoodTourDetails() {
 
     const fetchSessions = async () => {
       setSessionsLoading(true);
-      setSessionsError('');
+      setSessionsError(false);
 
       try {
         const response = await API.get(
@@ -445,13 +445,11 @@ function FoodTourDetails() {
 
         {/* Tour Header */}
         <header className="food-tour-detail-header">
-
           <h1>{tour.title}</h1>
-
           <p>{tour.description}</p>
         </header>
 
-        {/* Main {t('tourDetails.information')} */}
+        {/* Main Information */}
         <div className="food-tour-detail-layout">
 
           <div className="food-tour-detail-main">
@@ -471,7 +469,9 @@ function FoodTourDetails() {
 
                 <div className="detail-information-item">
                   <span>{t('tourDetails.city')}</span>
-                  <strong>{tour.city || t('tourDetails.notSpecified')}</strong>
+                  <strong>
+                    {tour.city || t('tourDetails.notSpecified')}
+                  </strong>
                 </div>
 
                 <div className="detail-information-item">
@@ -481,15 +481,15 @@ function FoodTourDetails() {
 
                 <div className="detail-information-item">
                   <span>{t('tourDetails.operator')}</span>
-<strong>
-  {tour.tour_operator_business_name || t('tourDetails.notSpecified')}
-</strong>
+                  <strong>
+                    {tour.tour_operator_business_name || t('tourDetails.notSpecified')}
+                  </strong>
                 </div>
 
               </div>
             </section>
 
-            {/* Tour Itinerary */}
+            {/* Tour Itinerary / Stops */}
             <section className="detail-section">
               <h2>{t('tourDetails.itinerary')}</h2>
 
@@ -586,6 +586,80 @@ function FoodTourDetails() {
               )}
             </section>
 
+            {/* Add to Itinerary - Below the Map */}
+            <section className="detail-section food-tour-itinerary-panel">
+
+              <h2>{t('tourDetails.addToItinerary')}</h2>
+
+              <p className="detail-section-description">
+                {t('tourDetails.saveItineraryDescription')}
+              </p>
+
+              {itineraries.length === 0 ? (
+                <div>
+                  <p className="detail-muted-text">
+                    {t('tourDetails.noItineraries')}
+                  </p>
+
+                  <Link
+                    to="/my-itineraries"
+                    className="taste-btn-secondary"
+                  >
+                    {t('tourDetails.viewItineraries')}
+                  </Link>
+                </div>
+              ) : (
+                <div className="itinerary-form">
+
+                  <label htmlFor="food-tour-itinerary">
+                    {t('tourDetails.selectItinerary')}
+                  </label>
+
+                  <select
+                    id="food-tour-itinerary"
+                    value={selectedItinerary}
+                    onChange={(e) => {
+                      setSelectedItinerary(e.target.value);
+                      setItineraryMessage('');
+                    }}
+                  >
+                    <option value="">
+                      {t('tourDetails.chooseItinerary')}
+                    </option>
+
+                    {itineraries.map((itinerary) => (
+                      <option
+                        key={itinerary.id}
+                        value={itinerary.id}
+                      >
+                        {itinerary.title}
+                      </option>
+                    ))}
+
+                  </select>
+
+                  <button
+                    type="button"
+                    className="taste-btn-primary"
+                    onClick={handleAddToItinerary}
+                    disabled={addingToItinerary || !selectedItinerary}
+                  >
+                    {addingToItinerary
+                      ? t('tourDetails.adding')
+                      : t('tourDetails.addToItineraryButton')}
+                  </button>
+
+                </div>
+              )}
+
+              {itineraryMessage && (
+                <div className="detail-feedback-message">
+                  {itineraryMessage}
+                </div>
+              )}
+
+            </section>
+
             {/* Ratings and Reviews */}
             <section className="detail-section food-tour-reviews">
               <h2>{t('tourDetails.reviews')}</h2>
@@ -638,7 +712,7 @@ function FoodTourDetails() {
               )}
             </section>
 
-            {/* {t('tourDetails.submitReview')} */}
+            {/* Write Review */}
             <section className="experience-write-review">
               <h2>{t('tourDetails.writeReview')}</h2>
 
@@ -689,7 +763,9 @@ function FoodTourDetails() {
                   className="experience-book-btn review-submit-btn"
                   disabled={submitting}
                 >
-                  {submitting ? t('tourDetails.submitting') : t('tourDetails.submitReview')}
+                  {submitting
+                    ? t('tourDetails.submitting')
+                    : t('tourDetails.submitReview')}
                 </button>
 
               </form>
@@ -697,10 +773,9 @@ function FoodTourDetails() {
 
           </div>
 
-          {/* Sidebar */}
+          {/* Booking Sidebar */}
           <aside className="food-tour-detail-sidebar">
 
-            {/* Booking Panel */}
             <section className="booking-panel">
 
               <span className="booking-panel-label">
@@ -819,80 +894,6 @@ function FoodTourDetails() {
               {favouriteMessage && (
                 <div className="detail-feedback-message">
                   {favouriteMessage}
-                </div>
-              )}
-
-            </section>
-
-            {/* {t('tourDetails.addToItineraryButton')} */}
-            <section className="booking-panel food-tour-itinerary-panel">
-
-              <h2>{t('tourDetails.addToItinerary')}</h2>
-
-              <p>
-                {t('tourDetails.saveItineraryDescription')}
-              </p>
-
-              {itineraries.length === 0 ? (
-                <div>
-                  <p className="detail-muted-text">
-                    {t('tourDetails.noItineraries')}
-                  </p>
-
-                  <Link
-                    to="/my-itineraries"
-                    className="experience-favourite-btn"
-                  >
-                    {t('tourDetails.viewItineraries')}
-                  </Link>
-                </div>
-              ) : (
-                <div className="itinerary-form">
-
-                  <label htmlFor="food-tour-itinerary">
-                    {t('tourDetails.selectItinerary')}
-                  </label>
-
-                  <select
-                    id="food-tour-itinerary"
-                    value={selectedItinerary}
-                    onChange={(e) => {
-                      setSelectedItinerary(e.target.value);
-                      setItineraryMessage('');
-                    }}
-                  >
-                    <option value="">
-                      {t('tourDetails.chooseItinerary')}
-                    </option>
-
-                    {itineraries.map((itinerary) => (
-                      <option
-                        key={itinerary.id}
-                        value={itinerary.id}
-                      >
-                        {itinerary.title}
-                      </option>
-                    ))}
-
-                  </select>
-
-                  <button
-                    type="button"
-                    className="experience-book-btn"
-                    onClick={handleAddToItinerary}
-                    disabled={addingToItinerary || !selectedItinerary}
-                  >
-                    {addingToItinerary
-                      ? t('tourDetails.adding')
-                      : t('tourDetails.addToItineraryButton')}
-                  </button>
-
-                </div>
-              )}
-
-              {itineraryMessage && (
-                <div className="detail-feedback-message">
-                  {itineraryMessage}
                 </div>
               )}
 

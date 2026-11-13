@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import API from '../services/api';
+import { getDashboardPath } from '../utils/roleRedirect';
 
 function Login() {
   const navigate = useNavigate();
@@ -51,7 +52,10 @@ function Login() {
       window.dispatchEvent(new Event('authChange'));
 
       alert('Login successful!');
-      navigate('/');
+
+const dashboardPath = getDashboardPath(userResponse.data.role);
+
+navigate(dashboardPath, { replace: true });
 
     } catch (error) {
       console.error('Login error:', error);

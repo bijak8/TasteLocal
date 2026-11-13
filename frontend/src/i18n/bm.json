@@ -235,7 +235,8 @@
     "exploreLocations": "Terokai Lokasi",
     "stop": "Hentian",
     "mapDescription": "Terokai lokasi yang termasuk dalam jelajah makanan ini pada peta.",
-    "reviewEligibility": "Anda perlu melengkapkan jelajah ini sebelum menghantar ulasan."
+    "reviewEligibility": "Anda perlu melengkapkan jelajah ini sebelum menghantar ulasan.",
+    "addToItineraryButton": "Tambah ke Jadual Perjalanan"
   },
   "booking": {
     "eyebrow": "RANCANG PENGALAMAN ANDA",

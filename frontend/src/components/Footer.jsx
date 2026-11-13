@@ -24,7 +24,7 @@ function Footer() {
           <h4>{t('footer.explore')}</h4>
           <Link to="/food-tours">{t('footer.foodTours')}</Link>
           <Link to="/food-experiences">{t('footer.foodExperiences')}</Link>
-          <Link to="/vendors">{t('footer.localVendors')}</Link>
+          <Link to="/explore#local-vendors">{t('footer.localVendors')}</Link>
           <Link to="/explore">{t('footer.exploreByLocation')}</Link>
         </div>
 
@@ -32,8 +32,8 @@ function Footer() {
         <div className="taste-footer-links">
           <h4>{t('footer.company')}</h4>
           <Link to="/about">{t('footer.aboutTasteLocal')}</Link>
-          <Link to="/vendors/register">{t('footer.forVendors')}</Link>
-          <Link to="/tour-operators">{t('footer.forTourOperators')}</Link>
+          <Link to="/for-vendors">{t('footer.forVendors')}</Link>
+          <Link to="/for-tour-operators">{t('footer.forTourOperators')}</Link>
           <Link to="/contact">{t('footer.contactUs')}</Link>
         </div>
 

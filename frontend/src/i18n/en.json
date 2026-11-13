@@ -235,7 +235,8 @@
     "exploreLocations": "Explore Locations",
     "stop": "Stop",
     "mapDescription": "Explore the locations included in this food tour on the map.",
-    "reviewEligibility": "You must complete this tour before submitting a review."
+    "reviewEligibility": "You must complete this tour before submitting a review.",
+    "addToItineraryButton": "Add to Itinerary"
   },
   "booking": {
     "eyebrow": "PLAN YOUR EXPERIENCE",
