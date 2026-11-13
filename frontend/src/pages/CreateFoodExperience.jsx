@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import API from '../services/api';
 
@@ -18,6 +18,14 @@ function CreateFoodExperience() {
     longitude: '',
   });
 
+  const [image, setImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState('');
+
+  // Experience category states
+  const [categories, setCategories] = useState([]);
+  const [categoriesLoading, setCategoriesLoading] = useState(true);
+  const [categoryError, setCategoryError] = useState('');
+
   const [sessions, setSessions] = useState([
     {
       date: '',
@@ -30,11 +38,89 @@ function CreateFoodExperience() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  // Generate and clean up image preview URL.
+  useEffect(() => {
+    if (!image) {
+      setImagePreview('');
+      return;
+    }
+
+    const previewUrl = URL.createObjectURL(image);
+    setImagePreview(previewUrl);
+
+    return () => URL.revokeObjectURL(previewUrl);
+  }, [image]);
+
+  // Fetch active experience categories from Django.
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await API.get('categories/experience/');
+
+        const categoryData = Array.isArray(response.data)
+          ? response.data
+          : response.data.results || [];
+
+        setCategories(
+          categoryData.filter((category) => category.is_active)
+        );
+
+      } catch (error) {
+        console.error('Error fetching experience categories:', error);
+        setCategoryError('Unable to load experience categories.');
+      } finally {
+        setCategoriesLoading(false);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
   const handleChange = (event) => {
     setFormData((previousData) => ({
       ...previousData,
       [event.target.name]: event.target.value,
     }));
+  };
+
+  // Handle cover image selection.
+  const handleImageChange = (event) => {
+    const file = event.target.files[0];
+
+    if (!file) return;
+
+    const allowedTypes = [
+      'image/jpeg',
+      'image/png',
+      'image/webp',
+    ];
+
+    if (!allowedTypes.includes(file.type)) {
+      setError('Please upload a JPG, PNG or WebP image.');
+      event.target.value = '';
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      setError('Image size must not exceed 5MB.');
+      event.target.value = '';
+      return;
+    }
+
+    setError('');
+    setImage(file);
+  };
+
+  const handleRemoveImage = () => {
+    setImage(null);
+
+    const fileInput = document.getElementById(
+      'experience-image'
+    );
+
+    if (fileInput) {
+      fileInput.value = '';
+    }
   };
 
   const handleSessionChange = (index, event) => {
@@ -67,7 +153,9 @@ function CreateFoodExperience() {
     }
 
     setSessions((previousSessions) =>
-      previousSessions.filter((_, sessionIndex) => sessionIndex !== index)
+      previousSessions.filter(
+        (_, sessionIndex) => sessionIndex !== index
+      )
     );
   };
 
@@ -75,6 +163,19 @@ function CreateFoodExperience() {
     event.preventDefault();
     setError('');
 
+    // Validate category selection.
+    if (!formData.category) {
+      setError('Please select an experience category.');
+      return;
+    }
+
+    // Validate price.
+    if (formData.price === '' || Number(formData.price) < 0) {
+      setError('Please enter a valid experience price.');
+      return;
+    }
+
+    // Validate availability sessions.
     for (let index = 0; index < sessions.length; index++) {
       const session = sessions[index];
 
@@ -84,7 +185,9 @@ function CreateFoodExperience() {
         !session.end_time ||
         !session.capacity
       ) {
-        setError(`Please complete all fields in Session ${index + 1}.`);
+        setError(
+          `Please complete all fields in Session ${index + 1}.`
+        );
         return;
       }
 
@@ -96,7 +199,9 @@ function CreateFoodExperience() {
       }
 
       if (Number(session.capacity) < 1) {
-        setError(`Session ${index + 1}: Capacity must be at least 1.`);
+        setError(
+          `Session ${index + 1}: Capacity must be at least 1.`
+        );
         return;
       }
     }
@@ -106,7 +211,7 @@ function CreateFoodExperience() {
     try {
       const firstSession = sessions[0];
 
-      // Keep the existing listing fields compatible with the serializer.
+      // Prepare the main experience details.
       const experienceData = {
         ...formData,
         price: Number(formData.price),
@@ -114,19 +219,37 @@ function CreateFoodExperience() {
         start_time: firstSession.start_time,
         end_time: firstSession.end_time,
         capacity: Number(firstSession.capacity),
-        latitude: formData.latitude || null,
-        longitude: formData.longitude || null,
       };
+
+      // Use FormData so Django can receive the image.
+      const data = new FormData();
+
+      Object.entries(experienceData).forEach(([key, value]) => {
+        // Do not send empty optional GPS coordinates.
+        if (
+          (key === 'latitude' || key === 'longitude') &&
+          value === ''
+        ) {
+          return;
+        }
+
+        data.append(key, value);
+      });
+
+      // Attach cover image if selected.
+      if (image) {
+        data.append('image', image);
+      }
 
       // First create the food experience.
       const response = await API.post(
         'food-experiences/create/',
-        experienceData
+        data
       );
 
       const foodExperienceId = response.data.id;
 
-      // Then create each availability session for this experience.
+      // Then create each availability session.
       for (const session of sessions) {
         await API.post('vendor/availability-sessions/', {
           food_experience: foodExperienceId,
@@ -166,6 +289,7 @@ function CreateFoodExperience() {
     <section className="create-experience-page">
       <div className="create-experience-container">
 
+        {/* Dashboard Heading */}
         <div className="create-experience-heading">
           <span className="create-experience-eyebrow">
             SHARE YOUR LOCAL FLAVOURS
@@ -181,6 +305,7 @@ function CreateFoodExperience() {
 
         <div className="create-experience-card">
 
+          {/* Form Heading */}
           <div className="create-experience-card-heading">
             <div className="create-experience-icon">✦</div>
 
@@ -253,15 +378,46 @@ function CreateFoodExperience() {
                     Category *
                   </label>
 
-                  <input
+                  <select
                     id="experience-category"
-                    type="text"
                     name="category"
-                    placeholder="e.g. Cooking Class, Food Tasting"
                     value={formData.category}
                     onChange={handleChange}
                     required
-                  />
+                    disabled={
+                      categoriesLoading ||
+                      categories.length === 0
+                    }
+                  >
+                    <option value="">
+                      {categoriesLoading
+                        ? 'Loading categories...'
+                        : 'Select an experience category'}
+                    </option>
+
+                    {categories.map((category) => (
+                      <option
+                        key={category.id}
+                        value={category.name}
+                      >
+                        {category.name}
+                      </option>
+                    ))}
+                  </select>
+
+                  {categoryError && (
+                    <small style={{ color: '#a33' }}>
+                      {categoryError}
+                    </small>
+                  )}
+
+                  {!categoriesLoading &&
+                    !categoryError &&
+                    categories.length === 0 && (
+                      <small>
+                        No active experience categories available.
+                      </small>
+                    )}
                 </div>
 
                 <div className="create-experience-field">
@@ -289,11 +445,84 @@ function CreateFoodExperience() {
               </div>
             </div>
 
-            {/* Section 2: Schedule and Capacity */}
+            {/* Section 2: Cover Image */}
             <div className="create-experience-section">
 
               <div className="create-experience-section-heading">
                 <span>02</span>
+
+                <div>
+                  <h3>Experience Cover Image</h3>
+                  <p>
+                    Upload a beautiful image to showcase your experience
+                    to travellers.
+                  </p>
+                </div>
+              </div>
+
+              <div className="create-experience-field">
+                <label htmlFor="experience-image">
+                  Upload Image
+                </label>
+
+                <input
+                  id="experience-image"
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  onChange={handleImageChange}
+                />
+
+                <small>
+                  JPG, PNG or WebP. Maximum file size: 5MB.
+                </small>
+              </div>
+
+              {imagePreview && (
+                <div
+                  className="experience-image-preview"
+                  style={{
+                    marginTop: '16px',
+                    maxWidth: '420px',
+                  }}
+                >
+                  <img
+                    src={imagePreview}
+                    alt="Food experience preview"
+                    style={{
+                      width: '100%',
+                      height: '250px',
+                      objectFit: 'cover',
+                      borderRadius: '12px',
+                      border: '1px solid #e7dcef',
+                    }}
+                  />
+
+                  <button
+                    type="button"
+                    onClick={handleRemoveImage}
+                    style={{
+                      display: 'block',
+                      marginTop: '10px',
+                      padding: '9px 16px',
+                      border: '1px solid #a33',
+                      borderRadius: '8px',
+                      background: 'transparent',
+                      color: '#a33',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Remove Image
+                  </button>
+                </div>
+              )}
+
+            </div>
+
+            {/* Section 3: Schedule and Capacity */}
+            <div className="create-experience-section">
+
+              <div className="create-experience-section-heading">
+                <span>03</span>
 
                 <div>
                   <h3>Schedule and Capacity</h3>
@@ -440,11 +669,11 @@ function CreateFoodExperience() {
 
             </div>
 
-            {/* Section 3: Location */}
+            {/* Section 4: Location */}
             <div className="create-experience-section">
 
               <div className="create-experience-section-heading">
-                <span>03</span>
+                <span>04</span>
 
                 <div>
                   <h3>Location</h3>
@@ -473,7 +702,9 @@ function CreateFoodExperience() {
               <div className="create-experience-form-grid">
 
                 <div className="create-experience-field">
-                  <label htmlFor="experience-city">City</label>
+                  <label htmlFor="experience-city">
+                    City
+                  </label>
 
                   <input
                     id="experience-city"
@@ -486,7 +717,9 @@ function CreateFoodExperience() {
                 </div>
 
                 <div className="create-experience-field">
-                  <label htmlFor="experience-area">Area</label>
+                  <label htmlFor="experience-area">
+                    Area
+                  </label>
 
                   <input
                     id="experience-area"
@@ -546,7 +779,7 @@ function CreateFoodExperience() {
               </div>
             </div>
 
-            {/* Form actions */}
+            {/* Form Actions */}
             <div className="create-experience-actions">
 
               <button
@@ -561,9 +794,11 @@ function CreateFoodExperience() {
               <button
                 type="submit"
                 className="create-experience-submit-btn"
-                disabled={loading}
+                disabled={loading || categoriesLoading || categories.length === 0}
               >
-                {loading ? 'Publishing...' : 'Publish Food Experience'}
+                {loading
+                  ? 'Publishing...'
+                  : 'Publish Food Experience'}
               </button>
 
             </div>

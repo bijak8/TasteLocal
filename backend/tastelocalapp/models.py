@@ -315,6 +315,73 @@ class FoodTour(models.Model):
         return self.title
 
 
+class ListingTranslation(models.Model):
+
+    LANGUAGE_CHOICES = [
+        ('bm', 'Bahasa Melayu'),
+    ]
+
+    food_tour = models.ForeignKey(
+        FoodTour,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='translations'
+    )
+
+    food_experience = models.ForeignKey(
+        FoodExperience,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='translations'
+    )
+
+    language = models.CharField(
+        max_length=5,
+        choices=LANGUAGE_CHOICES,
+        default='bm'
+    )
+
+    title = models.CharField(max_length=200)
+    description = models.TextField()
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        constraints = [
+            models.CheckConstraint(
+                condition=(
+                    models.Q(
+                        food_tour__isnull=False,
+                        food_experience__isnull=True
+                    )
+                    |
+                    models.Q(
+                        food_tour__isnull=True,
+                        food_experience__isnull=False
+                    )
+                ),
+                name='translation_one_listing_only'
+            ),
+            models.UniqueConstraint(
+                fields=['food_tour', 'language'],
+                condition=models.Q(food_tour__isnull=False),
+                name='unique_food_tour_translation'
+            ),
+            models.UniqueConstraint(
+                fields=['food_experience', 'language'],
+                condition=models.Q(food_experience__isnull=False),
+                name='unique_food_experience_translation'
+            ),
+        ]
+
+    def __str__(self):
+        listing = self.food_tour or self.food_experience
+        return f'{listing.title} ({self.language})'
+
+
 class AvailabilitySession(models.Model):
 
     food_experience = models.ForeignKey(

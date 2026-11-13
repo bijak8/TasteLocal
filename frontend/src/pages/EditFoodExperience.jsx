@@ -24,6 +24,12 @@ function EditFoodExperience() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
+  // Image states
+  const [currentImage, setCurrentImage] = useState('');
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState('');
+
+  // Fetch experience and availability sessions
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -46,6 +52,10 @@ function EditFoodExperience() {
           latitude: experience.latitude ?? '',
           longitude: experience.longitude ?? '',
         });
+
+        // Load existing image
+        setCurrentImage(experience.image || '');
+        setImagePreview(experience.image || '');
 
         const allSessions = Array.isArray(sessionsResponse.data)
           ? sessionsResponse.data
@@ -83,6 +93,7 @@ function EditFoodExperience() {
     fetchData();
   }, [id]);
 
+  // Handle ordinary form changes
   const handleChange = (event) => {
     setFormData((previousData) => ({
       ...previousData,
@@ -90,6 +101,54 @@ function EditFoodExperience() {
     }));
   };
 
+  // Handle replacement image selection
+  const handleImageChange = (event) => {
+    const file = event.target.files[0];
+
+    if (!file) return;
+
+    const allowedTypes = [
+      'image/jpeg',
+      'image/png',
+      'image/webp',
+    ];
+
+    if (!allowedTypes.includes(file.type)) {
+      setError('Please select a JPG, PNG or WebP image.');
+      event.target.value = '';
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      setError('Image size must not exceed 5 MB.');
+      event.target.value = '';
+      return;
+    }
+
+    setSelectedImage(file);
+    setImagePreview(URL.createObjectURL(file));
+    setError('');
+  };
+
+  // Resolve image URL
+  const getImageUrl = (image) => {
+    if (!image) return '';
+
+    if (
+      image.startsWith('http://') ||
+      image.startsWith('https://') ||
+      image.startsWith('blob:')
+    ) {
+      return image;
+    }
+
+    return new URL(
+      image,
+      API.defaults.baseURL || window.location.origin
+    ).href;
+  };
+
+  // Handle session changes
   const handleSessionChange = (index, field, value) => {
     setSessions((previousSessions) =>
       previousSessions.map((session, sessionIndex) =>
@@ -100,6 +159,7 @@ function EditFoodExperience() {
     );
   };
 
+  // Add new availability session
   const handleAddSession = () => {
     setSessions((previousSessions) => [
       ...previousSessions,
@@ -116,6 +176,7 @@ function EditFoodExperience() {
     ]);
   };
 
+  // Remove or deactivate session
   const handleRemoveSession = (index) => {
     setSessions((previousSessions) =>
       previousSessions
@@ -133,6 +194,7 @@ function EditFoodExperience() {
     );
   };
 
+  // Submit updated experience and sessions
   const handleSubmit = async (event) => {
     event.preventDefault();
     setError('');
@@ -141,6 +203,7 @@ function EditFoodExperience() {
       (session) => session.is_active
     );
 
+    // Validate availability sessions
     for (let index = 0; index < activeSessions.length; index++) {
       const session = activeSessions[index];
 
@@ -187,11 +250,28 @@ function EditFoodExperience() {
     };
 
     try {
+      // Create multipart form data
+      const experienceFormData = new FormData();
+
+      Object.entries(experienceData).forEach(([key, value]) => {
+        experienceFormData.append(
+          key,
+          value === null || value === undefined ? '' : value
+        );
+      });
+
+      // Only replace image when a new one is selected
+      if (selectedImage) {
+        experienceFormData.append('image', selectedImage);
+      }
+
+      // Update food experience
       await API.patch(
         `vendor/food-experiences/${id}/`,
-        experienceData
+        experienceFormData
       );
 
+      // Update availability sessions
       for (const session of sessions) {
         const sessionData = {
           date: session.date,
@@ -273,7 +353,7 @@ function EditFoodExperience() {
               </div>
             )}
 
-            {/* 01 - Basic Information */}
+            {/* 01 - Experience Photo */}
             <section className="edit-tour-section">
 
               <div className="edit-tour-section-heading">
@@ -282,8 +362,67 @@ function EditFoodExperience() {
                 </span>
 
                 <div>
+                  <h2>Experience Photo</h2>
+                  <p>
+                    Replace the existing photo with a new image.
+                  </p>
+                </div>
+              </div>
+
+              {imagePreview ? (
+                <div className="edit-tour-image-preview">
+                  <img
+                    src={getImageUrl(imagePreview)}
+                    alt="Food experience"
+                  />
+                </div>
+              ) : (
+                <div className="edit-tour-empty">
+                  No experience photo uploaded yet.
+                </div>
+              )}
+
+              <div className="edit-tour-field">
+                <label htmlFor="experience-image">
+                  Replace Experience Photo
+                </label>
+
+                <input
+                  id="experience-image"
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  onChange={handleImageChange}
+                />
+
+                <small>
+                  JPG, PNG or WebP. Maximum size 5 MB.
+                  Leave blank to keep the current photo.
+                </small>
+              </div>
+
+              {selectedImage && (
+                <p className="edit-tour-image-success">
+                  New photo selected: {selectedImage.name}
+                </p>
+              )}
+
+            </section>
+
+            <div className="edit-tour-divider"></div>
+
+            {/* 02 - Basic Information */}
+            <section className="edit-tour-section">
+
+              <div className="edit-tour-section-heading">
+                <span className="edit-tour-section-number">
+                  02
+                </span>
+
+                <div>
                   <h2>Basic Information</h2>
-                  <p>Tell travellers about your food experience.</p>
+                  <p>
+                    Tell travellers about your food experience.
+                  </p>
                 </div>
               </div>
 
@@ -357,12 +496,12 @@ function EditFoodExperience() {
 
             <div className="edit-tour-divider"></div>
 
-            {/* 02 - Availability Sessions */}
+            {/* 03 - Availability Sessions */}
             <section className="edit-tour-section">
 
               <div className="edit-tour-section-heading">
                 <span className="edit-tour-section-number">
-                  02
+                  03
                 </span>
 
                 <div>
@@ -517,17 +656,19 @@ function EditFoodExperience() {
 
             <div className="edit-tour-divider"></div>
 
-            {/* 03 - Location */}
+            {/* 04 - Location */}
             <section className="edit-tour-section">
 
               <div className="edit-tour-section-heading">
                 <span className="edit-tour-section-number">
-                  03
+                  04
                 </span>
 
                 <div>
                   <h2>Location</h2>
-                  <p>Where will your food experience take place?</p>
+                  <p>
+                    Where will your food experience take place?
+                  </p>
                 </div>
               </div>
 

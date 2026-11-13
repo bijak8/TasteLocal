@@ -1,4 +1,3 @@
-
 import './App.css';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
@@ -8,6 +7,7 @@ import FoodDiscoveryChatbot from './components/FoodDiscoveryChatbot';
 // Public pages
 import Home from './pages/Home';
 import GlobalSearchResults from './pages/GlobalSearchResults';
+import Explore from './pages/Explore';
 import FoodExperiences from './pages/FoodExperiences';
 import FoodExperienceDetails from './pages/FoodExperienceDetails';
 import FoodTours from './pages/FoodTours';
@@ -76,6 +76,12 @@ function App() {
           <Route
             path="/search"
             element={<GlobalSearchResults />}
+          />
+
+          {/* Explore Singapore */}
+          <Route
+            path="/explore"
+            element={<Explore />}
           />
 
           <Route

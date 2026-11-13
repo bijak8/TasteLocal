@@ -38,6 +38,7 @@ class AdminTourOperatorBulkImportView(APIView):
         'business_name',
         'owner_name',
         'email',
+        'username',
         'phone',
         'description',
         'website',
@@ -208,13 +209,37 @@ class AdminTourOperatorBulkImportView(APIView):
                     })
                     continue
 
-            base_username = re.sub(
-                r"[^a-zA-Z0-9_.-]", "", email.split("@")[0]
-            ) or 'tour_operator'
+            # Use the username supplied in the CSV.
+            # If it is blank, generate one from the email address.
+            requested_username = row.get("username", "").strip()
+
+            if requested_username:
+                base_username = re.sub(
+                    r"[^a-zA-Z0-9_.-]", "", requested_username
+                )
+            else:
+                base_username = re.sub(
+                    r"[^a-zA-Z0-9_.-]", "", email.split("@")[0]
+                )
+
+            base_username = base_username[:150]
+
+            if not base_username:
+                skipped.append({
+                    "row": row_number,
+                    "reason": "Invalid or empty username.",
+                })
+                continue
+
+            # Avoid duplicate usernames by appending a numeric suffix.
             username = base_username
             suffix = 1
+
             while User.objects.filter(username__iexact=username).exists():
-                username = f"{base_username}{suffix}"
+                suffix_text = str(suffix)
+                username = (
+                    f"{base_username[:150 - len(suffix_text)]}{suffix_text}"
+                )
                 suffix += 1
 
             initial_password = secrets.token_urlsafe(16)

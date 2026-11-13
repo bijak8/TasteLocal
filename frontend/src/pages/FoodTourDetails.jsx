@@ -1,10 +1,13 @@
 
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import API from '../services/api';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 
 function FoodTourDetails() {
+  const { t, i18n } = useTranslation();
+  const language = i18n.resolvedLanguage?.startsWith('bm') ? 'bm' : 'en';
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -13,7 +16,7 @@ function FoodTourDetails() {
   const [reviews, setReviews] = useState([]);
 
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState(false);
 
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState('');
@@ -24,7 +27,7 @@ function FoodTourDetails() {
   const [sessions, setSessions] = useState([]);
   const [selectedSession, setSelectedSession] = useState('');
   const [sessionsLoading, setSessionsLoading] = useState(true);
-  const [sessionsError, setSessionsError] = useState('');
+  const [sessionsError, setSessionsError] = useState(false);
 
   // Itinerary states
   const [itineraries, setItineraries] = useState([]);
@@ -49,7 +52,7 @@ function FoodTourDetails() {
       })
       .catch((error) => {
         console.error('Error fetching food tour:', error);
-        setError('Unable to load food tour details.');
+        setError(true);
       })
       .finally(() => {
         setLoading(false);
@@ -82,9 +85,7 @@ function FoodTourDetails() {
         if (cancelled) return;
 
         console.error('Error fetching food tour sessions:', error);
-        setSessionsError(
-          'Unable to load available tour sessions. Please try again later.'
-        );
+        setSessionsError(true);
       } finally {
         if (!cancelled) {
           setSessionsLoading(false);
@@ -109,7 +110,7 @@ function FoodTourDetails() {
       Number(year),
       Number(month) - 1,
       Number(day)
-    ).toLocaleDateString('en-GB', {
+    ).toLocaleDateString(language === 'bm' ? 'ms-MY' : 'en-GB', {
       day: 'numeric',
       month: 'short',
       year: 'numeric'
@@ -125,7 +126,7 @@ function FoodTourDetails() {
 
     date.setHours(Number(hours), Number(minutes), 0, 0);
 
-    return date.toLocaleTimeString('en-US', {
+    return date.toLocaleTimeString(language === 'bm' ? 'ms-MY' : 'en-US', {
       hour: 'numeric',
       minute: '2-digit',
       hour12: true
@@ -206,20 +207,20 @@ function FoodTourDetails() {
       if (favourite) {
         await API.delete(`favourites/${favourite.id}/`);
         setFavourite(null);
-        setFavouriteMessage('Removed from your favourites.');
+        setFavouriteMessage(t('tourDetails.removedFavouriteMessage'));
       } else {
         const response = await API.post('favourites/', {
           food_tour: Number(id),
         });
 
         setFavourite(response.data);
-        setFavouriteMessage('Added to your favourites!');
+        setFavouriteMessage(t('tourDetails.addedFavouriteMessage'));
       }
     } catch (error) {
       console.error('Error updating favourite:', error);
 
       const data = error.response?.data;
-      let message = 'Unable to update your favourites. Please try again.';
+      let message = t('tourDetails.favouriteError');
 
       if (data?.detail) {
         message = data.detail;
@@ -245,7 +246,7 @@ function FoodTourDetails() {
     }
 
     if (!selectedItinerary) {
-      setItineraryMessage('Please select an itinerary first.');
+      setItineraryMessage(t('tourDetails.selectItineraryFirst'));
       return;
     }
 
@@ -264,7 +265,7 @@ function FoodTourDetails() {
       );
 
       setItineraryMessage(
-        'Food tour successfully added to your itinerary!'
+        t('tourDetails.itinerarySuccess')
       );
 
       setSelectedItinerary('');
@@ -272,7 +273,7 @@ function FoodTourDetails() {
       console.error('Error adding food tour:', error);
 
       const data = error.response?.data;
-      let message = 'Unable to add this food tour to your itinerary.';
+      let message = t('tourDetails.itineraryError');
 
       if (data?.detail) {
         message = data.detail;
@@ -311,7 +312,7 @@ function FoodTourDetails() {
     }
 
     if (!comment.trim()) {
-      setReviewMessage('Please write a review before submitting.');
+      setReviewMessage(t('tourDetails.reviewRequired'));
       return;
     }
 
@@ -326,7 +327,7 @@ function FoodTourDetails() {
         comment,
       });
 
-      setReviewMessage('Thank you! Your review has been submitted.');
+      setReviewMessage(t('tourDetails.reviewSuccess'));
       setRating(5);
       setComment('');
       fetchReviews();
@@ -334,7 +335,7 @@ function FoodTourDetails() {
       console.error('Error submitting review:', error);
 
       const data = error.response?.data;
-      let message = 'Unable to submit your review. Please try again.';
+      let message = t('tourDetails.reviewError');
 
       if (data) {
         if (typeof data === 'string') {
@@ -371,7 +372,7 @@ function FoodTourDetails() {
       <div className="food-tour-details-page">
         <div className="food-tour-details-container container-custom">
           <div className="food-tour-details-message">
-            Loading food tour details...
+            {t('tourDetails.loading')}
           </div>
         </div>
       </div>
@@ -384,10 +385,10 @@ function FoodTourDetails() {
       <div className="food-tour-details-page">
         <div className="food-tour-details-container container-custom">
           <div className="food-tour-details-message food-tour-details-error">
-            {error}
+            {t('tourDetails.loadError')}
           </div>
           <Link to="/food-tours" className="experience-back-link">
-            ← Back to Food Tours
+            ← {t('tourDetails.backToTours')}
           </Link>
         </div>
       </div>
@@ -400,10 +401,10 @@ function FoodTourDetails() {
       <div className="food-tour-details-page">
         <div className="food-tour-details-container container-custom">
           <div className="food-tour-details-message">
-            Food tour not found.
+            {t('tourDetails.notFound')}
           </div>
           <Link to="/food-tours" className="experience-back-link">
-            ← Back to Food Tours
+            ← {t('tourDetails.backToTours')}
           </Link>
         </div>
       </div>
@@ -416,52 +417,72 @@ function FoodTourDetails() {
 
         {/* Back Link */}
         <Link to="/food-tours" className="experience-back-link">
-          ← Back to Food Tours
+          ← {t('tourDetails.backToTours')}
         </Link>
+
+        {/* Full Width Tour Image with Category Badge */}
+        <div className="experience-detail-image-wrapper">
+
+          {tour.image ? (
+            <img
+              src={tour.image}
+              alt={tour.title}
+              className="experience-detail-image"
+            />
+          ) : (
+            <div className="experience-detail-image-placeholder">
+              Food Tour
+            </div>
+          )}
+
+          {(tour.tour_category_name || tour.category) && (
+            <span className="experience-detail-category-badge">
+              {tour.tour_category_name || tour.category}
+            </span>
+          )}
+
+        </div>
 
         {/* Tour Header */}
         <header className="food-tour-detail-header">
-          <span className="home-eyebrow">
-            GUIDED CULINARY JOURNEY
-          </span>
 
           <h1>{tour.title}</h1>
 
           <p>{tour.description}</p>
         </header>
 
-        {/* Main Tour Information */}
+        {/* Main {t('tourDetails.information')} */}
         <div className="food-tour-detail-layout">
 
           <div className="food-tour-detail-main">
 
             {/* Tour Information */}
             <section className="detail-section">
-              <h2>Tour Information</h2>
+              <h2>{t('tourDetails.information')}</h2>
 
               <div className="detail-information-grid">
 
                 <div className="detail-information-item">
-                  <span>Location</span>
+                  <span>{t('tourDetails.location')}</span>
                   <strong>
-                    {tour.area || tour.city || 'Not specified'}
+                    {tour.area || tour.city || t('tourDetails.notSpecified')}
                   </strong>
                 </div>
 
                 <div className="detail-information-item">
-                  <span>City</span>
-                  <strong>{tour.city || 'Not specified'}</strong>
+                  <span>{t('tourDetails.city')}</span>
+                  <strong>{tour.city || t('tourDetails.notSpecified')}</strong>
                 </div>
 
                 <div className="detail-information-item">
-                  <span>Tour Price</span>
+                  <span>{t('tourDetails.tourPrice')}</span>
                   <strong>SGD {tour.price}</strong>
                 </div>
 
                 <div className="detail-information-item">
-                  <span>Tour Operator</span>
+                  <span>{t('tourDetails.operator')}</span>
 <strong>
-  {tour.tour_operator_business_name || 'Not specified'}
+  {tour.tour_operator_business_name || t('tourDetails.notSpecified')}
 </strong>
                 </div>
 
@@ -470,15 +491,15 @@ function FoodTourDetails() {
 
             {/* Tour Itinerary */}
             <section className="detail-section">
-              <h2>Tour Itinerary</h2>
+              <h2>{t('tourDetails.itinerary')}</h2>
 
               <p className="detail-section-description">
-                Discover the places included in this guided food tour.
+                {t('tourDetails.itineraryDescription')}
               </p>
 
               {stops.length === 0 ? (
                 <p className="detail-muted-text">
-                  No tour stops have been added yet.
+                  {t('tourDetails.noStops')}
                 </p>
               ) : (
                 <div className="food-tour-stops-list">
@@ -494,7 +515,7 @@ function FoodTourDetails() {
 
                       <div className="food-tour-stop-content">
                         <span className="food-tour-stop-label">
-                          STOP {index + 1}
+                          {t('tourDetails.stop')} {index + 1}
                         </span>
 
                         <h3>{stop.name}</h3>
@@ -502,7 +523,7 @@ function FoodTourDetails() {
                         <p>{stop.description}</p>
 
                         <div className="food-tour-stop-address">
-                          <strong>Address:</strong> {stop.address}
+                          <strong>{t('tourDetails.address')}:</strong> {stop.address}
                         </div>
                       </div>
                     </article>
@@ -514,15 +535,15 @@ function FoodTourDetails() {
 
             {/* Tour Map */}
             <section className="detail-section">
-              <h2>Explore Tour Locations</h2>
+              <h2>{t('tourDetails.exploreLocations')}</h2>
 
               <p className="detail-section-description">
-                View the locations included in this food tour.
+                {t('tourDetails.mapDescription')}
               </p>
 
               {mappedStops.length === 0 ? (
                 <div className="detail-feedback-message">
-                  Map locations are not available for these tour stops yet.
+                  {t('tourDetails.mapUnavailable')}
                 </div>
               ) : (
                 <div className="food-tour-detail-map">
@@ -551,7 +572,7 @@ function FoodTourDetails() {
                       >
                         <Popup>
                           <strong>
-                            Stop {index + 1}: {stop.name}
+                            {t('tourDetails.stop')} {index + 1}: {stop.name}
                           </strong>
                           <br />
                           {stop.address}
@@ -567,11 +588,11 @@ function FoodTourDetails() {
 
             {/* Ratings and Reviews */}
             <section className="detail-section food-tour-reviews">
-              <h2>Ratings & Reviews</h2>
+              <h2>{t('tourDetails.reviews')}</h2>
 
               {reviews.length === 0 ? (
                 <p className="detail-muted-text">
-                  No reviews yet. Be the first to share your experience!
+                  {t('tourDetails.noReviews')}
                 </p>
               ) : (
                 <div className="experience-reviews-list">
@@ -596,13 +617,13 @@ function FoodTourDetails() {
 
                       {review.provider_response && (
                         <div className="public-review-provider-response">
-                          <strong>Tour Operator's Response</strong>
+                          <strong>{t('tourDetails.operator')}'s Response</strong>
 
                           <p>{review.provider_response}</p>
 
                           {review.provider_responded_at && (
                             <small>
-                              Responded on{' '}
+                              {t('tourDetails.respondedOn')}{' '}
                               {new Date(
                                 review.provider_responded_at
                               ).toLocaleDateString()}
@@ -617,18 +638,18 @@ function FoodTourDetails() {
               )}
             </section>
 
-            {/* Submit Review */}
+            {/* {t('tourDetails.submitReview')} */}
             <section className="experience-write-review">
-              <h2>Write a Review</h2>
+              <h2>{t('tourDetails.writeReview')}</h2>
 
               <p className="detail-section-description">
-                Only tourists with a confirmed booking can submit a rating and review.
+                {t('tourDetails.reviewEligibility')}
               </p>
 
               <form onSubmit={handleSubmitReview}>
 
                 <label className="review-form-label">
-                  Your Rating
+                  {t('tourDetails.yourRating')}
                 </label>
 
                 <div className="review-rating-selector">
@@ -638,7 +659,7 @@ function FoodTourDetails() {
                       type="button"
                       className={number <= rating ? 'active' : ''}
                       onClick={() => setRating(number)}
-                      aria-label={`Rate ${number} out of 5`}
+                      aria-label={t('tourDetails.rateOutOfFive', { number })}
                     >
                       ★
                     </button>
@@ -646,12 +667,12 @@ function FoodTourDetails() {
                 </div>
 
                 <label className="review-form-label">
-                  Your Review
+                  {t('tourDetails.yourReview')}
                 </label>
 
                 <textarea
                   rows="4"
-                  placeholder="Share your food tour experience..."
+                  placeholder={t('tourDetails.reviewPlaceholder')}
                   value={comment}
                   onChange={(e) => setComment(e.target.value)}
                   required
@@ -668,7 +689,7 @@ function FoodTourDetails() {
                   className="experience-book-btn review-submit-btn"
                   disabled={submitting}
                 >
-                  {submitting ? 'Submitting...' : 'Submit Review'}
+                  {submitting ? t('tourDetails.submitting') : t('tourDetails.submitReview')}
                 </button>
 
               </form>
@@ -683,28 +704,28 @@ function FoodTourDetails() {
             <section className="booking-panel">
 
               <span className="booking-panel-label">
-                TOUR PRICE
+                {t('tourDetails.tourPriceLabel')}
               </span>
 
               <h2>SGD {tour.price}</h2>
 
-              <p>Per participant</p>
+              <p>{t('tourDetails.perParticipant')}</p>
 
               {/* Availability Sessions */}
               <div className="experience-availability">
-                <h3>Select Your Tour Session</h3>
+                <h3>{t('tourDetails.selectSession')}</h3>
 
                 {sessionsLoading ? (
                   <p className="detail-muted-text">
-                    Loading available sessions...
+                    {t('tourDetails.loadingSessions')}
                   </p>
                 ) : sessionsError ? (
                   <p className="detail-muted-text">
-                    {sessionsError}
+                    {t('tourDetails.sessionsError')}
                   </p>
                 ) : sessions.length === 0 ? (
                   <p className="detail-muted-text">
-                    No available sessions at the moment.
+                    {t('tourDetails.noSessions')}
                   </p>
                 ) : (
                   <div className="experience-session-grid">
@@ -740,8 +761,8 @@ function FoodTourDetails() {
 
                           <span className="experience-session-seats">
                             {fullyBooked
-                              ? 'Fully booked'
-                              : `${session.remaining_seats} seat(s) left`}
+                              ? t('tourDetails.fullyBooked')
+                              : `${session.remaining_seats} ${t('tourDetails.seatsLeft')}`}
                           </span>
                         </button>
                       );
@@ -752,14 +773,14 @@ function FoodTourDetails() {
 
                 {selectedSession && (
                   <div className="experience-session-selection">
-                    <span>Selected session:</span>{' '}
+                    <span>{t('tourDetails.selectedSession')}:</span>{' '}
                     {(() => {
                       const session = sessions.find(
                         (item) => String(item.id) === selectedSession
                       );
 
                       return session
-                        ? `${formatSessionDate(session.date)}, ${formatSessionTime(session.start_time)} till ${formatSessionTime(session.end_time)}`
+                        ? `${formatSessionDate(session.date)}, ${formatSessionTime(session.start_time)} ${t('tourDetails.till')} ${formatSessionTime(session.end_time)}`
                         : '';
                     })()}
                   </div>
@@ -776,7 +797,7 @@ function FoodTourDetails() {
                   !!sessionsError
                 }
               >
-                Book This Tour
+                {t('tourDetails.bookTour')}
               </button>
 
               {/* Favourite Button */}
@@ -789,10 +810,10 @@ function FoodTourDetails() {
                 disabled={favouriteLoading}
               >
                 {favouriteLoading
-                  ? 'Please wait...'
+                  ? t('tourDetails.pleaseWait')
                   : favourite
-                    ? '♥ Remove from Favourites'
-                    : '♡ Add to Favourites'}
+                    ? t('tourDetails.removeFavourite')
+                    : t('tourDetails.addFavourite')}
               </button>
 
               {favouriteMessage && (
@@ -803,33 +824,33 @@ function FoodTourDetails() {
 
             </section>
 
-            {/* Add to Itinerary */}
+            {/* {t('tourDetails.addToItineraryButton')} */}
             <section className="booking-panel food-tour-itinerary-panel">
 
-              <h2>Add to My Itinerary</h2>
+              <h2>{t('tourDetails.addToItinerary')}</h2>
 
               <p>
-                Save this food tour to one of your personal food itineraries.
+                {t('tourDetails.saveItineraryDescription')}
               </p>
 
               {itineraries.length === 0 ? (
                 <div>
                   <p className="detail-muted-text">
-                    No itineraries found. Create one first.
+                    {t('tourDetails.noItineraries')}
                   </p>
 
                   <Link
                     to="/my-itineraries"
                     className="experience-favourite-btn"
                   >
-                    View My Itineraries
+                    {t('tourDetails.viewItineraries')}
                   </Link>
                 </div>
               ) : (
                 <div className="itinerary-form">
 
                   <label htmlFor="food-tour-itinerary">
-                    Select an Itinerary
+                    {t('tourDetails.selectItinerary')}
                   </label>
 
                   <select
@@ -841,7 +862,7 @@ function FoodTourDetails() {
                     }}
                   >
                     <option value="">
-                      Choose an itinerary
+                      {t('tourDetails.chooseItinerary')}
                     </option>
 
                     {itineraries.map((itinerary) => (
@@ -862,8 +883,8 @@ function FoodTourDetails() {
                     disabled={addingToItinerary || !selectedItinerary}
                   >
                     {addingToItinerary
-                      ? 'Adding...'
-                      : 'Add to Itinerary'}
+                      ? t('tourDetails.adding')
+                      : t('tourDetails.addToItineraryButton')}
                   </button>
 
                 </div>

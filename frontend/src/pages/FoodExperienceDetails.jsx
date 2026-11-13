@@ -1,12 +1,14 @@
-
 import { useEffect, useState } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import API from '../services/api';
 import FoodMap from '../components/FoodMap';
+import { useTranslation } from 'react-i18next';
 
 function FoodExperienceDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { t, i18n } = useTranslation();
+  const language = i18n.resolvedLanguage?.startsWith('bm') ? 'bm' : 'en';
 
   const [experience, setExperience] = useState(null);
   const [reviews, setReviews] = useState([]);
@@ -43,7 +45,7 @@ function FoodExperienceDetails() {
       })
       .catch((error) => {
         console.error('Error fetching food experience:', error);
-        setError('Unable to load food experience details.');
+        setError(t('experienceDetails.loadError'));
       })
       .finally(() => {
         setLoading(false);
@@ -74,7 +76,7 @@ function FoodExperienceDetails() {
         if (cancelled) return;
 
         console.error('Error fetching availability sessions:', error);
-        setSessionsError('Unable to load available sessions.');
+        setSessionsError(t('experienceDetails.sessionsError'));
       })
       .finally(() => {
         if (!cancelled) {
@@ -89,13 +91,13 @@ function FoodExperienceDetails() {
 
   // Format session date
   const formatSessionDate = (date) => {
-    if (!date) return 'Date unavailable';
+    if (!date) return t('experienceDetails.dateUnavailable');
 
     const [year, month, day] = date.split('-').map(Number);
 
     const sessionDate = new Date(year, month - 1, day);
 
-    return sessionDate.toLocaleDateString('en-SG', {
+    return sessionDate.toLocaleDateString(language === 'bm' ? 'ms-MY' : 'en-SG', {
       weekday: 'short',
       day: '2-digit',
       month: 'short',
@@ -111,7 +113,7 @@ function FoodExperienceDetails() {
     const date = new Date();
     date.setHours(Number(hours), Number(minutes), 0, 0);
 
-    return date.toLocaleTimeString('en-SG', {
+    return date.toLocaleTimeString(language === 'bm' ? 'ms-MY' : 'en-SG', {
       hour: '2-digit',
       minute: '2-digit',
       hour12: true,
@@ -192,20 +194,20 @@ function FoodExperienceDetails() {
       if (favourite) {
         await API.delete(`favourites/${favourite.id}/`);
         setFavourite(null);
-        setFavouriteMessage('Removed from your favourites.');
+        setFavouriteMessage(t('experienceDetails.removedFavourite'));
       } else {
         const response = await API.post('favourites/', {
           food_experience: Number(id),
         });
 
         setFavourite(response.data);
-        setFavouriteMessage('Added to your favourites!');
+        setFavouriteMessage(t('experienceDetails.addedFavourite'));
       }
     } catch (error) {
       console.error('Error updating favourite:', error);
 
       const data = error.response?.data;
-      let message = 'Unable to update your favourites. Please try again.';
+      let message = t('experienceDetails.favouriteError');
 
       if (data?.detail) {
         message = data.detail;
@@ -231,7 +233,7 @@ function FoodExperienceDetails() {
     }
 
     if (!selectedItinerary) {
-      setItineraryMessage('Please select an itinerary first.');
+      setItineraryMessage(t('experienceDetails.selectItineraryFirst'));
       return;
     }
 
@@ -249,7 +251,7 @@ function FoodExperienceDetails() {
       );
 
       setItineraryMessage(
-        'Food experience successfully added to your itinerary!'
+        t('experienceDetails.itinerarySuccess')
       );
 
       setSelectedItinerary('');
@@ -257,7 +259,7 @@ function FoodExperienceDetails() {
       console.error('Error adding food experience:', error);
 
       const data = error.response?.data;
-      let message = 'Unable to add this food experience to your itinerary.';
+      let message = t('experienceDetails.itineraryError');
 
       if (data?.detail) {
         message = data.detail;
@@ -285,7 +287,7 @@ function FoodExperienceDetails() {
     }
 
     if (!comment.trim()) {
-      setReviewMessage('Please write a review before submitting.');
+      setReviewMessage(t('experienceDetails.reviewRequired'));
       return;
     }
 
@@ -300,7 +302,7 @@ function FoodExperienceDetails() {
         comment,
       });
 
-      setReviewMessage('Thank you! Your review has been submitted.');
+      setReviewMessage(t('experienceDetails.reviewSuccess'));
       setRating(5);
       setComment('');
       fetchReviews();
@@ -308,7 +310,7 @@ function FoodExperienceDetails() {
       console.error('Error submitting review:', error);
 
       const data = error.response?.data;
-      let message = 'Unable to submit your review. Please try again.';
+      let message = t('experienceDetails.reviewError');
 
       if (data) {
         if (typeof data === 'string') {
@@ -349,7 +351,7 @@ function FoodExperienceDetails() {
   if (loading) {
     return (
       <div className="experience-details-message">
-        Loading food experience...
+        {t('experienceDetails.loading')}
       </div>
     );
   }
@@ -365,7 +367,7 @@ function FoodExperienceDetails() {
   if (!experience) {
     return (
       <div className="experience-details-message">
-        Food experience not found.
+        {t('experienceDetails.notFound')}
       </div>
     );
   }
@@ -380,15 +382,34 @@ function FoodExperienceDetails() {
           to="/food-experiences"
           className="experience-back-link"
         >
-          ← Back to Food Experiences
+          ← {t('experienceDetails.backToExperiences')}
         </Link>
+
+        {/* Full Width Experience Image with Category Badge */}
+        <div className="experience-detail-image-wrapper">
+
+          {experience.image ? (
+            <img
+              src={experience.image}
+              alt={experience.title}
+              className="experience-detail-image"
+            />
+          ) : (
+            <div className="experience-detail-image-placeholder">
+              {t('experienceDetails.imagePlaceholder')}
+            </div>
+          )}
+
+          {experience.category && (
+            <span className="experience-detail-category-badge">
+              {experience.category}
+            </span>
+          )}
+
+        </div>
 
         {/* Experience Header */}
         <section className="experience-detail-header">
-
-          <span className="experience-category">
-            {experience.category}
-          </span>
 
           <h1>{experience.title}</h1>
 
@@ -404,30 +425,30 @@ function FoodExperienceDetails() {
             {/* Experience Information */}
             <section className="detail-section">
 
-              <h2>About This Experience</h2>
+              <h2>{t('experienceDetails.about')}</h2>
 
               <div className="detail-information-grid">
 
                 <div className="detail-information-item">
-                  <span>Address</span>
-                  <strong>{experience.address || 'Not specified'}</strong>
+                  <span>{t('experienceDetails.address')}</span>
+                  <strong>{experience.address || t('experienceDetails.notSpecified')}</strong>
                 </div>
 
                 <div className="detail-information-item">
-                  <span>Area</span>
-                  <strong>{experience.area || 'Not specified'}</strong>
+                  <span>{t('experienceDetails.area')}</span>
+                  <strong>{experience.area || t('experienceDetails.notSpecified')}</strong>
                 </div>
 
                 <div className="detail-information-item">
-                  <span>City</span>
-                  <strong>{experience.city || 'Not specified'}</strong>
+                  <span>{t('experienceDetails.city')}</span>
+                  <strong>{experience.city || t('experienceDetails.notSpecified')}</strong>
                 </div>
 
                 <div className="detail-information-item">
-                  <span>Vendor</span>
-<strong>
-  {experience.vendor_business_name || 'Not specified'}
-</strong>
+                  <span>{t('experienceDetails.vendor')}</span>
+                  <strong>
+                    {experience.vendor_business_name || t('experienceDetails.notSpecified')}
+                  </strong>
                 </div>
 
               </div>
@@ -437,10 +458,10 @@ function FoodExperienceDetails() {
             {/* Location Map */}
             <section className="detail-section">
 
-              <h2>Location</h2>
+              <h2>{t('experienceDetails.location')}</h2>
 
               <p className="detail-section-description">
-                Find out where this food experience takes place.
+                {t('experienceDetails.locationDescription')}
               </p>
 
               <div className="experience-detail-map">
@@ -457,31 +478,30 @@ function FoodExperienceDetails() {
             {/* Add to Itinerary */}
             <section className="detail-section itinerary-section">
 
-              <h2>Add to My Itinerary</h2>
+              <h2>{t('experienceDetails.addToItinerary')}</h2>
 
               <p className="detail-section-description">
-                Save this food experience to one of your personal
-                food itineraries.
+                {t('experienceDetails.itineraryDescription')}
               </p>
 
               {itineraries.length === 0 ? (
                 <div>
                   <p className="detail-muted-text">
-                    No itineraries found. Create one first.
+                    {t('experienceDetails.noItineraries')}
                   </p>
 
                   <Link
                     to="/my-itineraries"
                     className="taste-btn-secondary"
                   >
-                    View My Itineraries
+                    {t('experienceDetails.viewItineraries')}
                   </Link>
                 </div>
               ) : (
                 <div className="itinerary-form">
 
                   <label htmlFor="select-itinerary">
-                    Select an Itinerary
+                    {t('experienceDetails.selectItinerary')}
                   </label>
 
                   <select
@@ -492,7 +512,7 @@ function FoodExperienceDetails() {
                       setItineraryMessage('');
                     }}
                   >
-                    <option value="">Choose an itinerary</option>
+                    <option value="">{t('experienceDetails.chooseItinerary')}</option>
 
                     {itineraries.map((itinerary) => (
                       <option
@@ -511,8 +531,8 @@ function FoodExperienceDetails() {
                     disabled={addingToItinerary || !selectedItinerary}
                   >
                     {addingToItinerary
-                      ? 'Adding...'
-                      : 'Add to Itinerary'}
+                      ? t('experienceDetails.adding')
+                      : t('experienceDetails.addToItineraryButton')}
                   </button>
 
                 </div>
@@ -534,21 +554,21 @@ function FoodExperienceDetails() {
             <div className="booking-panel">
 
               <span className="booking-panel-label">
-                EXPERIENCE PRICE
+                {t('experienceDetails.experiencePrice')}
               </span>
 
               <h2>SGD {experience.price}</h2>
 
-              <p>Per participant</p>
+              <p>{t('experienceDetails.perParticipant')}</p>
 
               {/* Availability Sessions */}
               <div className="experience-availability">
 
-                <h3>Choose Date and Time</h3>
+                <h3>{t('experienceDetails.chooseDateTime')}</h3>
 
                 {sessionsLoading ? (
                   <p className="detail-muted-text">
-                    Loading available sessions...
+                    {t('experienceDetails.loadingSessions')}
                   </p>
                 ) : sessionsError ? (
                   <p className="detail-feedback-message">
@@ -556,7 +576,7 @@ function FoodExperienceDetails() {
                   </p>
                 ) : sessions.length === 0 ? (
                   <p className="detail-muted-text">
-                    No upcoming sessions are currently available.
+                    {t('experienceDetails.noSessions')}
                   </p>
                 ) : (
                   <div className="experience-session-grid">
@@ -589,15 +609,15 @@ function FoodExperienceDetails() {
                             {formatSessionDate(session.date)}
                           </strong>
 
-<span className="experience-session-time">
-  {formatSessionTime(session.start_time)} till{' '}
-  {formatSessionTime(session.end_time)}
-</span>
+                          <span className="experience-session-time">
+                            {formatSessionTime(session.start_time)} {t('experienceDetails.till')}{' '}
+                            {formatSessionTime(session.end_time)}
+                          </span>
 
                           <span className="experience-session-seats">
                             {isFullyBooked
-                              ? 'Fully booked'
-                              : `${remainingSeats} left`}
+                              ? t('experienceDetails.fullyBooked')
+                              : `${remainingSeats} ${t('experienceDetails.seatsLeft')}`}
                           </span>
 
                         </button>
@@ -609,7 +629,7 @@ function FoodExperienceDetails() {
 
                 {selectedSession && (
                   <p className="experience-session-selection">
-                    <span>Selected session:</span>{' '}
+                    <span>{t('experienceDetails.selectedSession')}:</span>{' '}
                     {(() => {
                       const selected = sessions.find(
                         (session) =>
@@ -635,7 +655,7 @@ function FoodExperienceDetails() {
                   sessions.length === 0
                 }
               >
-                Book This Experience
+                {t('experienceDetails.bookExperience')}
               </button>
 
               <button
@@ -647,10 +667,10 @@ function FoodExperienceDetails() {
                 disabled={favouriteLoading}
               >
                 {favouriteLoading
-                  ? 'Please wait...'
+                  ? t('experienceDetails.pleaseWait')
                   : favourite
-                    ? '♥ Remove from Favourites'
-                    : '♡ Add to Favourites'}
+                    ? t('experienceDetails.removeFavourite')
+                    : t('experienceDetails.addFavourite')}
               </button>
 
               {favouriteMessage && (
@@ -670,11 +690,11 @@ function FoodExperienceDetails() {
 
           <div className="detail-section">
 
-            <h2>Ratings & Reviews</h2>
+            <h2>{t('experienceDetails.reviews')}</h2>
 
             {reviews.length === 0 ? (
               <p className="detail-muted-text">
-                No reviews yet. Be the first to share your experience!
+                {t('experienceDetails.noReviews')}
               </p>
             ) : (
               <div className="experience-reviews-list">
@@ -700,13 +720,13 @@ function FoodExperienceDetails() {
 
                     {review.provider_response && (
                       <div className="public-review-provider-response">
-                        <strong>Vendor's Response</strong>
+                        <strong>{t('experienceDetails.vendorResponse')}</strong>
 
                         <p>{review.provider_response}</p>
 
                         {review.provider_responded_at && (
                           <small>
-                            Responded on{' '}
+                            {t('experienceDetails.respondedOn')}{' '}
                             {new Date(
                               review.provider_responded_at
                             ).toLocaleDateString()}
@@ -728,17 +748,16 @@ function FoodExperienceDetails() {
         {/* Submit Review */}
         <section className="experience-write-review">
 
-          <h2>Write a Review</h2>
+          <h2>{t('experienceDetails.writeReview')}</h2>
 
           <p className="detail-section-description">
-            Only tourists with a confirmed booking can submit a
-            rating and review.
+            {t('experienceDetails.reviewEligibility')}
           </p>
 
           <form onSubmit={handleSubmitReview}>
 
             <label className="review-form-label">
-              Your Rating
+              {t('experienceDetails.yourRating')}
             </label>
 
             <div className="review-rating-selector">
@@ -749,7 +768,7 @@ function FoodExperienceDetails() {
                   type="button"
                   className={number <= rating ? 'active' : ''}
                   onClick={() => setRating(number)}
-                  aria-label={`Rate ${number} out of 5`}
+                  aria-label={t('experienceDetails.rateOutOfFive', { number })}
                   aria-pressed={rating === number}
                 >
                   ★
@@ -762,13 +781,13 @@ function FoodExperienceDetails() {
               htmlFor="review-comment"
               className="review-form-label"
             >
-              Your Review
+              {t('experienceDetails.yourReview')}
             </label>
 
             <textarea
               id="review-comment"
               rows="4"
-              placeholder="Share your experience..."
+              placeholder={t('experienceDetails.reviewPlaceholder')}
               value={comment}
               onChange={(e) => setComment(e.target.value)}
               required
@@ -785,7 +804,7 @@ function FoodExperienceDetails() {
               className="taste-btn-primary review-submit-btn"
               disabled={submitting}
             >
-              {submitting ? 'Submitting...' : 'Submit Review'}
+              {submitting ? t('experienceDetails.submitting') : t('experienceDetails.submitReview')}
             </button>
 
           </form>

@@ -19,7 +19,7 @@ from rest_framework.views import APIView
 
 from .views import IsTasteLocalAdmin
 
-from .models import Vendor
+from .models import Vendor, CuisineCategory
 
 
 class AdminVendorBulkImportView(APIView):
@@ -40,10 +40,12 @@ class AdminVendorBulkImportView(APIView):
         'business_name',
         'owner_name',
         'email',
+        'username',
         'phone',
         'description',
         'website',
         'social_media',
+        'cuisine_categories',
         'address',
         'city',
         'area',
@@ -218,14 +220,70 @@ class AdminVendorBulkImportView(APIView):
                         ),
                     })
                     continue
+            # Validate cuisine categories supplied in the CSV.
+            cuisine_category_names = [
+                name.strip()
+                for name in row.get("cuisine_categories", "").split(";")
+                if name.strip()
+            ]
 
-            base_username = re.sub(
-                r"[^a-zA-Z0-9_.-]", "", email.split("@")[0]
-            ) or 'vendor'
+            cuisine_categories = []
+            invalid_categories = []
+
+            for category_name in cuisine_category_names:
+                category = CuisineCategory.objects.filter(
+                    name__iexact=category_name,
+                    is_active=True
+                ).first()
+
+                if category:
+                    if category not in cuisine_categories:
+                        cuisine_categories.append(category)
+                else:
+                    invalid_categories.append(category_name)
+
+            if invalid_categories:
+                skipped.append({
+                    "row": row_number,
+                    "reason": (
+                        "Unknown or inactive cuisine categories: "
+                        + ", ".join(invalid_categories)
+                    ),
+                })
+                continue
+
+
+            # Use the username supplied in the CSV.
+            # If it is blank, generate one from the email address.
+            requested_username = row.get("username", "").strip()
+
+            if requested_username:
+                base_username = re.sub(
+                    r"[^a-zA-Z0-9_.-]", "", requested_username
+                )
+            else:
+                base_username = re.sub(
+                    r"[^a-zA-Z0-9_.-]", "", email.split("@")[0]
+                )
+
+            base_username = base_username[:150]
+
+            if not base_username:
+                skipped.append({
+                    "row": row_number,
+                    "reason": "Invalid or empty username."
+                })
+                continue
+
+            # Avoid duplicate usernames.
             username = base_username
             suffix = 1
+
             while User.objects.filter(username__iexact=username).exists():
-                username = f"{base_username}{suffix}"
+                suffix_text = str(suffix)
+                username = (
+                    f"{base_username[:150 - len(suffix_text)]}{suffix_text}"
+                )
                 suffix += 1
 
             initial_password = secrets.token_urlsafe(16)
@@ -261,6 +319,9 @@ class AdminVendorBulkImportView(APIView):
 
                     provider.full_clean()
                     provider.save()
+
+                    if cuisine_categories:
+                        provider.cuisine_categories.set(cuisine_categories)
 
                 imported.append({
                     'vendor_id': provider.id,

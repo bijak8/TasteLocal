@@ -756,11 +756,33 @@ class TourStopSerializer(serializers.ModelSerializer):
         ]
 
 
+
 class BookingSerializer(serializers.ModelSerializer):
 
     availability_session = serializers.PrimaryKeyRelatedField(
         queryset=AvailabilitySession.objects.all(),
         required=True
+    )
+
+    # Listing information for the My Bookings dashboard
+    listing_title = serializers.SerializerMethodField()
+    listing_type = serializers.SerializerMethodField()
+    listing_url = serializers.SerializerMethodField()
+
+    # Availability session information
+    session_date = serializers.DateField(
+        source='availability_session.date',
+        read_only=True
+    )
+
+    session_start_time = serializers.TimeField(
+        source='availability_session.start_time',
+        read_only=True
+    )
+
+    session_end_time = serializers.TimeField(
+        source='availability_session.end_time',
+        read_only=True
     )
 
     class Meta:
@@ -770,7 +792,13 @@ class BookingSerializer(serializers.ModelSerializer):
             'tourist',
             'food_experience',
             'food_tour',
+            'listing_title',
+            'listing_type',
+            'listing_url',
             'availability_session',
+            'session_date',
+            'session_start_time',
+            'session_end_time',
             'number_of_participants',
             'price_per_participant',
             'total_price',
@@ -783,12 +811,45 @@ class BookingSerializer(serializers.ModelSerializer):
         read_only_fields = [
             'id',
             'tourist',
+            'listing_title',
+            'listing_type',
+            'listing_url',
+            'session_date',
+            'session_start_time',
+            'session_end_time',
             'price_per_participant',
             'total_price',
             'status',
             'created_at',
             'updated_at',
         ]
+
+    def get_listing_title(self, obj):
+        if obj.food_experience:
+            return obj.food_experience.title
+
+        if obj.food_tour:
+            return obj.food_tour.title
+
+        return None
+
+    def get_listing_type(self, obj):
+        if obj.food_experience:
+            return 'Food Experience'
+
+        if obj.food_tour:
+            return 'Food Tour'
+
+        return None
+
+    def get_listing_url(self, obj):
+        if obj.food_experience:
+            return f'/food-experiences/{obj.food_experience_id}'
+
+        if obj.food_tour:
+            return f'/food-tours/{obj.food_tour_id}'
+
+        return None
 
     def validate(self, data):
         food_experience = data.get('food_experience')
@@ -810,12 +871,13 @@ class BookingSerializer(serializers.ModelSerializer):
                 "Please select an availability session."
             )
 
-        if data.get('number_of_participants', 0) < 1:
+        participants = data.get('number_of_participants', 0)
+
+        if participants < 1:
             raise serializers.ValidationError(
                 "At least one participant is required."
             )
 
-        # Ensure the selected session belongs to the selected listing.
         if food_experience:
             if availability_session.food_experience_id != food_experience.id:
                 raise serializers.ValidationError(
@@ -835,9 +897,6 @@ class BookingSerializer(serializers.ModelSerializer):
 
         return data
 
-    def create(self, validated_data):
-        validated_data['tourist'] = self.context['request'].user
-        return Booking.objects.create(**validated_data)
 
 class BookingUpdateSerializer(serializers.ModelSerializer):
 

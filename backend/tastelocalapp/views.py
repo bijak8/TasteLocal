@@ -1,3 +1,5 @@
+from django.shortcuts import get_object_or_404
+from .services.translation_service import translate_to_bahasa_melayu
 from django.contrib.auth.models import User
 from django.shortcuts import render
 from groq import Groq
@@ -19,6 +21,7 @@ from .models import (
     TourOperator,
     FoodExperience,
     FoodTour,
+    ListingTranslation,
     AvailabilitySession,
     TourStop,
     Booking,
@@ -368,9 +371,18 @@ class FoodExperienceListView(generics.ListAPIView):
     permission_classes = [AllowAny]
 
     def get_queryset(self):
-        return FoodExperience.objects.filter(
-            status='approved'
-        ).order_by('-created_at')
+        queryset = FoodExperience.objects.filter(status='approved')
+
+        city = self.request.query_params.get('city', '').strip()
+        area = self.request.query_params.get('area', '').strip()
+
+        if city:
+            queryset = queryset.filter(city__iexact=city)
+
+        if area:
+            queryset = queryset.filter(area__iexact=area)
+
+        return queryset.order_by('-created_at')
 
 
 # ==========================================
@@ -397,9 +409,18 @@ class FoodTourListView(generics.ListAPIView):
     permission_classes = [AllowAny]
 
     def get_queryset(self):
-        return FoodTour.objects.filter(
-            status='approved'
-        ).order_by('-created_at')
+        queryset = FoodTour.objects.filter(status='approved')
+
+        city = self.request.query_params.get('city', '').strip()
+        area = self.request.query_params.get('area', '').strip()
+
+        if city:
+            queryset = queryset.filter(city__iexact=city)
+
+        if area:
+            queryset = queryset.filter(area__iexact=area)
+
+        return queryset.order_by('-created_at')
 
 
 # ==========================================
@@ -432,6 +453,105 @@ class TourStopListView(generics.ListAPIView):
             food_tour_id=food_tour_id,
             food_tour__status='approved'
         ).order_by('stop_order')
+
+
+# ==========================================
+# PUBLIC EXPLORE MAP LOCATIONS
+# ==========================================
+
+class ExploreLocationsView(APIView):
+    permission_classes = [AllowAny]
+
+    def get_image_url(self, request, image_field):
+        if image_field:
+            try:
+                return request.build_absolute_uri(image_field.url)
+            except (ValueError, AttributeError):
+                return None
+        return None
+
+    def get(self, request):
+        locations = []
+
+        # Approved food experiences with valid coordinates.
+        experiences = FoodExperience.objects.filter(
+            status='approved',
+            latitude__isnull=False,
+            longitude__isnull=False
+        ).select_related('vendor')
+
+        for experience in experiences:
+            locations.append({
+                'id': f'experience-{experience.id}',
+                'type': 'food_experience',
+                'listing_id': experience.id,
+                'title': experience.title,
+                'description': experience.description,
+                'city': experience.city,
+                'area': experience.area,
+                'address': experience.address,
+                'latitude': experience.latitude,
+                'longitude': experience.longitude,
+                'image': self.get_image_url(request, experience.image),
+                'url': f'/food-experiences/{experience.id}'
+            })
+
+        # Approved food-tour stops with valid coordinates.
+        stops = TourStop.objects.filter(
+            food_tour__status='approved',
+            latitude__isnull=False,
+            longitude__isnull=False
+        ).select_related('food_tour').order_by(
+            'food_tour_id', 'stop_order'
+        )
+
+        for stop in stops:
+            locations.append({
+                'id': f'tour-stop-{stop.id}',
+                'type': 'food_tour',
+                'listing_id': stop.food_tour_id,
+                'stop_id': stop.id,
+                'title': stop.food_tour.title,
+                'stop_name': stop.name,
+                'description': stop.description,
+                'city': stop.city or stop.food_tour.city,
+                'area': stop.area or stop.food_tour.area,
+                'address': stop.address,
+                'latitude': stop.latitude,
+                'longitude': stop.longitude,
+                'image': self.get_image_url(
+                    request, stop.food_tour.image
+                ),
+                'url': f'/food-tours/{stop.food_tour_id}'
+            })
+
+        # Approved vendors with valid coordinates.
+        vendors = Vendor.objects.filter(
+            status='approved',
+            latitude__isnull=False,
+            longitude__isnull=False
+        )
+
+        for vendor in vendors:
+            locations.append({
+                'id': f'vendor-{vendor.id}',
+                'type': 'vendor',
+                'listing_id': vendor.id,
+                'title': vendor.business_name,
+                'description': vendor.description,
+                'city': vendor.city,
+                'area': vendor.area,
+                'address': vendor.address,
+                'latitude': vendor.latitude,
+                'longitude': vendor.longitude,
+                'image': self.get_image_url(request, vendor.logo),
+                'url': None
+            })
+
+        return Response({
+            'total_locations': len(locations),
+            'locations': locations
+        })
 
 
 # ==========================================
@@ -906,9 +1026,11 @@ class FoodTourAvailabilityView(generics.ListAPIView):
             date__gte=timezone.localdate(),
         ).select_related('food_tour').order_by('date', 'start_time')
 
+
 # ==========================================
 # CREATE BOOKING REQUEST
 # ==========================================
+
 class BookingCreateView(generics.CreateAPIView):
     serializer_class = BookingSerializer
     permission_classes = [IsAuthenticated]
@@ -929,10 +1051,12 @@ class BookingCreateView(generics.CreateAPIView):
         with transaction.atomic():
 
             try:
-                session = AvailabilitySession.objects.select_for_update().select_related(
-                    'food_experience',
-                    'food_tour'
-                ).get(pk=requested_session.pk)
+                session = (
+                    AvailabilitySession.objects
+                    .select_for_update()
+                    .select_related('food_experience', 'food_tour')
+                    .get(pk=requested_session.pk)
+                )
 
             except AvailabilitySession.DoesNotExist:
                 raise ValidationError(
@@ -944,18 +1068,19 @@ class BookingCreateView(generics.CreateAPIView):
                     "This availability session is no longer active."
                 )
 
-            # Ensure the session has not already started.
+            # Ensure the selected session has not started.
             today = timezone.localdate()
             current_time = timezone.localtime().time()
 
             if session.date < today or (
-                session.date == today and session.start_time <= current_time
+                session.date == today
+                and session.start_time <= current_time
             ):
                 raise ValidationError(
                     "This availability session has already started or passed."
                 )
 
-            # Check listing approval and obtain the current listing price.
+            # Check listing approval and retrieve its current price.
             if session.food_experience:
                 listing = session.food_experience
 
@@ -963,8 +1088,6 @@ class BookingCreateView(generics.CreateAPIView):
                     raise PermissionDenied(
                         "This food experience is not approved for bookings."
                     )
-
-                price = listing.price
 
             elif session.food_tour:
                 listing = session.food_tour
@@ -974,19 +1097,22 @@ class BookingCreateView(generics.CreateAPIView):
                         "This food tour is not approved for bookings."
                     )
 
-                price = listing.price
-
             else:
                 raise ValidationError(
                     "This availability session is not linked to a listing."
                 )
+
+            price = listing.price
 
             # Count seats reserved by pending and confirmed bookings.
             reserved_seats = sum(
                 Booking.objects.filter(
                     availability_session=session,
                     status__in=['pending', 'confirmed']
-                ).values_list('number_of_participants', flat=True)
+                ).values_list(
+                    'number_of_participants',
+                    flat=True
+                )
             )
 
             remaining_seats = session.capacity - reserved_seats
@@ -996,7 +1122,7 @@ class BookingCreateView(generics.CreateAPIView):
                     f"Only {remaining_seats} seat(s) remain for this session."
                 )
 
-            # Calculate and save the booking price on the server.
+            # Calculate booking prices on the server.
             total_price = price * participants
 
             serializer.save(
@@ -1005,6 +1131,7 @@ class BookingCreateView(generics.CreateAPIView):
                 price_per_participant=price,
                 total_price=total_price
             )
+
 
 # ==========================================
 # PROVIDER BOOKING LIST
@@ -1017,20 +1144,30 @@ class BookingListView(generics.ListAPIView):
     def get_queryset(self):
         user = self.request.user
 
-        # Vendor: show bookings for their own food experiences
+        # Vendor: show bookings for their own food experiences.
         vendor = user.vendors.first()
 
         if vendor:
             return Booking.objects.filter(
                 food_experience__vendor=vendor
+            ).select_related(
+                'tourist',
+                'food_experience',
+                'food_tour',
+                'availability_session'
             ).order_by('-created_at')
 
-        # Tour Operator: show bookings for their own food tours
+        # Tour Operator: show bookings for their own food tours.
         operator = user.tour_operators.first()
 
         if operator:
             return Booking.objects.filter(
                 food_tour__tour_operator=operator
+            ).select_related(
+                'tourist',
+                'food_experience',
+                'food_tour',
+                'availability_session'
             ).order_by('-created_at')
 
         raise PermissionDenied(
@@ -1069,13 +1206,12 @@ class BookingUpdateView(generics.UpdateAPIView):
         status_value = request.data.get('status')
 
         if status_value not in ['confirmed', 'rejected']:
-            from rest_framework.exceptions import ValidationError
-
             raise ValidationError(
                 "Booking status must be confirmed or rejected."
             )
 
         return super().update(request, *args, **kwargs)
+
 
 # ==========================================
 # TOURIST BOOKING CANCELLATION
@@ -1088,10 +1224,19 @@ class TouristBookingCancelView(generics.UpdateAPIView):
     def get_queryset(self):
         return Booking.objects.filter(
             tourist=self.request.user
+        ).select_related(
+            'food_experience',
+            'food_tour',
+            'availability_session'
         )
 
     def update(self, request, *args, **kwargs):
         booking = self.get_object()
+
+        if not request.user.groups.filter(name='Tourist').exists():
+            raise PermissionDenied(
+                "Only registered tourists can cancel bookings."
+            )
 
         if booking.status not in ['pending', 'confirmed']:
             raise ValidationError(
@@ -1121,6 +1266,7 @@ class TouristBookingCancelView(generics.UpdateAPIView):
             ).data
         )
 
+
 # ==========================================
 # TOURIST BOOKING HISTORY
 # ==========================================
@@ -1130,10 +1276,20 @@ class TouristBookingListView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        return Booking.objects.filter(
-            tourist=self.request.user
-        ).order_by('-created_at')
+        user = self.request.user
 
+        if not user.groups.filter(name='Tourist').exists():
+            raise PermissionDenied(
+                "Only registered tourists can access their bookings."
+            )
+
+        return Booking.objects.filter(
+            tourist=user
+        ).select_related(
+            'food_experience',
+            'food_tour',
+            'availability_session'
+        ).order_by('-created_at')
 
 # ==========================================
 # CREATE REVIEW
@@ -1546,6 +1702,7 @@ class VendorFoodExperienceDetailView(
 ):
     serializer_class = FoodExperienceSerializer
     permission_classes = [IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
 
     def get_queryset(self):
         vendor = self.request.user.vendors.first()
@@ -1876,3 +2033,116 @@ class PublicFoodTourCategoryListView(PublicCategoryListView):
 
     category_model = FoodTourCategory
     serializer_class = FoodTourCategorySerializer
+
+
+# ==========================================
+# AI TRANSLATION - ENGLISH TO BAHASA MELAYU
+# ==========================================
+
+class GenerateListingTranslationView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+
+        listing_type = request.data.get('listing_type')
+        listing_id = request.data.get('listing_id')
+
+        if listing_type not in ['food_tour', 'food_experience']:
+            return Response({
+                'error': 'Invalid listing type.'
+            }, status=400)
+
+        if not listing_id:
+            return Response({
+                'error': 'Listing ID is required.'
+            }, status=400)
+
+        # Retrieve the listing and verify ownership
+        if listing_type == 'food_tour':
+
+            operator = request.user.tour_operators.first()
+
+            if not operator:
+                raise PermissionDenied(
+                    'You do not have a Tour Operator profile.'
+                )
+
+            listing = get_object_or_404(
+                FoodTour,
+                id=listing_id,
+                tour_operator=operator
+            )
+
+        else:
+
+            vendor = request.user.vendors.first()
+
+            if not vendor:
+                raise PermissionDenied(
+                    'You do not have a Vendor profile.'
+                )
+
+            listing = get_object_or_404(
+                FoodExperience,
+                id=listing_id,
+                vendor=vendor
+            )
+
+        try:
+            # Generate Bahasa Melayu translation using Groq
+            translated = translate_to_bahasa_melayu(
+                title=listing.title,
+                description=listing.description
+            )
+
+            # Save or update the translation
+            if listing_type == 'food_tour':
+
+                translation, created = (
+                    ListingTranslation.objects.update_or_create(
+                        food_tour=listing,
+                        language='bm',
+                        defaults={
+                            'title': translated['title'],
+                            'description': translated['description'],
+                            'food_experience': None
+                        }
+                    )
+                )
+
+            else:
+
+                translation, created = (
+                    ListingTranslation.objects.update_or_create(
+                        food_experience=listing,
+                        language='bm',
+                        defaults={
+                            'title': translated['title'],
+                            'description': translated['description'],
+                            'food_tour': None
+                        }
+                    )
+                )
+
+            return Response({
+                'message': (
+                    'Bahasa Melayu translation generated successfully.'
+                ),
+                'translation_created': created,
+                'translation': {
+                    'id': translation.id,
+                    'language': translation.language,
+                    'title': translation.title,
+                    'description': translation.description
+                }
+            }, status=200)
+
+        except Exception as e:
+
+            print('GROQ TRANSLATION ERROR:', repr(e))
+
+            return Response({
+                'error': (
+                    'Unable to generate translation. Please try again.'
+                )
+            }, status=503)

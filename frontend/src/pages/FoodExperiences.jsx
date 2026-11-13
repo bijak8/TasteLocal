@@ -1,27 +1,37 @@
 
 import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import API from '../services/api';
 
 // Format session date and time
-const formatSessionDateTime = (session) => {
+const formatSessionDateTime = (session, language) => {
   const dateTime = new Date(
     `${session.date}T${session.start_time}`
   );
 
-  return new Intl.DateTimeFormat('en-SG', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-  }).format(dateTime);
+  return new Intl.DateTimeFormat(
+    language === 'bm' ? 'ms-MY' : 'en-SG',
+    {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+    }
+  ).format(dateTime);
 };
 
 function FoodExperiences() {
+  const { t, i18n } = useTranslation();
+
+  const language = i18n.resolvedLanguage?.startsWith('bm')
+    ? 'bm'
+    : 'en';
+
   const [experiences, setExperiences] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState(false);
 
   // Availability sessions for each food experience
   const [availabilityByExperience, setAvailabilityByExperience] =
@@ -125,13 +135,11 @@ function FoodExperiences() {
             Object.fromEntries(availabilityResults)
           );
         }
-      } catch (error) {
-        console.error('Error fetching food experiences:', error);
+      } catch (fetchError) {
+        console.error('Error fetching food experiences:', fetchError);
 
         if (!cancelled) {
-          setError(
-            'Unable to load food experiences. Please try again.'
-          );
+          setError(true);
         }
       } finally {
         if (!cancelled) {
@@ -148,17 +156,23 @@ function FoodExperiences() {
   }, []);
 
   // Get unique filter options
-  const cities = [...new Set(
-    experiences.map((item) => item.city).filter(Boolean)
-  )];
+  const cities = [
+    ...new Set(
+      experiences.map((item) => item.city).filter(Boolean)
+    ),
+  ];
 
-  const areas = [...new Set(
-    experiences.map((item) => item.area).filter(Boolean)
-  )];
+  const areas = [
+    ...new Set(
+      experiences.map((item) => item.area).filter(Boolean)
+    ),
+  ];
 
-  const categories = [...new Set(
-    experiences.map((item) => item.category).filter(Boolean)
-  )];
+  const categories = [
+    ...new Set(
+      experiences.map((item) => item.category).filter(Boolean)
+    ),
+  ];
 
   // Apply search and filters
   const filteredExperiences = experiences.filter((experience) => {
@@ -212,15 +226,12 @@ function FoodExperiences() {
       <section className="experiences-hero">
         <div className="container-custom">
           <span className="home-eyebrow">
-            TASTE SOMETHING DIFFERENT
+            {t('foodExperiences.eyebrow')}
           </span>
 
-          <h1>Explore Food Experiences</h1>
+          <h1>{t('foodExperiences.title')}</h1>
 
-          <p>
-            Discover authentic local food activities, cooking classes,
-            food tastings and unique culinary experiences.
-          </p>
+          <p>{t('foodExperiences.subtitle')}</p>
         </div>
       </section>
 
@@ -231,22 +242,20 @@ function FoodExperiences() {
 
           <div className="filter-heading">
             <div>
-              <h2>Find Your Food Experience</h2>
-              <p>
-                Search and filter experiences to find your perfect match.
-              </p>
+              <h2>{t('foodExperiences.findTitle')}</h2>
+              <p>{t('foodExperiences.findDescription')}</p>
             </div>
           </div>
 
           <div className="experience-search">
             <label htmlFor="experience-search">
-              Search experiences
+              {t('foodExperiences.searchLabel')}
             </label>
 
             <input
               id="experience-search"
               type="text"
-              placeholder="Search by name, description or keyword..."
+              placeholder={t('foodExperiences.searchPlaceholder')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
@@ -255,14 +264,18 @@ function FoodExperiences() {
           <div className="experience-filter-grid">
 
             <div className="experience-filter-field">
-              <label htmlFor="filter-city">City</label>
+              <label htmlFor="filter-city">
+                {t('foodExperiences.city')}
+              </label>
 
               <select
                 id="filter-city"
                 value={selectedCity}
                 onChange={(e) => setSelectedCity(e.target.value)}
               >
-                <option value="">All Cities</option>
+                <option value="">
+                  {t('foodExperiences.allCities')}
+                </option>
 
                 {cities.map((city) => (
                   <option key={city} value={city}>
@@ -273,14 +286,18 @@ function FoodExperiences() {
             </div>
 
             <div className="experience-filter-field">
-              <label htmlFor="filter-area">Area</label>
+              <label htmlFor="filter-area">
+                {t('foodExperiences.area')}
+              </label>
 
               <select
                 id="filter-area"
                 value={selectedArea}
                 onChange={(e) => setSelectedArea(e.target.value)}
               >
-                <option value="">All Areas</option>
+                <option value="">
+                  {t('foodExperiences.allAreas')}
+                </option>
 
                 {areas.map((area) => (
                   <option key={area} value={area}>
@@ -292,7 +309,7 @@ function FoodExperiences() {
 
             <div className="experience-filter-field">
               <label htmlFor="filter-category">
-                Food Category
+                {t('foodExperiences.foodCategory')}
               </label>
 
               <select
@@ -300,7 +317,9 @@ function FoodExperiences() {
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
               >
-                <option value="">All Categories</option>
+                <option value="">
+                  {t('foodExperiences.allCategories')}
+                </option>
 
                 {categories.map((category) => (
                   <option key={category} value={category}>
@@ -312,14 +331,14 @@ function FoodExperiences() {
 
             <div className="experience-filter-field">
               <label htmlFor="filter-min-price">
-                Minimum Price (SGD)
+                {t('foodExperiences.minimumPrice')}
               </label>
 
               <input
                 id="filter-min-price"
                 type="number"
                 min="0"
-                placeholder="Minimum price"
+                placeholder={t('foodExperiences.minimumPricePlaceholder')}
                 value={minPrice}
                 onChange={(e) => setMinPrice(e.target.value)}
               />
@@ -327,14 +346,14 @@ function FoodExperiences() {
 
             <div className="experience-filter-field">
               <label htmlFor="filter-max-price">
-                Maximum Price (SGD)
+                {t('foodExperiences.maximumPrice')}
               </label>
 
               <input
                 id="filter-max-price"
                 type="number"
                 min="0"
-                placeholder="Maximum price"
+                placeholder={t('foodExperiences.maximumPricePlaceholder')}
                 value={maxPrice}
                 onChange={(e) => setMaxPrice(e.target.value)}
               />
@@ -348,7 +367,7 @@ function FoodExperiences() {
               className="filter-clear-btn"
               onClick={clearFilters}
             >
-              Clear All Filters
+              {t('foodExperiences.clearAllFilters')}
             </button>
           </div>
 
@@ -357,14 +376,14 @@ function FoodExperiences() {
         {/* Loading */}
         {loading && (
           <div className="experiences-message">
-            <p>Loading food experiences...</p>
+            <p>{t('foodExperiences.loading')}</p>
           </div>
         )}
 
         {/* Error */}
         {error && (
           <div className="experiences-error">
-            {error}
+            {t('foodExperiences.error')}
           </div>
         )}
 
@@ -375,29 +394,32 @@ function FoodExperiences() {
             <div className="experiences-results-heading">
               <div>
                 <span className="home-eyebrow">
-                  EXPLORE LOCAL FLAVOURS
+                  {t('foodExperiences.resultsEyebrow')}
                 </span>
 
-                <h2>Available Experiences</h2>
+                <h2>{t('foodExperiences.availableTitle')}</h2>
               </div>
 
               <p>
-                Showing <strong>{filteredExperiences.length}</strong> of{' '}
-                <strong>{experiences.length}</strong> experiences
+                {t('foodExperiences.showing')}{' '}
+                <strong>{filteredExperiences.length}</strong>{' '}
+                {t('foodExperiences.of')}{' '}
+                <strong>{experiences.length}</strong>{' '}
+                {t('foodExperiences.experiences')}
               </p>
             </div>
 
             {filteredExperiences.length === 0 ? (
               <div className="experiences-empty">
-                <h3>No matching experiences found</h3>
-                <p>Try changing your search or filters.</p>
+                <h3>{t('foodExperiences.noResults')}</h3>
+                <p>{t('foodExperiences.noResultsDescription')}</p>
 
                 <button
                   type="button"
                   className="taste-btn-primary"
                   onClick={clearFilters}
                 >
-                  Clear Filters
+                  {t('foodExperiences.clearFilters')}
                 </button>
               </div>
             ) : (
@@ -414,11 +436,34 @@ function FoodExperiences() {
                       key={experience.id}
                     >
 
-                      <div className="experience-card-content">
+                      {/* Cover Image and Category Overlay */}
+                      <div className="experience-card-image-wrapper">
 
-                        <span className="experience-category">
-                          {experience.category}
-                        </span>
+                        {experience.image ? (
+                          <img
+                            src={experience.image}
+                            alt={experience.title}
+                            className="experience-card-image"
+                            onError={(e) => {
+                              e.currentTarget.style.display = 'none';
+                            }}
+                          />
+                        ) : (
+                          <div className="experience-card-image-placeholder">
+                            {t('foodExperiences.imagePlaceholder')}
+                          </div>
+                        )}
+
+                        {experience.category && (
+                          <span className="experience-category-badge">
+                            {experience.category}
+                          </span>
+                        )}
+
+                      </div>
+
+                      {/* Existing Card Content */}
+                      <div className="experience-card-content">
 
                         <h3>{experience.title}</h3>
 
@@ -429,14 +474,16 @@ function FoodExperiences() {
                         <div className="experience-details">
 
                           <p>
-                            <span>Location</span>
+                            <span>{t('foodExperiences.location')}</span>
                             {experience.area ||
                               experience.city ||
-                              'Not specified'}
+                              t('foodExperiences.notSpecified')}
                           </p>
 
                           <p>
-                            <span>Earliest Upcoming Session</span>
+                            <span>
+                              {t('foodExperiences.earliestSession')}
+                            </span>
 
                             <span
                               style={{
@@ -450,9 +497,10 @@ function FoodExperiences() {
                               <strong>
                                 {availability?.earliest
                                   ? formatSessionDateTime(
-                                      availability.earliest
+                                      availability.earliest,
+                                      language
                                     )
-                                  : 'No upcoming sessions available'}
+                                  : t('foodExperiences.noUpcomingSessions')}
                               </strong>
 
                               {availability?.count > 0 && (
@@ -463,15 +511,15 @@ function FoodExperiences() {
                                     fontWeight: 600,
                                   }}
                                 >
-                                  {availability.count} upcoming sessions
-                                  available
+                                  {availability.count}{' '}
+                                  {t('foodExperiences.upcomingSessions')}
                                 </small>
                               )}
                             </span>
                           </p>
 
                           <p>
-                            <span>Price</span>
+                            <span>{t('foodExperiences.price')}</span>
                             <strong>
                               SGD {experience.price}
                             </strong>
@@ -483,7 +531,7 @@ function FoodExperiences() {
                           to={`/food-experiences/${experience.id}`}
                           className="experience-details-btn"
                         >
-                          View Details →
+                          {t('foodExperiences.viewDetails')} →
                         </Link>
 
                       </div>

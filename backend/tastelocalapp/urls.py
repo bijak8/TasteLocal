@@ -25,6 +25,7 @@ from .views import (
     FoodTourListView,
     FoodTourDetailView,
     TourStopListView,
+    ExploreLocationsView,
 
     BookingCreateView,
     BookingListView,
@@ -205,6 +206,13 @@ urlpatterns = [
     # ==========================================
     # 4. FOOD EXPERIENCE MANAGEMENT
     # ==========================================
+
+    # Public Explore map locations
+    path(
+        'explore/locations/',
+        ExploreLocationsView.as_view(),
+        name='explore-locations'
+    ),
 
     # Global website search
     path(

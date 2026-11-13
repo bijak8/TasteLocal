@@ -1,27 +1,37 @@
 
 import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import API from '../services/api';
 
 // Format session date and time
-const formatSessionDateTime = (session) => {
+const formatSessionDateTime = (session, language) => {
   const dateTime = new Date(
     `${session.date}T${session.start_time}`
   );
 
-  return new Intl.DateTimeFormat('en-SG', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-  }).format(dateTime);
+  return new Intl.DateTimeFormat(
+    language === 'bm' ? 'ms-MY' : 'en-SG',
+    {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+    }
+  ).format(dateTime);
 };
 
 function FoodTours() {
+  const { t, i18n } = useTranslation();
+
+  const language = i18n.resolvedLanguage?.startsWith('bm')
+    ? 'bm'
+    : 'en';
+
   const [tours, setTours] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState(false);
 
   // Availability sessions for each food tour
   const [availabilityByTour, setAvailabilityByTour] = useState({});
@@ -123,13 +133,11 @@ function FoodTours() {
             Object.fromEntries(availabilityResults)
           );
         }
-      } catch (error) {
-        console.error('Error fetching food tours:', error);
+      } catch (fetchError) {
+        console.error('Error fetching food tours:', fetchError);
 
         if (!cancelled) {
-          setError(
-            'Unable to load food tours. Please try again.'
-          );
+          setError(true);
         }
       } finally {
         if (!cancelled) {
@@ -146,13 +154,13 @@ function FoodTours() {
   }, []);
 
   // Get available cities and areas
-  const cities = [...new Set(
-    tours.map((tour) => tour.city).filter(Boolean)
-  )];
+  const cities = [
+    ...new Set(tours.map((tour) => tour.city).filter(Boolean)),
+  ];
 
-  const areas = [...new Set(
-    tours.map((tour) => tour.area).filter(Boolean)
-  )];
+  const areas = [
+    ...new Set(tours.map((tour) => tour.area).filter(Boolean)),
+  ];
 
   // Apply search and filters
   const filteredTours = tours.filter((tour) => {
@@ -200,15 +208,12 @@ function FoodTours() {
       <section className="food-tours-hero">
         <div className="container-custom">
           <span className="home-eyebrow">
-            EXPLORE LOCAL FOOD CULTURE
+            {t('foodTours.eyebrow')}
           </span>
 
-          <h1>Discover Food Tours</h1>
+          <h1>{t('foodTours.title')}</h1>
 
-          <p>
-            Explore local food destinations through guided,
-            multi-stop culinary journeys created by local tour operators.
-          </p>
+          <p>{t('foodTours.subtitle')}</p>
         </div>
       </section>
 
@@ -218,19 +223,19 @@ function FoodTours() {
         <section className="food-tours-filter-panel">
 
           <div className="food-tours-filter-heading">
-            <h2>Find Your Food Tour</h2>
-            <p>
-              Search and filter tours to find your next culinary adventure.
-            </p>
+            <h2>{t('foodTours.findTitle')}</h2>
+            <p>{t('foodTours.findDescription')}</p>
           </div>
 
           <div className="food-tour-search">
-            <label htmlFor="tour-search">Search food tours</label>
+            <label htmlFor="tour-search">
+              {t('foodTours.searchLabel')}
+            </label>
 
             <input
               id="tour-search"
               type="text"
-              placeholder="Search by tour name or keyword..."
+              placeholder={t('foodTours.searchPlaceholder')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
@@ -239,14 +244,18 @@ function FoodTours() {
           <div className="food-tour-filter-grid">
 
             <div className="food-tour-filter-field">
-              <label htmlFor="tour-city">City</label>
+              <label htmlFor="tour-city">
+                {t('foodTours.city')}
+              </label>
 
               <select
                 id="tour-city"
                 value={selectedCity}
                 onChange={(e) => setSelectedCity(e.target.value)}
               >
-                <option value="">All Cities</option>
+                <option value="">
+                  {t('foodTours.allCities')}
+                </option>
 
                 {cities.map((city) => (
                   <option key={city} value={city}>
@@ -257,14 +266,18 @@ function FoodTours() {
             </div>
 
             <div className="food-tour-filter-field">
-              <label htmlFor="tour-area">Area</label>
+              <label htmlFor="tour-area">
+                {t('foodTours.area')}
+              </label>
 
               <select
                 id="tour-area"
                 value={selectedArea}
                 onChange={(e) => setSelectedArea(e.target.value)}
               >
-                <option value="">All Areas</option>
+                <option value="">
+                  {t('foodTours.allAreas')}
+                </option>
 
                 {areas.map((area) => (
                   <option key={area} value={area}>
@@ -276,14 +289,14 @@ function FoodTours() {
 
             <div className="food-tour-filter-field">
               <label htmlFor="tour-min-price">
-                Minimum Price (SGD)
+                {t('foodTours.minimumPrice')}
               </label>
 
               <input
                 id="tour-min-price"
                 type="number"
                 min="0"
-                placeholder="Minimum price"
+                placeholder={t('foodTours.minimumPricePlaceholder')}
                 value={minPrice}
                 onChange={(e) => setMinPrice(e.target.value)}
               />
@@ -291,14 +304,14 @@ function FoodTours() {
 
             <div className="food-tour-filter-field">
               <label htmlFor="tour-max-price">
-                Maximum Price (SGD)
+                {t('foodTours.maximumPrice')}
               </label>
 
               <input
                 id="tour-max-price"
                 type="number"
                 min="0"
-                placeholder="Maximum price"
+                placeholder={t('foodTours.maximumPricePlaceholder')}
                 value={maxPrice}
                 onChange={(e) => setMaxPrice(e.target.value)}
               />
@@ -311,7 +324,7 @@ function FoodTours() {
               type="button"
               onClick={clearFilters}
             >
-              Clear All Filters
+              {t('foodTours.clearAllFilters')}
             </button>
           </div>
 
@@ -320,14 +333,14 @@ function FoodTours() {
         {/* Loading */}
         {loading && (
           <div className="food-tours-message">
-            Loading food tours...
+            {t('foodTours.loading')}
           </div>
         )}
 
         {/* Error */}
         {error && (
           <div className="food-tours-error">
-            {error}
+            {t('foodTours.error')}
           </div>
         )}
 
@@ -339,33 +352,34 @@ function FoodTours() {
 
               <div>
                 <span className="home-eyebrow">
-                  EXPLORE CULINARY JOURNEYS
+                  {t('foodTours.resultsEyebrow')}
                 </span>
 
-                <h2>Available Food Tours</h2>
+                <h2>{t('foodTours.availableTitle')}</h2>
               </div>
 
               <p>
-                Showing <strong>{filteredTours.length}</strong> of{' '}
-                <strong>{tours.length}</strong> food tours
+                {t('foodTours.showing')}{' '}
+                <strong>{filteredTours.length}</strong>{' '}
+                {t('foodTours.of')}{' '}
+                <strong>{tours.length}</strong>{' '}
+                {t('foodTours.tours')}
               </p>
 
             </div>
 
             {filteredTours.length === 0 ? (
               <div className="food-tours-empty">
-                <h3>No matching food tours found</h3>
+                <h3>{t('foodTours.noResults')}</h3>
 
-                <p>
-                  Try changing your search or filters.
-                </p>
+                <p>{t('foodTours.noResultsDescription')}</p>
 
                 <button
                   type="button"
                   className="taste-btn-primary"
                   onClick={clearFilters}
                 >
-                  Clear Filters
+                  {t('foodTours.clearFilters')}
                 </button>
               </div>
             ) : (
@@ -377,16 +391,33 @@ function FoodTours() {
                     availabilityByTour[tour.id];
 
                   return (
-                    <article
-                      className="food-tour-card"
-                      key={tour.id}
-                    >
+<article
+  className="food-tour-card"
+  key={tour.id}
+>
+  {/* Food Tour Cover Image */}
+  <div className="experience-card-image-wrapper">
+    {tour.image ? (
+      <img
+        src={tour.image}
+        alt={tour.title || 'TasteLocal food tour'}
+        className="experience-card-image"
+      />
+    ) : (
+      <div className="experience-card-image-placeholder">
+        <span>味</span>
+      </div>
+    )}
 
-                      <div className="food-tour-card-content">
+    {/* Category Badge */}
+    <span className="experience-category-badge">
+      {t('foodTours.guidedTour')}
+    </span>
+  </div>
 
-                        <span className="food-tour-label">
-                          GUIDED FOOD TOUR
-                        </span>
+  <div className="food-tour-card-content">
+
+
 
                         <h3>{tour.title}</h3>
 
@@ -397,12 +428,14 @@ function FoodTours() {
                         <div className="food-tour-details">
 
                           <p>
-                            <span>Location</span>
-                            {tour.area || tour.city || 'Not specified'}
+                            <span>{t('foodTours.location')}</span>
+                            {tour.area || tour.city || t('foodTours.notSpecified')}
                           </p>
 
                           <p>
-                            <span>Earliest Upcoming Session</span>
+                            <span>
+                              {t('foodTours.earliestSession')}
+                            </span>
 
                             <span
                               style={{
@@ -416,9 +449,10 @@ function FoodTours() {
                               <strong>
                                 {availability?.earliest
                                   ? formatSessionDateTime(
-                                      availability.earliest
+                                      availability.earliest,
+                                      language
                                     )
-                                  : 'No upcoming sessions available'}
+                                  : t('foodTours.noUpcomingSessions')}
                               </strong>
 
                               {availability?.count > 0 && (
@@ -429,15 +463,15 @@ function FoodTours() {
                                     fontWeight: 600,
                                   }}
                                 >
-                                  {availability.count} upcoming sessions
-                                  available
+                                  {availability.count}{' '}
+                                  {t('foodTours.upcomingSessions')}
                                 </small>
                               )}
                             </span>
                           </p>
 
                           <p>
-                            <span>Price</span>
+                            <span>{t('foodTours.price')}</span>
                             <strong>SGD {tour.price}</strong>
                           </p>
 
@@ -447,7 +481,7 @@ function FoodTours() {
                           to={`/food-tours/${tour.id}`}
                           className="experience-details-btn"
                         >
-                          View Tour Details →
+                          {t('foodTours.viewDetails')} →
                         </Link>
 
                       </div>
